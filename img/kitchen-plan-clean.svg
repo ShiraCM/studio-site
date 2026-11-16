@@ -1,0 +1,133 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 860" width="900" height="860" font-family="Helvetica Neue, Helvetica, Arial, sans-serif">
+  <!-- Kitchen, from the cabinet maker's plan. Scale: 1 cm = 1.5 px.
+       Interior 430 x 400 cm at (128,130)-(773,730). Open to the living room at the bottom. -->
+  <defs>
+    <clipPath id="room"><rect x="128" y="130" width="645" height="600"/></clipPath>
+    <marker id="tick" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="10" markerHeight="10" orient="auto">
+      <path d="M1 9 L9 1" stroke="#6b6660" stroke-width="1.4"/>
+    </marker>
+    <!-- counter stool, 40 x 40 cm seat with a low back (60 x 60 px) -->
+    <g id="stool" stroke="#2b2926" fill="#ffffff">
+      <rect x="-30" y="-30" width="60" height="60" rx="14" stroke-width="1.4"/>
+      <path d="M-24 -30 Q0 -40 24 -30" fill="none" stroke-width="3" stroke-linecap="round"/>
+    </g>
+  </defs>
+  <rect width="900" height="860" fill="#ffffff"/>
+
+  <!-- floor: large-format porcelain, 80 x 80 cm -->
+  <g clip-path="url(#room)" stroke="#e7e4de" stroke-width="1">
+    <rect x="128" y="130" width="645" height="600" fill="#faf9f6" stroke="none"/>
+    <path d="M248 130V730M368 130V730M488 130V730M608 130V730M728 130V730M128 250H773M128 370H773M128 490H773M128 610H773"/>
+  </g>
+
+  <!-- walls -->
+  <g fill="#2b2926">
+    <rect x="98" y="100" width="705" height="30"/>           <!-- back -->
+    <rect x="773" y="100" width="30" height="548"/>          <!-- right, along the tall units -->
+    <rect x="98" y="100" width="30" height="63"/>            <!-- left, above the first window -->
+    <rect x="98" y="346" width="30" height="66"/>            <!-- left, between the windows -->
+    <rect x="98" y="592" width="30" height="138"/>           <!-- left, below the second window -->
+  </g>
+  <g fill="#ffffff" stroke="#2b2926" stroke-width="1.5">
+    <rect x="98" y="163" width="30" height="183"/>
+    <rect x="98" y="412" width="30" height="180"/>
+  </g>
+  <path d="M110 163V346M116 163V346M110 412V592M116 412V592" stroke="#2b2926" stroke-width="1.2"/>
+  <line x1="128" y1="730" x2="773" y2="730" stroke="#9a948c" stroke-width="1.2" stroke-dasharray="6 5"/>
+
+  <!-- window wall: cooktop, oven below the counter, sink, dishwasher -->
+  <g stroke="#2b2926" stroke-width="1.6">
+    <rect x="128" y="130" width="90" height="537" fill="#f3efe7"/>
+    <rect x="138" y="256" width="70" height="90" rx="4" fill="#ffffff" stroke-width="1.3"/>
+    <rect x="140" y="486" width="62" height="98" rx="9" fill="#ffffff" stroke-width="1.3"/>
+  </g>
+  <g fill="none" stroke="#2b2926" stroke-width="1.2">
+    <circle cx="157" cy="280" r="11"/><circle cx="189" cy="280" r="9"/>
+    <circle cx="157" cy="322" r="9"/><circle cx="189" cy="322" r="11"/>
+    <circle cx="171" cy="535" r="5"/>
+    <path d="M128 382H218M128 472H218M128 600H218" stroke-dasharray="4 4"/>
+  </g>
+  <rect x="204" y="530" width="10" height="10" fill="#b8925a"/>
+
+  <!-- back wall: base run with the main sink and a second dishwasher, uppers above -->
+  <g stroke="#2b2926" stroke-width="1.6">
+    <rect x="218" y="130" width="465" height="90" fill="#f3efe7"/>
+    <rect x="460" y="140" width="124" height="68" rx="9" fill="#ffffff" stroke-width="1.3"/>
+  </g>
+  <circle cx="522" cy="174" r="5" fill="none" stroke="#2b2926" stroke-width="1.2"/>
+  <rect x="517" y="208" width="10" height="10" fill="#b8925a"/>
+  <g stroke="#2b2926" stroke-width="1" fill="none" stroke-dasharray="5 4">
+    <line x1="218" y1="175" x2="460" y2="175"/>
+    <line x1="588" y1="130" x2="588" y2="220"/>
+  </g>
+
+  <!-- tall wall: pantry, oven column, French-door fridge, utility closet -->
+  <g stroke="#2b2926" stroke-width="1.6">
+    <rect x="683" y="130" width="90" height="518" fill="#e9e4da"/>
+    <rect x="693" y="341" width="70" height="84" fill="#ffffff" stroke-width="1.3"/>
+    <rect x="683" y="442" width="90" height="142" fill="#ffffff"/>
+  </g>
+  <g stroke="#2b2926" stroke-width="1" fill="none">
+    <path d="M683 226H773M683 322H773M683 584H773"/>
+    <line x1="683" y1="513" x2="698" y2="513" stroke-width="1.4"/>
+    <path d="M693 360H763"/>
+  </g>
+
+  <!-- island: 92 x 196 cm. Cabinets, a slot for a fold-out table, then seating on both sides -->
+  <g stroke="#2b2926" stroke-width="1.6">
+    <rect x="381" y="379" width="138" height="294" fill="#f3efe7"/>
+    <rect x="381" y="529" width="138" height="51" fill="#faf9f6" stroke-width="1"/>
+    <rect x="381" y="580" width="138" height="93" fill="#faf9f6" stroke-width="1"/>
+  </g>
+  <g stroke="#2b2926" stroke-width="1" fill="none" stroke-dasharray="5 4">
+    <path d="M396 580V673M504 580V673"/>
+  </g>
+  <rect x="381" y="669" width="138" height="5" fill="#2b2926"/>
+  <use href="#stool" transform="translate(356 627) rotate(-90)"/>
+  <use href="#stool" transform="translate(544 627) rotate(90)"/>
+
+  <!-- labels -->
+  <g fill="#6b6660" font-size="14" letter-spacing="1.5" text-anchor="middle">
+    <text x="450" y="455">ISLAND</text>
+    <text x="450" y="474" font-size="12" letter-spacing="1">92 × 196</text>
+    <text x="450" y="559" font-size="10" letter-spacing="1">FOLD-OUT TABLE</text>
+    <text x="450" y="630" font-size="11" letter-spacing="1">SEATING</text>
+    <text x="173" y="368" font-size="11">COOKTOP</text>
+    <text x="173" y="431" font-size="11">OVEN</text>
+    <text x="173" y="446" font-size="9" letter-spacing="1">BELOW</text>
+    <text x="171" y="572" font-size="11">SINK</text>
+    <text x="173" y="638" font-size="11">DW</text>
+    <text x="522" y="241" font-size="11">SINK</text>
+    <text x="636" y="180" font-size="11">DW</text>
+    <text x="340" y="160" font-size="10" letter-spacing="1">UPPERS ABOVE</text>
+    <text x="728" y="182" font-size="11" transform="rotate(-90 728 178)">PANTRY</text>
+    <text x="728" y="278" font-size="11" transform="rotate(-90 728 274)">PANTRY</text>
+    <text x="728" y="404" font-size="11" transform="rotate(-90 728 400)">OVEN</text>
+    <text x="728" y="517" font-size="11" transform="rotate(-90 728 513)">FRIDGE</text>
+    <text x="728" y="620" font-size="10" transform="rotate(-90 728 616)">UTILITY</text>
+    <text x="450" y="760" font-size="12">OPEN TO THE LIVING ROOM</text>
+    <text x="70" y="258" font-size="11" transform="rotate(-90 70 254)">WINDOW</text>
+    <text x="70" y="506" font-size="11" transform="rotate(-90 70 502)">WINDOW</text>
+  </g>
+
+  <!-- dimensions (cm) -->
+  <g stroke="#6b6660" stroke-width="1" fill="none">
+    <line x1="128" y1="55" x2="773" y2="55" marker-start="url(#tick)" marker-end="url(#tick)"/>
+    <line x1="128" y1="47" x2="128" y2="95"/><line x1="773" y1="47" x2="773" y2="95"/>
+    <line x1="30" y1="130" x2="30" y2="730" marker-start="url(#tick)" marker-end="url(#tick)"/>
+    <line x1="22" y1="130" x2="93" y2="130"/><line x1="22" y1="730" x2="93" y2="730"/>
+    <line x1="850" y1="130" x2="850" y2="648" marker-start="url(#tick)" marker-end="url(#tick)"/>
+    <line x1="808" y1="130" x2="858" y2="130"/><line x1="778" y1="648" x2="858" y2="648"/>
+    <line x1="218" y1="400" x2="381" y2="400" marker-start="url(#tick)" marker-end="url(#tick)"/>
+    <line x1="519" y1="400" x2="683" y2="400" marker-start="url(#tick)" marker-end="url(#tick)"/>
+    <line x1="450" y1="220" x2="450" y2="379" marker-start="url(#tick)" marker-end="url(#tick)"/>
+  </g>
+  <g fill="#3a3632" font-size="17" text-anchor="middle">
+    <text x="450" y="47">430</text>
+    <text x="20" y="436" transform="rotate(-90 20 430)">400</text>
+    <text x="872" y="395" transform="rotate(90 872 389)">345</text>
+    <text x="300" y="392" font-size="14">105</text>
+    <text x="601" y="392" font-size="14">105</text>
+    <text x="458" y="304" font-size="14" text-anchor="start">100</text>
+  </g>
+</svg>

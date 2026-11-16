@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Build your order · Shira Svei Design Studio</title>
+<meta name="description" content="Choose the design services you need for your new-build apartment in Israel and see the total.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Hanken+Grotesk:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Frank+Ruhl+Libre:wght@400;500&display=swap">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="index.html" aria-label="Shira Svei Design Studio, home">
+      <span class="mono-mark" aria-hidden="true">SS</span>
+      <span><b>Shira Svei</b><small>Design Studio</small></span>
+    </a>
+    <nav class="links" aria-label="Main">
+      <a class="hide-sm" href="process.html">How we work</a>
+      <a class="hide-sm" href="packages.html">Packages</a>
+      <a class="hide-sm" href="order.html" aria-current="page">Order</a>
+      <a class="btn btn-primary" href="contact.html">Let’s talk</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+<section class="phero" style="padding-bottom:clamp(20px,3vw,36px)">
+  <div class="wrap">
+    <div class="phero-copy" style="max-width:720px">
+      <span class="label">Build your order</span>
+      <h1>Pick what you need, <em>see the total.</em></h1>
+      <p class="lede">Choose only the help you want. Every package after the first saves you another $750, and the consultation is included free with any package.</p>
+    </div>
+  </div>
+</section>
+
+<section class="section" style="padding-top:0" aria-label="Services">
+  <form class="wrap order" id="order-form" data-saving="750" novalidate>
+    <section class="ogroup" aria-labelledby="og-start">
+      <h2 id="og-start">Start here</h2>
+      <ul><li class="oitem consult" data-id="consult" data-price="300" data-name="Consultation">
+          <label><input type="checkbox" name="consult"><span class="box" aria-hidden="true"></span>
+            <span class="otext"><span class="ochip">01 Prospectus</span><b>Consultation</b><small>A basic assessment of the contractor’s prospectus and sales plan, with our team in English.</small></span></label>
+          <span class="oprice"><s hidden>$300</s><span class="amt">$300</span></span>
+        </li></ul>
+    </section>
+    <section class="ogroup" aria-labelledby="og-pk">
+      <h2 id="og-pk">Packages <span class="osave">Save $750 on each one you add</span></h2>
+      <ul><li class="oitem" data-id="floor-plan" data-price="4000" data-name="Floor plan redesign">
+          <label><input type="checkbox" name="floor-plan"><span class="box" aria-hidden="true"></span>
+            <span class="otext"><span class="ochip">02 Layout</span><b>Floor plan redesign</b><small>We rework the contractor’s plan around your family and draw it up for the buyer-changes submission.</small></span></label>
+          <span class="oprice"><s hidden>$4,000</s><span class="amt">$4,000</span></span>
+        </li><li class="oitem" data-id="selections" data-price="4000" data-name="Tile and fixture shopping, and kitchen design">
+          <label><input type="checkbox" name="selections"><span class="box" aria-hidden="true"></span>
+            <span class="otext"><span class="ochip">03 Selections</span><b>Tile and fixture shopping, and kitchen design</b><small>Floor and wall tiles, sinks, toilets, tubs and shower fittings, plus your kitchen layout, appliances, surfaces and storage.</small></span></label>
+          <span class="oprice"><s hidden>$4,000</s><span class="amt">$4,000</span></span>
+        </li><li class="oitem" data-id="liaison" data-price="4000" data-name="Contractor liaison">
+          <label><input type="checkbox" name="liaison"><span class="box" aria-hidden="true"></span>
+            <span class="otext"><span class="ochip">02–03</span><b>Contractor liaison</b><small>We speak with the contractor for you on every design matter and follow up until it’s done.</small></span></label>
+          <span class="oprice"><s hidden>$4,000</s><span class="amt">$4,000</span></span>
+        </li><li class="oitem" data-id="furnishing" data-price="3000" data-name="Furniture and accessory shopping">
+          <label><input type="checkbox" name="furnishing"><span class="box" aria-hidden="true"></span>
+            <span class="otext"><span class="ochip">04 Move-in</span><b>Furniture and accessory shopping</b><small>Furniture, rugs, lighting, window treatments and accessories, chosen to work together.</small></span></label>
+          <span class="oprice"><s hidden>$3,000</s><span class="amt">$3,000</span></span>
+        </li></ul>
+    </section>
+    <div class="obar" role="region" aria-label="Order total">
+      <div class="osum">
+        <span class="label" id="o-count">Nothing selected yet</span>
+        <strong id="o-total">$0</strong>
+        <small id="o-note"></small>
+      </div>
+      <div class="oact">
+        <button class="btn btn-pay" type="button" id="o-pay" disabled>Pay with PayPal</button>
+        <button class="btn btn-ghost-light" type="submit" disabled>Copy my order</button>
+        <output id="o-status" aria-live="polite"></output>
+      </div>
+      <textarea id="o-fallback" aria-label="Order text to copy" rows="6" hidden readonly></textarea>
+    </div>
+  </form>
+</section>
+
+</main>
+<section class="close" aria-labelledby="close-h">
+  <div class="wrap">
+    <div class="close-grid">
+      <div>
+        <h2 id="close-h">Have a plan you’d like to <em>talk through?</em></h2>
+        <div class="actions">
+          <a class="btn btn-primary" href="contact.html">Tell us about your apartment</a>
+          <a class="btn btn-ghost" href="packages.html">See packages</a>
+        </div>
+      </div>
+      <p>Tell us what you’re buying for and which decisions are coming up.</p>
+    </div>
+    <div class="foot">
+      <span>Shira Svei Design Studio · Israel</span>
+      <span><a href="index.html">Home</a> · <a href="process.html">How we work</a> · <a href="packages.html">Packages</a> · <a href="order.html">Order</a> · <a href="contact.html">Contact</a></span>
+    </div>
+  </div>
+</section>
+
+<script src="app.js"></script>
+</body>
+</html>

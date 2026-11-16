@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Contact · Shira Svei Design Studio</title>
+<meta name="description" content="Tell Shira Svei Design Studio about your new-build apartment in Israel.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Hanken+Grotesk:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Frank+Ruhl+Libre:wght@400;500&display=swap">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="index.html" aria-label="Shira Svei Design Studio, home">
+      <span class="mono-mark" aria-hidden="true">SS</span>
+      <span><b>Shira Svei</b><small>Design Studio</small></span>
+    </a>
+    <nav class="links" aria-label="Main">
+      <a class="hide-sm" href="process.html">How we work</a>
+      <a class="hide-sm" href="packages.html">Packages</a>
+      <a class="hide-sm" href="order.html">Order</a>
+      <a class="btn btn-primary" href="contact.html">Let’s talk</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+<section class="phero">
+  <div class="wrap two" style="align-items:start">
+    <div class="phero-copy">
+      <span class="label">Get in touch</span>
+      <h1>Let’s talk about <em>your apartment.</em></h1>
+      <p class="lede">Buying an apartment on paper from an Israeli contractor? Reach out while you’re reviewing the sales plan, or after you’ve signed while changes are still possible.</p>
+      <p class="lede">Tell us what you’re buying for, what you need to make room for, and when your next decisions are due.</p>
+      <img src="img/evening-kitchen.webp" alt="Open kitchen with dark pendant lights behind a gray sofa" width="800" height="1208" style="width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:3px;margin-top:8px">
+    </div>
+    <form class="form" id="inquiry-form" novalidate>
+      <span class="label">Your apartment inquiry</span>
+      <label for="f-name">Name<input id="f-name" name="name" autocomplete="name" required></label>
+      <div class="row">
+        <label for="f-stage">Where you are<select id="f-stage" name="stage">
+          <option>Reviewing the contractor’s sales plan</option>
+          <option>Signed and planning changes before construction</option>
+          <option>Choosing changes or finishes</option>
+          <option>Getting ready to move in</option>
+          <option>Other</option>
+        </select></label>
+        <label for="f-purpose">Plans for the apartment<select id="f-purpose" name="purpose">
+          <option value="">Select if you know</option>
+          <option>Move in at handover</option>
+          <option>Live there later</option>
+          <option>Buy as an investment</option>
+          <option>Still deciding</option>
+        </select></label>
+      </div>
+      <div class="row">
+        <label for="f-package">Package<select id="f-package" name="package">
+          <option value="">Select if you know</option>
+          <option value="plan-review">Prospectus review</option>
+          <option value="floor-plan">Floor plan redesign</option>
+          <option value="selections">Tile, sanitaryware and kitchen design</option>
+          <option value="liaison">Contractor liaison</option>
+          <option value="furnishing">Furnishing and home styling</option>
+          <option value="ongoing-support">Full-service new-build support</option>
+        </select></label>
+        <label for="f-deadline">Next deadline <small>optional</small><input id="f-deadline" name="deadline" placeholder="e.g. changes due March 3"></label>
+      </div>
+      <label for="f-details">Project and upcoming decisions<textarea id="f-details" name="details" rows="5" required placeholder="City and project, number of rooms, what you’d like to work better…"></textarea></label>
+      <div class="actions">
+        <button class="btn btn-primary" type="submit">Copy inquiry</button>
+        <output id="copy-status" aria-live="polite"></output>
+      </div>
+      <textarea id="copy-fallback" aria-label="Inquiry text to copy" rows="6" hidden readonly></textarea>
+      <p class="fine">This preview builds your inquiry and copies it. A contact address will be added before launch.</p>
+    </form>
+  </div>
+</section>
+<section class="close" style="padding-top:40px">
+  <div class="wrap"><div class="foot" style="margin-top:0">
+    <span>Shira Svei Design Studio · Israel</span>
+    <span><a href="index.html">Home</a> · <a href="process.html">How we work</a> · <a href="packages.html">Packages</a> · <a href="order.html">Order</a></span>
+  </div></div>
+</section>
+
+</main>
+
+<script src="app.js"></script>
+</body>
+</html>
