@@ -26,14 +26,25 @@ function webglOK() {
   try { const c = document.createElement('canvas'); return !!(c.getContext('webgl2') || c.getContext('webgl')); } catch { return false; }
 }
 
-async function planTexture(src) {
+async function planTexture(src, clearPaper = false) {
   const img = new Image();
   // onload, not img.decode(): Safari rejects decode() for SVG images
   await new Promise((resolve, reject) => { img.onload = resolve; img.onerror = reject; img.src = src; });
   const c = document.createElement('canvas');
   c.width = 1800; c.height = 1720;
-  c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
-  const tex = new THREE.CanvasTexture(c);
+const g = c.getContext('2d', { willReadFrequently: clearPaper });
+g.drawImage(img, 0, 0, c.width, c.height);
+if (clearPaper) {
+  const d = g.getImageData(0, 0, c.width, c.height), p = d.data;
+  for (let i = 0; i < p.length; i += 4) {
+    const a = 255 - Math.min(p[i], p[i + 1], p[i + 2]);
+    if (a === 0) { p[i + 3] = 0; continue; }
+    for (let k = 0; k < 3; k++) p[i + k] = Math.round(255 - (255 - p[i + k]) * 255 / a);
+    p[i + 3] = a;
+  }
+  g.putImageData(d, 0, 0);
+}
+const tex = new THREE.CanvasTexture(c);
   tex.colorSpace = THREE.SRGBColorSpace;
   tex.anisotropy = 8;
   return tex;
@@ -42,7 +53,8 @@ async function planTexture(src) {
 async function init(box) {
   THREE = await import('./vendor/three.module.min.js');
   const reel = box.classList.contains('k3d-reel');
-  const hero = box.classList.contains('k3d-hero');      // the home-page hero: loops, stage buttons overlaid at the bottom
+  const hero = box.classList.contains('k3d-hero');
+  const scrolled = box.classList.contains('k3d-scroll');  // driven by page scroll, on a transparent background      // the home-page hero: loops, stage buttons overlaid at the bottom
   let wrapped = false;                                    // true after the first loop, so the rendering fades back into the plan
   // Camera poses: straight down on the plan, then the rendering's eye-level view.
   const TOP = { pos: new THREE.Vector3(2.15, 9.4, 2.0), look: new THREE.Vector3(2.15, 0, 2.0), fov: 34 };
@@ -53,7 +65,7 @@ async function init(box) {
   const replay = box.querySelector('.k3d-replay');
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: scrolled });
   renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -65,7 +77,7 @@ async function init(box) {
 
   const scene = new THREE.Scene();
   const paper = new THREE.Color('#ffffff'), room = new THREE.Color('#ece8e1');
-  scene.background = paper.clone();
+  scene.background = scrolled ? null : paper.clone();
   const camera = new THREE.PerspectiveCamera(TOP.fov, 2, 0.05, 60);
 
   // Light: soft sky fill, warm daylight through the left windows
@@ -152,17 +164,18 @@ async function init(box) {
   block(back, 218, 130, 683, 220, BASE, TOP_, mat.stone, false);
   part(back, X(522), TOP_ + .003, Z(174), .78, .01, .42, mat.steel);
   part(back, X(522), TOP_ + .2, Z(140), .025, .4, .025, mat.dark);
-// Back wall, as in the rendering: stone backsplash from the counter to the ceiling,
-// uppers up to the ceiling from the corner run to past the sink (6 doors on top, 3 below),
-// with a warm light strip underneath. The tall units stand apart on the right.
+// Back wall, from the cabinet maker's elevation of wall B (order PDF p.14):
+// three 90 cm upper modules (270 cm), 50 cm from the window-wall corner, from 135 to 240 cm high:
+// 45 cm lift-up doors (HK) below, 60 cm doors (two per module) on top, LED strip underneath.
+// Stone backsplash behind, as in the rendering.
 const splash = group(1);
 block(splash, 128, 130, 683, 132, TOP_, H, mat.stone, false);
 const uppers = group(3, { drop: true });
-const U0 = 218, U1 = 608, UB = 1.45, US = 2.12, UD = 183;
-block(uppers, U0, 130, U1, UD, UB, H, mat.cab);
+const U0 = 128 + 50 * 1.5, U1 = U0 + 270 * 1.5, UB = 1.35, US = 1.80, UT = 2.40, UD = 130 + 35 * 1.5;
+block(uppers, U0, 130, U1, UD, UB, UT, mat.cab);
 const uw = X(U1) - X(U0), front = Z(UD) + .002;
 part(uppers, (X(U0) + X(U1)) / 2, US, front, uw, .006, .004, mat.groove);
-for (let i = 1; i < 6; i++) part(uppers, X(U0) + uw * i / 6, (US + H) / 2, front, .006, H - US, .004, mat.groove);
+for (let i = 1; i < 6; i++) part(uppers, X(U0) + uw * i / 6, (US + UT) / 2, front, .006, UT - US, .004, mat.groove);
 for (let i = 1; i < 3; i++) part(uppers, X(U0) + uw * i / 3, (UB + US) / 2, front, .006, US - UB, .004, mat.groove);
 part(uppers, (X(U0) + X(U1)) / 2, UB - .012, Z(UD) - .06, uw - .04, .012, .03, mat.led);
 
@@ -204,9 +217,17 @@ for (const [px, side] of [[381 - 22, -1], [519 + 22, 1]]) {
 
   // Floor (oak) and the plan drawing on top of it
   const floor = new THREE.Mesh(new THREE.PlaneGeometry(4.7, 7.6), mat.floor);
-  floor.rotation.x = -Math.PI / 2; floor.position.set(2.15, 0, 3.6); floor.receiveShadow = true;
+floor.rotation.x = -Math.PI / 2; floor.position.set(2.15, 0, 3.6); floor.receiveShadow = true;
+if (scrolled) {
+  // fade the floor out into the living room, so the model has no hard edge on the page
+  const a = document.createElement('canvas'); a.width = 4; a.height = 256;
+  const ag = a.getContext('2d'), gr = ag.createLinearGradient(0, 0, 0, 256);
+  gr.addColorStop(0, '#fff'); gr.addColorStop(.55, '#fff'); gr.addColorStop(.74, '#000'); gr.addColorStop(1, '#000');
+  ag.fillStyle = gr; ag.fillRect(0, 0, 4, 256);
+  mat.floor.alphaMap = new THREE.CanvasTexture(a);
+}
   scene.add(floor);
-  const planMat = new THREE.MeshBasicMaterial({ map: await planTexture('img/kitchen-plan-clean.svg'), transparent: true, toneMapped: false });
+  const planMat = new THREE.MeshBasicMaterial({ map: await planTexture('img/kitchen-plan-clean.svg', scrolled), transparent: true, toneMapped: false });
   const plan = new THREE.Mesh(new THREE.PlaneGeometry(6, 860 / 150), planMat);
   plan.rotation.x = -Math.PI / 2; plan.position.set(X(450), .003, Z(430));
   scene.add(plan);
@@ -226,7 +247,7 @@ for (const [px, side] of [[381 - 22, -1], [519 + 22, 1]]) {
     planMat.opacity = 1 - f;
     mat.floor.opacity = f;
     edgeMat.opacity = .9 - .7 * span(t, 5, 8);
-    scene.background.copy(paper).lerp(room, f);
+    if (scene.background) scene.background.copy(paper).lerp(room, f);
 
     const c = ease(span(t, ...T.cam));
     camera.position.lerpVectors(TOP.pos, EYE.pos, c);
@@ -249,12 +270,12 @@ for (const [px, side] of [[381 - 22, -1], [519 + 22, 1]]) {
     camera.aspect = w / h;
     // keep the whole plan in view on narrow screens; in the reel, keep it above the caption
     TOP.pos.y = reel ? 13.6 : (hero ? 9.9 : 9.4) * Math.max(1, 1.25 / camera.aspect);
-    const lift = reel ? .075 : hero ? .05 : 0;            // keep the plan clear of what's overlaid at the bottom
+    const lift = reel ? .075 : hero && !scrolled ? .05 : 0;            // keep the plan clear of what's overlaid at the bottom
     TOP.pos.z = TOP.look.z = 2.0 + lift * TOP.pos.y * 2 * Math.tan(17 * Math.PI / 180);
     frame(time);
   }
 
-  let time = reduce ? STAGES[hero ? 2 : 0] : 0, playing = !reduce && !reel, visible = true, last = 0;
+  let time = reduce ? STAGES[hero ? 2 : 0] : 0, playing = !reduce && !reel && !scrolled, visible = true, last = 0;
   function loop(now) {
     requestAnimationFrame(loop);
     if (!playing || !visible) { last = now; return; }
@@ -266,15 +287,44 @@ for (const [px, side] of [[381 - 22, -1], [519 + 22, 1]]) {
   }
   function jump(t, keepPlaying = false) { time = t; wrapped = false; playing = keepPlaying && !reduce; frame(time); }
 
-  buttons.forEach((b, i) => b.addEventListener('click', () => jump(STAGES[i])));
+// Scroll mode: the page's scroll position is the timeline. The scroll range is the pinned
+// hero on wide screens (.hero-pin is sticky) or the figure's own track on phones (figure is sticky).
+const SCROLL_END = T.photo[1] + .4;
+function scrollRange() {
+  const pin = box.closest('.hero-pin'), section = box.closest('.hero-scroll'), track = box.closest('.k3d-track');
+  let el, child;
+  if (pin && getComputedStyle(pin).position === 'sticky') { el = section; child = pin; }
+  else if (getComputedStyle(box).position === 'sticky') { el = track; child = box; }
+  else return null;
+  const r = el.getBoundingClientRect(), top = parseFloat(getComputedStyle(child).top) || 0;
+  return { start: top - r.top, len: Math.max(1, r.height - child.offsetHeight) };
+}
+function fromScroll() {
+  const s = scrollRange();
+  if (!s) { if (time !== STAGES[2]) { time = STAGES[2]; frame(time); } return; }
+  time = clamp01(s.start / s.len) * SCROLL_END;
+  frame(time);
+}
+if (scrolled) {
+  let queued = false;
+  const onScroll = () => { if (!queued) { queued = true; requestAnimationFrame(() => { queued = false; fromScroll(); }); } };
+  addEventListener('scroll', onScroll, { passive: true });
+  addEventListener('resize', onScroll);
+  buttons.forEach((b, i) => b.addEventListener('click', () => {
+    const s = scrollRange();
+    if (!s) return jump(STAGES[i]);
+    scrollTo({ top: scrollY + (STAGES[i] / SCROLL_END) * s.len - s.start, behavior: reduce ? 'auto' : 'smooth' });
+  }));
+} else buttons.forEach((b, i) => b.addEventListener('click', () => jump(STAGES[i])));
   replay?.addEventListener('click', () => { jump(0, true); });
   new IntersectionObserver(es => { visible = es[0].isIntersecting; }).observe(box);
   new ResizeObserver(size).observe(stageEl);
   box.classList.add('k3d-live');
   size();
+  if (scrolled) fromScroll();
   requestAnimationFrame(loop);
 
-  const api = { EYE, TOP, jump, play: () => jump(0, true), frame: () => frame(time), get time() { return time; } };
+  const api = { EYE, TOP, jump, sync: () => fromScroll(), play: () => jump(0, true), frame: () => frame(time), get time() { return time; } };
   window.__k3d = api;
   return api;
 }

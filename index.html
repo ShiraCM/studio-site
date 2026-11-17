@@ -24,33 +24,41 @@
 </header>
 
 <main id="top">
-<section class="hero hero-3d">
-<figure class="k3d k3d-hero" id="model">
-  <div class="k3d-stage">
-    <img class="k3d-photo" src="img/kitchen-render-wide.jpg" width="1452" height="720" alt="Rendering of a finished kitchen designed by the studio: greige cabinets, white stone counters and backsplash, a waterfall island and oak floors.">
-    <img class="k3d-fallback" src="img/kitchen-plan-clean.svg" width="900" height="860" alt="">
-  </div>
-  <figcaption class="k3d-bar">
-    <div class="k3d-steps" role="group" aria-label="Show a stage of the kitchen">
-      <button type="button" aria-pressed="true"><span>01</span> Plan</button>
-      <button type="button" aria-pressed="false"><span>02</span> 3D model</button>
-      <button type="button" aria-pressed="false"><span>03</span> Rendering</button>
-    </div>
-  </figcaption>
-</figure>
-  <div class="wrap hero-grid">
-    <div class="hero-copy">
-      <span class="label">For American buyers of new-build apartments in Israel</span>
-      <h1>Your apartment in Israel, <em>from plan to move&#8209;in.</em></h1>
-    </div>
-    <div class="hero-side">
+<section class="hero hero-scroll">
+  <div class="hero-pin">
+    <div class="wrap hero-grid">
+      <div class="hero-copy">
+        <span class="label">For American buyers of new-build apartments in Israel</span>
+        <h1>Your apartment in Israel, <em>from plan to move&#8209;in.</em></h1>
         <p class="lede">You’re buying a home from a floor plan, in another country, in another language. We’re your design team on the ground: we review the plan, talk to the contractor for you, and get the apartment ready to live in.</p>
         <div class="hero-actions">
           <a class="btn btn-primary" href="contact.html">Tell us about your apartment
             <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg></a>
           <a class="btn btn-ghost" href="#stages">See how it works</a>
         </div>
-        <div class="finder" role="group" aria-labelledby="finder-q">
+      </div>
+      <div class="hero-media k3d-track">
+        <figure class="k3d k3d-hero k3d-scroll" id="model">
+          <div class="k3d-stage">
+            <img class="k3d-photo" src="img/kitchen-render-wide.jpg" width="1452" height="720" alt="Rendering of a finished kitchen designed by the studio: greige cabinets, white stone counters and backsplash, a waterfall island and oak floors.">
+            <img class="k3d-fallback" src="img/kitchen-plan-clean.svg" width="900" height="860" alt="">
+          </div>
+          <figcaption class="k3d-bar">
+            <div class="k3d-steps" role="group" aria-label="Show a stage of the kitchen">
+              <button type="button" aria-pressed="true"><span>01</span> Plan</button>
+              <button type="button" aria-pressed="false"><span>02</span> 3D model</button>
+              <button type="button" aria-pressed="false"><span>03</span> Rendering</button>
+            </div>
+            <span class="k3d-hint" aria-hidden="true">Scroll to build it ↓</span>
+          </figcaption>
+        </figure>
+      </div>
+    </div>
+  </div>
+</section>
+<section class="hero-after">
+  <div class="wrap">
+    <div class="finder" role="group" aria-labelledby="finder-q">
           <span class="label" id="finder-q">Where are you right now?</span>
           <div class="finder-row">
             <button type="button" data-stage="1" aria-pressed="false"><b>01</b> Just got the prospectus</button>
@@ -60,25 +68,8 @@
           </div>
           <p class="finder-answer" id="finder-answer" aria-live="polite">Bring us in at any stage, or for the whole process.</p>
         </div>
-      </div>
   </div>
 </section>
-
-
-  <section class="strip" aria-labelledby="why-h">
-    <div class="wrap strip-grid">
-      <div style="display:grid;gap:16px">
-        <span class="label">Why buyers bring us in</span>
-        <h2 id="why-h" style="font-size:clamp(32px,4vw,48px)">The decisions come fast, and they all come in Hebrew.</h2>
-        <img class="why-photo" src="img/open-living.webp" alt="Living room opening onto a dining area and wood kitchen" width="1250" height="1284" loading="lazy">
-      </div>
-      <div class="facts">
-        <div class="fact"><h4>You’re buying on paper</h4><p>A sales plan can make a room look bigger than it is. We draw your furniture to scale so you know before you commit.</p></div>
-        <div class="fact"><h4>The contractor sets limits</h4><p>Every builder allows some changes and not others. We know where the flexibility is and use it for you.</p></div>
-        <div class="fact"><h4>You’re not in the room</h4><p>We speak with the contractor and suppliers directly, then explain each decision to you in English.</p></div>
-      </div>
-    </div>
-  </section>
 
   <section class="process" aria-labelledby="stages-h">
     <div class="wrap">

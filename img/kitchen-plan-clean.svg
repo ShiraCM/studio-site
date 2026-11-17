@@ -57,7 +57,7 @@
   <circle cx="522" cy="174" r="5" fill="none" stroke="#2b2926" stroke-width="1.2"/>
   <rect x="517" y="208" width="10" height="10" fill="#b8925a"/>
   <g stroke="#2b2926" stroke-width="1" fill="none" stroke-dasharray="5 4">
-    <line x1="218" y1="175" x2="460" y2="175"/>
+    <line x1="203" y1="183" x2="608" y2="183"/>
     <line x1="588" y1="130" x2="588" y2="220"/>
   </g>
 

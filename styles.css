@@ -502,14 +502,35 @@ dialog.lb button{position:fixed;top:max(16px,env(safe-area-inset-top,0px));right
 .scene.k3d.k3d-live::after{display:none}
 .scene.k3d .k3d-stage img.k3d-photo{padding:0;animation:none}
 
-/* Home hero: the 3D kitchen runs full width under the header, big; headline and copy below it */
-.hero-3d{padding-top:0}
-.k3d-hero{position:relative;margin:0 0 clamp(32px,5vw,64px);height:clamp(380px,50vw,calc(100svh - 140px));background:#fff;border-bottom:1px solid var(--rule)}
-.k3d-hero .k3d-stage{position:absolute;inset:0;aspect-ratio:auto;border:0;border-radius:0;background:#fff}
-.k3d-hero .k3d-bar{position:absolute;left:0;right:0;bottom:clamp(14px,2.4vw,28px);margin:0;z-index:2;max-width:var(--max);margin-inline:auto;padding-inline:max(16px,env(safe-area-inset-left,0px));justify-content:flex-start}
-@media (min-width:720px){.k3d-hero .k3d-bar{padding-inline:40px}}
-.k3d-hero .k3d-bar button{background:color-mix(in srgb,var(--sheet) 86%,transparent);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
-.k3d-hero .k3d-steps button[aria-pressed="true"]{background:var(--olive)}
-.hero-3d .hero-grid{align-items:start}
-.hero-side{display:grid;gap:24px;min-width:0}
-@media (max-width:719px){.k3d-hero{height:min(118vw,66svh)}}
+/* Home hero: words on the left, the 3D kitchen beside them with no frame. Scrolling drives it:
+   plan -> 3D model -> rendering. Wide screens pin the whole hero while it plays;
+   phones pin just the animation under the headline. kitchen3d.js reads whichever is sticky. */
+.hero-scroll{padding:0}
+.hero-scroll .hero-grid{grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);align-items:center}
+.hero-scroll .hero-copy{gap:24px}
+.hero-scroll h1{font-size:clamp(44px,5.6vw,84px)}
+.k3d-hero{margin:0;background:transparent}
+.k3d-hero .k3d-stage{aspect-ratio:4/3;border:0;border-radius:0;background:transparent;overflow:visible}
+.k3d-hero .k3d-stage{-webkit-mask-image:linear-gradient(to right,transparent,#000 8%,#000 92%,transparent),linear-gradient(to bottom,transparent,#000 8%,#000 90%,transparent);-webkit-mask-composite:source-in;mask-image:linear-gradient(to right,transparent,#000 8%,#000 92%,transparent),linear-gradient(to bottom,transparent,#000 8%,#000 90%,transparent);mask-composite:intersect}
+.k3d-hero .k3d-fallback{background:transparent}
+.k3d-hero .k3d-bar{margin-top:6px;align-items:center}
+.k3d-hint{font:500 12px/1 var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.hero-after{padding-bottom:clamp(40px,6vw,72px)}
+.hero-after .finder{margin-top:0}
+@media (min-width:901px){
+  .hero-scroll{height:260svh}
+  .hero-pin{position:sticky;top:70px;height:calc(100svh - 70px);display:flex;align-items:center}
+  .hero-pin>.hero-grid{width:100%}
+}
+@media (max-width:900px){
+  .hero-scroll .hero-grid{grid-template-columns:1fr;gap:20px;padding-top:28px}
+  .hero-scroll .hero-copy{display:contents}
+  .hero-scroll .hero-copy>*{order:2}
+  .hero-scroll .hero-copy>.label,.hero-scroll .hero-copy>h1{order:0}
+  .hero-scroll .hero-media{order:1}
+  .k3d-track{height:160svh}
+  .k3d-scroll{position:sticky;top:72px}
+}
+@media (prefers-reduced-motion:reduce){
+  .hero-scroll{height:auto}.hero-pin{position:static;height:auto}.k3d-track{height:auto}.k3d-scroll{position:static}.k3d-hint{display:none}
+}
