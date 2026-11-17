@@ -23,7 +23,7 @@ const lerp = (a, b, t) => a + (b - a) * t;
 
 // Rooms for the tour, plan px [x0, y0, x1, y1], in the order the camera visits them.
 const ROOMS = [
-  { key: 'kitchen', name: 'Kitchen', note: 'Carved out of the old laundry area and part of the entrance.', img: 'img/jh-kitchen-real.webp', pos: '26% 50%', r: [700, 440, 970, 760] },
+  { key: 'kitchen', name: 'Kitchen', note: 'Carved out of the old laundry area and part of the entrance.', img: 'img/jh-kitchen-real.webp', pos: '26% 50%', r: [700, 440, 970, 760], zoom: .72 },
   { key: 'dining', name: 'Kitchen and dining', note: 'The kitchen faces the dining table.', img: 'img/jh-styled-dining.jpg', r: [560, 700, 920, 1100] },
   { key: 'kids', name: 'Children’s room', note: 'This room was the kitchen.', img: 'img/jh-styled-kids.jpg', r: [968, 442, 1192, 806] },
   { key: 'main', name: 'Main bedroom', note: 'Closets along the wall it shares with the kitchen.', img: 'img/jh-styled-bedroom.jpg', r: [216, 442, 529, 789] },
@@ -92,33 +92,86 @@ function parts(mask, reach = 2, min = 40) {
 // Step 2: which pixels change between the developer's plan and the construction plan, and when.
 // Each pixel is sorted on its own: lighter in the construction plan = erased, darker = drawn,
 // so a new wall next to a removed one is still drawn with the other new walls.
+// The old laundry closet is wiped clean (its leftover boxes too), and the new walls are drawn solid.
+const LAUNDRY = [745, 438, 913, 600];       // plan px: the utility closet that becomes part of the kitchen
+const INK = [52, 49, 45];                   // new walls are drawn in this charcoal
 function changes(O, C) {
   const o = O.data, c = C.data, er = new Uint8Array(W * H), dr = new Uint8Array(W * H);
+  const target = new Uint8ClampedArray(c);  // what each pixel becomes
   for (let p = 0; p < W * H; p++) {
     const i = p * 4;
     if (Math.abs(o[i] - c[i]) + Math.abs(o[i + 1] - c[i + 1]) + Math.abs(o[i + 2] - c[i + 2]) <= 40) continue;
     (lum(c, i) > lum(o, i) ? er : dr)[p] = 1;
   }
+  // the laundry closet: everything inside goes, down to white paper
+  for (let y = LAUNDRY[1]; y < LAUNDRY[3]; y++) for (let x = LAUNDRY[0]; x < LAUNDRY[2]; x++) {
+    const p = y * W + x, i = p * 4;
+    if (lum(o, i) < 248 || lum(c, i) < 248) { er[p] = 1; dr[p] = 0; target[i] = target[i + 1] = target[i + 2] = 255; }
+  }
+  // new walls: close the hatching into a solid band, then ink it
+  const drawParts = parts(dr, 3, 30);
+  for (const pt of drawParts) {
+    const x0 = Math.max(0, pt.x0 - 4), y0 = Math.max(0, pt.y0 - 4), x1 = Math.min(W - 1, pt.x1 + 4), y1 = Math.min(H - 1, pt.y1 + 4);
+    const bw = x1 - x0 + 1, bh = y1 - y0 + 1, m = new Uint8Array(bw * bh), dil = new Uint8Array(bw * bh);
+    for (const p of pt.px) m[((p / W | 0) - y0) * bw + (p % W) - x0] = 1;
+    const R = 3;
+    for (let y = 0; y < bh; y++) for (let x = 0; x < bw; x++) {
+      let on = 0;
+      for (let dy = -R; dy <= R && !on; dy++) for (let dx = -R; dx <= R; dx++) { const xx = x + dx, yy = y + dy; if (xx >= 0 && yy >= 0 && xx < bw && yy < bh && m[yy * bw + xx]) { on = 1; break; } }
+      dil[y * bw + x] = on;
+    }
+    const px = [];
+    for (let y = 0; y < bh; y++) for (let x = 0; x < bw; x++) {
+      let all = dil[y * bw + x];
+      for (let dy = -R + 1; dy <= R - 1 && all; dy++) for (let dx = -R + 1; dx <= R - 1; dx++) { const xx = x + dx, yy = y + dy; if (xx < 0 || yy < 0 || xx >= bw || yy >= bh || !dil[yy * bw + xx]) { all = 0; break; } }
+      if (all) { const p = (y + y0) * W + x + x0, i = p * 4; px.push(p); target[i] = INK[0]; target[i + 1] = INK[1]; target[i + 2] = INK[2]; }
+    }
+    pt.px = px;
+  }
+  const list = [];                          // [pixel, start time, fade seconds]
+  // the eraser: one hand moving from wall to wall, rubbing back and forth across each in quick strokes
   const order = (a, b) => (a.y0 + a.x0 * .3) - (b.y0 + b.x0 * .3);
-  const erase = parts(er, 3, 30).sort(order), draw = parts(dr, 3, 30).sort(order);
-  const list = [];                         // [pixel, time]
-  const schedule = (group, [a, b], jitter) => {
-    const n = group.length; if (!n) return;
-    const slot = (b - a) / n;
-    group.forEach((pt, k) => {
-      const horiz = pt.x1 - pt.x0 >= pt.y1 - pt.y0;
-      const len = Math.max(1, horiz ? pt.x1 - pt.x0 : pt.y1 - pt.y0);
-      for (const p of pt.px) {
-        const x = p % W, y = (p / W) | 0;
-        const f = (horiz ? x - pt.x0 : y - pt.y0) / len;
-        list.push([p, a + slot * k + slot * .9 * clamp01(f * (1 - jitter) + Math.random() * jitter)]);
-      }
-    });
+  const erase = parts(er, 4, 20).sort(order);
+  const path = [];                          // [x, y] points along the eraser's way, evenly spaced in time
+  const step = 3;
+  const lineTo = (x, y) => {
+    const [px, py] = path.length ? path[path.length - 1] : [x, y];
+    const n = Math.max(1, Math.ceil(Math.hypot(x - px, y - py) / step));
+    for (let k = 1; k <= n; k++) path.push([px + (x - px) * k / n, py + (y - py) * k / n]);
   };
-  schedule(erase, T.erase, .35);           // the eraser rubs: rough, back and forth
-  schedule(draw, T.draw, 0);               // the pen draws: clean, end to end
+  for (const pt of erase) {
+    const horiz = pt.x1 - pt.x0 >= pt.y1 - pt.y0, m = 7;
+    const a0 = (horiz ? pt.x0 : pt.y0) - m, a1 = (horiz ? pt.x1 : pt.y1) + m;
+    const b0 = (horiz ? pt.y0 : pt.x0) - m, b1 = (horiz ? pt.y1 : pt.x1) + m;
+    const at = (a, b) => horiz ? [a, b] : [b, a];
+    if (!path.length) path.push(at(a0, b0));
+    lineTo(...at(a0, b0));
+    let side = 0;
+    for (let a = a0; a <= a1 + 8; a += 8) { lineTo(...at(a + 4, side ? b0 : b1)); side ^= 1; }
+  }
+  const tmap = new Float32Array(W * H).fill(Infinity), RR = 11;
+  const dur = T.erase[1] - T.erase[0];
+  path.forEach(([x, y], k) => {
+    const t = T.erase[0] + dur * k / Math.max(1, path.length - 1);
+    for (let dy = -RR; dy <= RR; dy++) for (let dx = -RR; dx <= RR; dx++) {
+      if (dx * dx + dy * dy > RR * RR) continue;
+      const xx = Math.round(x + dx), yy = Math.round(y + dy); if (xx < 0 || yy < 0 || xx >= W || yy >= H) continue;
+      const p = yy * W + xx; if (er[p] && t < tmap[p]) tmap[p] = t;
+    }
+  });
+  for (const pt of erase) for (const p of pt.px) list.push([p, Math.min(tmap[p], T.erase[1]), .16]);
+  // the pen: each new wall drawn from one end to the other, one after another
+  drawParts.sort(order);
+  const slot = (T.draw[1] - T.draw[0]) / Math.max(1, drawParts.length);
+  drawParts.forEach((pt, k) => {
+    const horiz = pt.x1 - pt.x0 >= pt.y1 - pt.y0, len = Math.max(1, horiz ? pt.x1 - pt.x0 : pt.y1 - pt.y0);
+    for (const p of pt.px) {
+      const f = ((horiz ? p % W : p / W | 0) - (horiz ? pt.x0 : pt.y0)) / len;
+      list.push([p, T.draw[0] + slot * k + slot * .85 * clamp01(f), .1]);
+    }
+  });
   list.sort((a, b) => a[1] - b[1]);
-  return { list };
+  return { list, target };
 }
 
 // Step 3: the model, read from the revised plan.
@@ -234,20 +287,23 @@ async function start() {
     for (let x = 0; x < W; x += 63) { g.beginPath(); g.moveTo(x, 0); g.lineTo(x, H); g.stroke(); }
     for (let y = 0; y < H; y += 63) { g.beginPath(); g.moveTo(0, y); g.lineTo(W, y); g.stroke(); }
     g.globalAlpha = .3; g.globalCompositeOperation = 'multiply'; g.drawImage(revisedImg, 0, 0); }
-  let done = 0;                             // how many changed pixels are already swapped in
+  let done = 0;                             // changed pixels before this index are finished
   function sheetAt(t) {
-    if (t < (ch.list[done - 1] || [0, -1])[1]) { cur.data.set(O.data); done = 0; }   // loop back
-    let moved = false;
-    while (done < ch.list.length && ch.list[done][1] <= t) {
-      const p = ch.list[done][0] * 4;
-      cur.data[p] = C.data[p]; cur.data[p + 1] = C.data[p + 1]; cur.data[p + 2] = C.data[p + 2];
-      done++; moved = true;
+    const L = ch.list, tg = ch.target, d = cur.data, o = O.data;
+    if (sheetAt.t !== undefined && t < sheetAt.t) { d.set(o); done = 0; }   // loop back
+    sheetAt.t = t;
+    let moved = false, k = done, allDone = true;
+    for (; k < L.length && L[k][1] <= t; k++) {
+      const [p, t0, fade] = L[k], i = p * 4, a = clamp01((t - t0) / fade);
+      d[i] = o[i] + (tg[i] - o[i]) * a; d[i + 1] = o[i + 1] + (tg[i + 1] - o[i + 1]) * a; d[i + 2] = o[i + 2] + (tg[i + 2] - o[i + 2]) * a;
+      moved = true;
+      if (a < 1) allDone = false; else if (allDone) done = k + 1;
     }
-    const k = ease(span(t, ...T.floor));
-    if (moved || t < 1 || k > 0 && k < 1 || sheetAt.k !== k) {
+    const f = ease(span(t, ...T.floor));
+    if (moved || t < 1 || f > 0 && f < 1 || sheetAt.k !== f) {
       sg.putImageData(cur, 0, 0);
-      if (k > 0) { sg.globalAlpha = k; sg.drawImage(tiled, 0, 0); sg.globalAlpha = 1; }
-      sheetAt.k = k;
+      if (f > 0) { sg.globalAlpha = f; sg.drawImage(tiled, 0, 0); sg.globalAlpha = 1; }
+      sheetAt.k = f;
       return true;
     }
     return false;
@@ -290,7 +346,10 @@ async function start() {
   const poche = new THREE.MeshStandardMaterial({ color: 0x2a2825, roughness: .8 });
   // the windows (plan px [x, y, w, d], sill in cm), read off the plan: wall gaps the plan crosses with
   // window lines. The detector also flags the front door and the pantry niche, so they are listed by hand.
-  const WINDOWS = [[230, 795, 100, 20, 0], [335, 805, 30, 195, 90], [910, 880, 20, 140, 60], [935, 795, 135, 15, 90]];
+  const WINDOWS = [[80, 408, 90, 32, 100], [230, 795, 100, 20, 0], [335, 805, 30, 195, 90], [910, 880, 20, 140, 60], [935, 795, 135, 15, 90]];
+  // new walls that the revised plan draws only as thin lines: the wall that wraps the bar
+  // (the children's room wall, then a short return under the bar)
+  model.runs.push([954, 438, 11, 272], [904, 700, 61, 10], [904, 686, 10, 24]);
   const blocks = [...model.runs.map(r => [r, 0, WALL]), ...WINDOWS.map(([x, y, w, d]) => [[x, y, w, d], HEAD, WALL])];
   const built = new THREE.Group(); scene.add(built);
   const walls = new THREE.InstancedMesh(unit, plaster, blocks.length);
@@ -478,12 +537,13 @@ async function start() {
     }
   }
   rug(250, 520, 200, 120, mats.rugBlue);
-  // the safe room: two single beds with a night table between, against an oak slat wall (as in its picture)
-  begin(); add(70, 60, 240, 6, 250, mats.slats, 0, .002);
-  bed(76, 72, 84, 190, 'n', { base: mats.white, duvet: mats.linen, throw: mats.rust, headMat: mats.white, accent: mats.rust, hb: 85, pillows: 1 });
-  bed(222, 72, 84, 190, 'n', { base: mats.white, duvet: mats.linen, throw: mats.navy, headMat: mats.white, accent: mats.navy, hb: 85, pillows: 1 });
-  nightstand(167, 70, 48, 40);
-  rug(110, 200, 170, 140, mats.rugWarm);
+  // the safe room: two single beds with their heads on the window wall side (west), the window to the
+  // left of the left bed, a night table between them, an oak slat wall behind (as in its picture)
+  begin(); add(68, 104, 6, 252, 250, mats.slats, 0, .002);
+  bed(74, 118, 190, 84, 'w', { base: mats.white, duvet: mats.linen, throw: mats.rust, headMat: mats.white, accent: mats.rust, hb: 85, pillows: 1 });
+  bed(74, 266, 190, 84, 'w', { base: mats.white, duvet: mats.linen, throw: mats.navy, headMat: mats.white, accent: mats.navy, hb: 85, pillows: 1 });
+  nightstand(76, 212, 42, 46);
+  rug(170, 140, 130, 190, mats.rugWarm);
   for (const r of model.closets) closet(...r);
   // the bedroom side of the new kitchen: thin partition, pantry and fridge, and the wall to the fridge's right
   begin();
@@ -495,34 +555,47 @@ async function start() {
   add(625, 525, 3, 3, 120, mats.dark, 40, .002); add(625, 560, 3, 3, 120, mats.dark, 40, .002);
   add(565, 515, 64, 72, 63, mats.lacquer, 187, .01);                      // cupboard over the fridge
 
-  // the kitchen: white lacquer cabinets, a pale stone top, two sinks, a gas hob, uppers on the back wall
+  // the kitchen, as on the revised plan and in the kitchen photo: a U open to the west.
+  // North run: a tall unit at its open end, then drawers and the first sink. East run (the wall shared
+  // with the children's room): the oven, with the upper cabinets above it. South run: the bar, with
+  // the second sink, the gas hob at its east end, and an overhang on the living-room side for two stools.
   begin();
-  const counters = [[723, 460, 233, 66], [891, 526, 65, 77], [723, 603, 237, 97]];
-  for (const [x, y, w, d] of counters) {
-    add(x + 2, y + 2, w - 4, d - 4, 10, mats.dark, 0, .002);                // toe kick
+  const base = (x, y, w, d) => {
+    add(x + 3, y + 3, w - 6, d - 6, 10, mats.dark, 0, .002);              // toe kick
     add(x, y, w, d, 76, mats.lacquer, 10, .006);
-    add(x - 1, y - 1, w + 2, d + 2, 4, mats.stone, 86, .006);
+  };
+  base(787, 440, 105, 67); base(892, 440, 62, 262); base(724, 584, 168, 66);
+  add(724, 440, 63, 67, 232, mats.lacquer, 0, .008);                       // tall unit
+  add(722, 470, 2, 3, 110, mats.steel, 70, .002);                          // its long pull
+  add(785, 438, 171, 71, 4, mats.stone, 86, .006);                         // worktops
+  add(890, 507, 66, 79, 4, mats.stone, 86, .006);
+  add(722, 582, 234, 122, 4, mats.stone, 86, .006);                        // the bar top, with its overhang
+  // drawer joints along the north run, door joints along the bar
+  for (const x of [822, 857]) add(x, 506, 1.2, 2, 70, mats.dark, 14, .001);
+  for (const y of [470, 492]) add(787, y, 105, 1.4, 1.2, mats.dark, 50, .001);
+  add(890, 520, 2, 58, 58, mats.black, 18, .004);                          // oven door, facing the U
+  add(890, 523, 2.5, 52, 2, mats.steel, 70, .002);
+  add(797, 452, 58, 38, 1, mats.steel, 90, .01);                           // sinks
+  add(752, 596, 60, 42, 1, mats.steel, 90, .01);
+  add(849, 594, 62, 46, 1, mats.black, 90, .008);                          // hob
+  for (const [bx, by] of [[862, 606], [895, 606], [862, 629], [895, 629]]) cyl(bx, by, 5, 1.5, mats.dark, 91);
+  cyl(826, 446, 1.6, 30, mats.steel, 90); cyl(782, 590, 1.6, 34, mats.steel, 90);   // taps
+  add(922, 440, 34, 160, 70, mats.lacquer, 145, .006);                     // uppers over the oven, east wall
+  for (const y of [480, 520, 560]) add(921, y, 1.2, 1.2, 66, mats.dark, 147, .001);
+  for (const sx of [760, 823]) {                                          // two stools at the bar
+    begin(); cyl(sx + 19, 728, 19, 5, mats.linen, 62, 18);
+    for (const [lx, ly] of [[sx + 5, 714], [sx + 33, 714], [sx + 5, 742], [sx + 33, 742]]) cyl(lx, ly, 1.3, 62, mats.paleOak);
   }
-  add(797, 456, 58, 36, 1, mats.steel, 90, .01);                          // sinks
-  add(752, 598, 58, 40, 1, mats.steel, 90, .01);
-  add(849, 596, 62, 44, 1, mats.black, 90, .008);                         // hob
-  for (const [bx, by] of [[862, 607], [895, 607], [862, 630], [895, 630]]) cyl(bx, by, 5, 1.5, mats.dark, 91);
-  cyl(826, 462, 1.6, 30, mats.steel, 90); cyl(781, 600, 1.6, 34, mats.steel, 90);   // taps
-  add(723, 460, 233, 34, 70, mats.lacquer, 145, .006);                     // uppers
-  for (const sx of [760, 823]) {                                          // two stools
-    begin(); cyl(sx + 19, 726, 19, 5, mats.linen, 62, 18);
-    for (const [lx, ly] of [[sx + 5, 712], [sx + 33, 712], [sx + 5, 740], [sx + 33, 740]]) cyl(lx, ly, 1.3, 62, mats.paleOak);
-  }
-  // dining: a white table with six grey chairs on a warm rug, a milk-glass pendant over it
-  rug(612, 770, 240, 170, mats.rugWarm);
+  // dining: a white table, long side north to south, six grey chairs, a warm rug, a milk-glass pendant
+  rug(630, 765, 205, 200, mats.rugWarm);
   begin();
-  add(648, 805, 168, 95, 4, mats.white, 72, .01);
-  for (const [lx, ly] of [[656, 812], [802, 812], [656, 886], [802, 886]]) cyl(lx, ly, 2.5, 72, mats.paleOak);
-  for (const cx of [668, 722, 776]) for (const [cy, by] of [[766, 766], [910, 936]]) {
-    begin(); add(cx, cy, 40, 32, 46, mats.greyUph, 0, .03);
-    add(cx, by, 40, 6, 90, mats.greyUph, 0, .02);
+  add(685, 772, 95, 168, 4, mats.white, 72, .01);
+  for (const [lx, ly] of [[692, 780], [772, 780], [692, 932], [772, 932]]) cyl(lx, ly, 2.5, 72, mats.paleOak);
+  for (const cy of [782, 836, 890]) for (const [cx, bx] of [[646, 640], [787, 813]]) {
+    begin(); add(cx, cy, 32, 40, 46, mats.greyUph, 0, .03);
+    add(bx, cy, 6, 40, 90, mats.greyUph, 0, .02);
   }
-  begin(); cyl(732, 852, 15, 15, mats.milk, 200, 12); cyl(732, 852, .4, 45, mats.dark, 215);
+  begin(); cyl(732, 856, 15, 15, mats.milk, 200, 12); cyl(732, 856, .4, 45, mats.dark, 215);
   // sofa under the window, with cushions, and an olive tree in a basket
   begin();
   add(600, 1110, 230, 88, 42, mats.linen, 0, .04);
@@ -543,7 +616,7 @@ async function start() {
     const [x0, y0, x1, y1] = rm.r;
     const c = new THREE.Vector3(wx((x0 + x1) / 2), h(60), wz((y0 + y1) / 2));
     const ext = Math.max(x1 - x0, y1 - y0) / U;
-    return { pos: c.clone().addScaledVector(DIR, ext * 4.6 + 2), look: c, mid: c.clone().setY(h(90)) };
+    return { pos: c.clone().addScaledVector(DIR, (ext * 4.6 + 2) * (rm.zoom || 1)), look: c, mid: c.clone().setY(h(90)) };
   });
   const top = { pos: new THREE.Vector3(), look: new THREE.Vector3() }, bird = { pos: new THREE.Vector3(), look: new THREE.Vector3() };
   const tmpP = new THREE.Vector3(), tmpL = new THREE.Vector3();
