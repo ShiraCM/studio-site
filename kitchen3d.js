@@ -332,6 +332,7 @@ async function init(box) {
     steel: M('#bfc0bf', { roughness: .3, metalness: .6 }), glass: new THREE.MeshBasicMaterial({ color: '#f7f8f6', toneMapped: false }),
     floor: M('#dcc8ac', { roughness: .7, transparent: true, opacity: 0 }), stool: M('#eadbcf', { roughness: .85, side: THREE.DoubleSide }),
     chrome: M('#c9c8c4', { roughness: .3 }), groove: M('#b3ab9e', { roughness: .8 }),
+    brushed: M('#c6c4bf', { roughness: .42, metalness: .2 }),     // stainless fridge and taps, as in the rendering
     brass: M('#d6ae63', { roughness: .38, metalness: .25, emissive: '#3a2a10' }), frame: M('#5c5955', { roughness: .5, metalness: .2 }),
     globe: new THREE.MeshStandardMaterial({ color: '#ffffff', roughness: .05, metalness: 0, transparent: true, opacity: .22, depthWrite: false }),
     bulb: new THREE.MeshBasicMaterial({ color: '#ffd9a0', toneMapped: false }),
@@ -392,16 +393,16 @@ async function init(box) {
   part(left, X(173), TOP_ + .006, Z(301), .5, .012, .58, mat.dark);                 // induction cooktop
   part(left, X(218) + .006, .48, Z(427), .012, .56, .58, mat.dark);                 // oven front
   part(left, X(171), TOP_ + .003, Z(535), .4, .01, .62, mat.steel);                 // sink
-  part(left, X(140), TOP_ + .2, Z(535), .025, .4, .025, mat.dark);                  // tap, at the back of the sink by the window
-  part(left, X(140) + .07, TOP_ + .39, Z(535), .14, .022, .022, mat.dark);           // its spout, over the sink
+  part(left, X(140), TOP_ + .2, Z(535), .025, .4, .025, mat.brushed);                  // tap, at the back of the sink by the window
+  part(left, X(140) + .07, TOP_ + .39, Z(535), .14, .022, .022, mat.brushed);           // its spout, over the sink
 
   // Back run (order 1): base cabinets, main sink, uppers above (order 3, drop in)
   const back = group(1);
   block(back, 218, 130, 683, 220, 0, BASE, mat.cab);
   block(back, 218, 130, 683, 220, BASE, TOP_, mat.stone, false);
   part(back, X(522), TOP_ + .003, Z(174), .78, .01, .42, mat.steel);
-  part(back, X(522), TOP_ + .2, Z(140), .025, .4, .025, mat.dark);
-  part(back, X(522), TOP_ + .39, Z(140) + .07, .022, .022, .14, mat.dark);
+  part(back, X(522), TOP_ + .2, Z(140), .025, .4, .025, mat.brushed);
+  part(back, X(522), TOP_ + .39, Z(140) + .07, .022, .022, .14, mat.brushed);
 // Back wall, from the cabinet maker's elevation of wall B (order PDF p.14):
 // three 90 cm upper modules (270 cm), 50 cm from the window-wall corner, from 135 to 240 cm high:
 // 45 cm lift-up doors (HK) below, 60 cm doors (two per module) on top, LED strip underneath.
@@ -422,7 +423,9 @@ part(uppers, (X(U0) + X(U1)) / 2, UB - .012, Z(UD) - .06, uw - .04, .012, .03, m
   block(tall, 683, 130, 773, 648, 0, 2.5, mat.tall);
   for (const py of [226, 322, 442, 584]) part(tall, X(682), 1.25, Z(py), .004, 2.5, .006, mat.dark);
   part(tall, X(682), 1.2, Z(383), .012, .58, .56, mat.dark);                        // wall oven
-  part(tall, X(682), 1.0, Z(513), .014, 2.0, .9, mat.dark);                         // fridge doors
+  part(tall, X(682), 1.0, Z(513), .014, 2.0, .9, mat.brushed);
+  for (const dz of [-.04, .04]) part(tall, X(682) - .03, 1.2, Z(513) + dz, .02, .7, .02, mat.steel);   // fridge handles
+  part(tall, X(682) - .009, .62, Z(513), .004, .006, .9, mat.groove);                                  // freezer drawer line                         // fridge doors
 
   // Island (order 2): cabinets, fold-out table slot, seating end with a waterfall
   const island = group(2);
