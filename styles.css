@@ -669,3 +669,15 @@ dialog.lb button{position:fixed;top:max(16px,env(safe-area-inset-top,0px));right
 .with h2 em{font-style:italic;color:var(--olive)}
 .with .lede{color:var(--ink)}
 @media (max-width:900px){.story .story-howto{min-height:40svh}}
+
+/* The niche must not get lost (owner, Nov 17): on the first screen it is a solid olive band,
+   right under the headline; it is repeated in "The difference" and in the closing line. */
+.feature-niche{display:inline-block;justify-self:start;max-width:none;margin:26px 0 0;padding:12px 22px 14px;border-left:0;background:var(--olive);color:var(--on-olive,#F4F2EA);font:400 clamp(26px,2.6vw,40px)/1.15 var(--display);border-radius:2px;box-shadow:0 10px 30px -18px rgba(30,34,20,.6)}
+.feature-niche em{color:inherit;font-style:italic}
+.feature .lede{font-size:clamp(16px,1.2vw,18px);color:var(--muted)}
+.niche-strong{font:400 clamp(24px,2.4vw,34px)/1.2 var(--display);color:var(--ink);max-width:28ch;margin:4px 0 8px}
+.niche-strong em{font-style:italic;color:var(--olive)}
+@media (max-width:900px){
+  .feature-niche{font-size:clamp(22px,6.2vw,28px);padding:10px 16px 12px;margin-top:18px}
+}
+.niche-strong{max-width:36ch;margin:6px 0 4px;padding-left:18px;border-left:3px solid var(--olive)}
