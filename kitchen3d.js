@@ -731,7 +731,7 @@ function fromStory() {
     if (d[k] > 0) { t = lerp(STEP_T[k - 1], STEP_T[k], clamp01(-d[k - 1] / (d[k] - d[k - 1]))); break; }
   }
   time = t;
-  steps.forEach((el, k) => el.classList.toggle('on', k === 0 || Math.abs(d[k]) < Math.max(160, innerHeight * .28)));
+  steps.forEach((el, k) => el.classList.toggle('on', k === 0 || Math.abs(d[k]) < Math.max(160, innerHeight * .4)));
   frame(time);
 }
 function fromScroll() {

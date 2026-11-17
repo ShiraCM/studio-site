@@ -814,3 +814,10 @@ nav.links .menu-panel a:first-child{border-top:0}
   .about-grid{grid-template-columns:1fr;gap:24px}
   .about-head{position:static}
 }
+
+/* Gentler fading (owner, Nov 17: "things fade too quickly"): the story blocks only dim a little
+   when they're away from the reading line, and change more slowly. */
+.story-step:not(.story-intro){opacity:.55;transition:opacity .9s ease,transform .9s ease}
+.story-step.on{opacity:1}
+@media (max-width:900px){.story-step:not(.story-intro){opacity:1}}
+@media (prefers-reduced-motion:reduce){.story-step:not(.story-intro){opacity:1;transition:none}}
