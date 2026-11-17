@@ -502,38 +502,35 @@ dialog.lb button{position:fixed;top:max(16px,env(safe-area-inset-top,0px));right
 .scene.k3d.k3d-live::after{display:none}
 .scene.k3d .k3d-stage img.k3d-photo{padding:0;animation:none}
 
-/* Home hero, after the linked reference site: a full-screen stage pinned while you scroll.
-   The words sit on the left over a soft fade; the kitchen plan rises into a 3D model in the
-   space beside them, then the rendering opens in a growing circle. kitchen3d.js (k3d-full). */
-.hero-full{position:relative;background:var(--stone)}
-.hero-full .k3d-stage{position:relative;height:calc(100svh - 70px);min-height:560px;overflow:hidden;aspect-ratio:auto;border:0;border-radius:0;background:transparent}
-.hero-full .k3d-stage canvas{position:absolute;left:0;right:0;top:var(--k3d-top,0px);width:100%;height:calc(100% - var(--k3d-top,0px));z-index:0}
-.hero-full .k3d-photo{position:absolute;left:0;right:0;top:var(--k3d-top,0px);width:100%;height:calc(100% - var(--k3d-top,0px));object-fit:cover;z-index:1;opacity:0}
-.k3d-scrim{position:absolute;inset:0;z-index:2;pointer-events:none;background:linear-gradient(90deg,var(--stone) 0%,color-mix(in srgb,var(--stone) 88%,transparent) 34%,color-mix(in srgb,var(--stone) 0%,transparent) 56%)}
-.k3d-copy-wrap{position:relative;z-index:3;height:100%;display:flex;align-items:center}
-.k3d-copy{display:grid;gap:24px;max-width:min(540px,44%)}
-.hero-full h1{font-size:clamp(42px,5vw,76px)}
-.hero-full .lede{max-width:44ch}
-.k3d-line{position:absolute;z-index:3;right:max(16px,calc((100vw - var(--max))/2 + 40px));bottom:24px;display:flex;gap:18px;list-style:none;margin:0;padding:0;font:500 12px/1 var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
-.k3d-line li{min-width:110px;padding-top:10px;background:linear-gradient(var(--rule),var(--rule)) 0 0/100% 1.5px no-repeat;transition:color .3s}
-.k3d-line li.done{background-image:linear-gradient(var(--olive),var(--olive))}
-.k3d-line li.on{color:var(--ink);background-image:linear-gradient(var(--olive),var(--olive));background-size:100% 3px}
-.hero-full:not(.k3d-live) .k3d-photo{opacity:1}
-.hero-full:not(.k3d-live) .k3d-line{display:none}
-@media (min-width:901px){.hero-full.k3d-live{height:260svh}.hero-full.k3d-live .k3d-stage{position:sticky;top:70px}}
+/* Home hero as a scrolling story: the page scrolls normally. On the left, the intro and three
+   text blocks pass by; on the right the kitchen stays in view (sticky) and follows them:
+   plan, 3D model, then the rendering opening in a circle. kitchen3d.js (k3d-story). */
+.story{padding-bottom:clamp(24px,4vw,56px)}
+.story-grid{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:clamp(28px,4vw,64px)}
+.story-step{min-height:72svh;display:flex;flex-direction:column;justify-content:center;gap:20px;max-width:520px}
+.story-step:not(.story-intro){opacity:.28;transform:translateY(14px);transition:opacity .5s ease,transform .5s ease}
+.story-step.on{opacity:1;transform:none}
+.story-intro{min-height:calc(100svh - 70px);gap:24px}
+.story-intro h1{font-size:clamp(42px,5vw,76px)}
+.story-step h2{font-size:clamp(32px,3.6vw,48px)}
+.story-step p{color:var(--muted);font-size:clamp(17px,1.4vw,19px)}
+.story-step .btn{justify-self:start;align-self:flex-start}
+.story-cue{font:500 12px/1 var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-top:12px}
+.story-media{position:relative}
+.story-media .k3d-stage{position:sticky;top:calc(70px + 5svh);height:calc(90svh - 70px);aspect-ratio:auto;border:0;border-radius:0;background:transparent;overflow:hidden}
+.story-media canvas{position:absolute;inset:0;width:100%;height:100%}
+.story-media .k3d-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;border-radius:4px}
+.story:not(.k3d-live) .k3d-photo{opacity:1}
 @media (max-width:900px){
-  .hero-full .k3d-stage{height:auto;min-height:calc(100svh - 64px);display:flex;flex-direction:column}
-  .k3d-copy-wrap{height:auto;align-items:flex-start;padding-top:28px}
-  .k3d-copy{max-width:none;gap:18px}
-  .hero-full .lede{font-size:16px}
-  .hero-full .hero-actions .btn-ghost{display:none}
-  .k3d-scrim{display:none}
-  .k3d-line{display:none}
-  .hero-full.k3d-live{height:230svh}
-  .hero-full.k3d-live .k3d-stage{position:sticky;top:64px;height:calc(100svh - 64px)}
-  .hero-full:not(.k3d-live) .k3d-photo{position:relative;height:auto;aspect-ratio:4/3;margin-top:24px}
+  .story-grid{grid-template-columns:1fr;gap:0}
+  .story-text{display:contents}
+  .story-intro{order:0;min-height:auto;padding-block:28px 24px}
+  .story-media{order:1;position:sticky;top:64px;z-index:2;background:var(--stone);margin-inline:-16px;padding-inline:16px}
+  .story-media .k3d-stage{position:relative;top:0;height:42svh}
+  .story-step:not(.story-intro){order:2;min-height:62svh}
+  .story-cue{display:none}
 }
-@media (prefers-reduced-motion:reduce){.hero-full.k3d-live{height:auto}.hero-full.k3d-live .k3d-stage{position:relative;top:0}}
+@media (prefers-reduced-motion:reduce){.story-step:not(.story-intro){opacity:1;transform:none}}
 
 /* Home: stages, one example each */
 .stages-head{padding-block:clamp(64px,9vw,112px) 0}

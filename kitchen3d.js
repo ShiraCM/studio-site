@@ -64,6 +64,7 @@ async function init(box) {
   const buttons = box.querySelectorAll('.k3d-steps button');
   const replay = box.querySelector('.k3d-replay');
   const full = box.classList.contains('k3d-full');        // full-screen pinned hero: words on one side, kitchen in the free space
+  const story = box.classList.contains('k3d-story');      // the page scrolls; text blocks pass by and the kitchen follows them
   const copyEl = box.querySelector('.k3d-copy');
   const marks = box.querySelectorAll('.k3d-line li');
   const focus = { x: 0, y: 0, w: 1, h: 1 };              // where the kitchen sits on screen, in px
@@ -263,7 +264,7 @@ if (scrolled) {
     camera.updateProjectionMatrix();
 
 const st = t < T.rise[0] + .8 ? 0 : t < T.photo[0] + .6 ? 1 : 2;
-if (full) {
+if (full || story) {
   // the rendering opens in a growing circle from the middle of the kitchen
   const k = ease(span(t, ...T.photo)), R = Math.hypot(Math.max(focus.x, focus.w - focus.x), Math.max(focus.y, focus.h - focus.y));
   photo.style.opacity = k > 0 ? 1 : 0;
@@ -309,6 +310,14 @@ if (full) {
   }
   TOP.pos.z = TOP.look.z = 2.0;
 }
+if (story) {
+  // the kitchen fills its own sticky box beside (or above) the text
+  camera.clearViewOffset();
+  focus.x = w / 2; focus.y = h / 2; focus.w = w; focus.h = h;
+  const V = Math.max(860 / 150, (900 / 150) / camera.aspect) * 1.03;
+  TOP.pos.y = V / (2 * Math.tan(TOP.fov * Math.PI / 360));
+  TOP.pos.z = TOP.look.z = 2.0;
+}
 frame(time);
   }
 
@@ -337,7 +346,27 @@ function scrollRange() {
   const r = el.getBoundingClientRect(), top = parseFloat(getComputedStyle(child).top) || 0;
   return { start: top - r.top, len: Math.max(1, r.height - child.offsetHeight) };
 }
+// Story mode: the page scrolls normally. The text blocks (.story-step) pass the reading line
+// (middle of the free part of the screen) and the kitchen follows them: the intro shows the plan,
+// "01" holds the plan, "02" builds the 3D model, "03" opens the rendering.
+const STEP_T = [0, .6, 7.4, SCROLL_END];
+const steps = [...box.querySelectorAll('.story-step')];
+function fromStory() {
+  const sr = stageEl.getBoundingClientRect();
+  const stacked = sr.width > innerWidth * .8;                 // phones: the kitchen sits above the text
+  const lineY = stacked ? sr.bottom + (innerHeight - sr.bottom) / 2 : innerHeight / 2;
+  const d = steps.map(el => { const r = el.getBoundingClientRect(); return (r.top + r.height / 2) - lineY; });
+  let t = STEP_T[STEP_T.length - 1];
+  if (d[0] > 0) t = 0;
+  else for (let k = 1; k < d.length; k++) {
+    if (d[k] > 0) { t = lerp(STEP_T[k - 1], STEP_T[k], clamp01(-d[k - 1] / (d[k] - d[k - 1]))); break; }
+  }
+  time = t;
+  steps.forEach((el, k) => el.classList.toggle('on', k === 0 || Math.abs(d[k]) < Math.max(160, innerHeight * .28)));
+  frame(time);
+}
 function fromScroll() {
+  if (story) return fromStory();
   const s = scrollRange();
   if (!s) { if (time !== STAGES[2]) { time = STAGES[2]; frame(time); } return; }
   time = clamp01(s.start / s.len) * SCROLL_END;
