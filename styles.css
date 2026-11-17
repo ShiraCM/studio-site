@@ -796,3 +796,21 @@ nav.links .menu-panel a:first-child{border-top:0}
   .story-step:not(.story-intro){opacity:1;transform:none;min-height:auto;padding-block:48px}
 }
 @media (max-width:900px){.story-media::after{content:"";position:absolute;left:0;right:0;top:100%;height:28px;background:linear-gradient(var(--stone),color-mix(in srgb,var(--stone) 0%,transparent));pointer-events:none}}
+
+/* About (Nov 17): the owner's own words, first person. No portrait (her choice); her name
+   as a handwritten signature closes it instead. */
+.about{padding-block:clamp(64px,9vw,120px);border-top:1px solid color-mix(in srgb,var(--rule) 65%,transparent)}
+.about-grid{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:clamp(32px,6vw,96px);align-items:start}
+.about-head{display:grid;gap:14px;position:sticky;top:110px}
+.about h2{font-size:clamp(40px,4.6vw,64px);line-height:1.02}
+.about h2 em{font-style:italic;color:var(--olive)}
+.about-role{font:500 11px/1.5 var(--body);letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+.about-copy{display:grid;gap:18px;max-width:60ch}
+.about-copy p{color:var(--muted);font-size:clamp(17px,1.3vw,18px)}
+.about-copy .about-lead{font:400 clamp(24px,2.2vw,30px)/1.25 var(--display);color:var(--ink)}
+.about-sign{font:400 clamp(44px,4.4vw,56px)/1 "Mrs Saint Delafield",var(--display);color:var(--ink);margin-top:6px}
+.about-copy .about-sign{color:var(--ink);font-size:clamp(46px,4.6vw,60px);line-height:1}
+@media (max-width:900px){
+  .about-grid{grid-template-columns:1fr;gap:24px}
+  .about-head{position:static}
+}
