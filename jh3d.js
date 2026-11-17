@@ -23,7 +23,7 @@ const lerp = (a, b, t) => a + (b - a) * t;
 
 // Rooms for the tour, plan px [x0, y0, x1, y1], in the order the camera visits them.
 const ROOMS = [
-  { key: 'kitchen', name: 'Kitchen', note: 'Carved out of the old laundry area and part of the entrance.', img: 'img/jh-kitchen-real.webp', pos: '26% 50%', r: [700, 440, 970, 760], zoom: .72 },
+  { key: 'kitchen', name: 'Kitchen', note: 'Carved out of the old laundry area and part of the entrance.', img: 'img/jh-kitchen-real.webp', pos: '26% 50%', r: [700, 440, 970, 760], zoom: .9 },
   { key: 'dining', name: 'Kitchen and dining', note: 'The kitchen faces the dining table.', img: 'img/jh-styled-dining.jpg', r: [560, 700, 920, 1100] },
   { key: 'kids', name: 'Children’s room', note: 'This room was the kitchen.', img: 'img/jh-styled-kids.jpg', r: [968, 442, 1192, 806] },
   { key: 'main', name: 'Main bedroom', note: 'Closets along the wall it shares with the kitchen.', img: 'img/jh-styled-bedroom.jpg', r: [216, 442, 529, 789] },
@@ -350,7 +350,7 @@ async function start() {
   // new walls that the revised plan draws only as thin lines: the wall that wraps the bar
   // (the children's room wall, then a short return under the bar)
   // and the short wall that closes the fridge niche on the living-room side (white, as seen from the salon)
-  model.runs.push([954, 438, 11, 272], [904, 700, 61, 10], [904, 686, 10, 24], [560, 587, 72, 9]);
+  model.runs.push([954, 438, 11, 272], [904, 700, 61, 10], [904, 686, 10, 24], [527, 586, 105, 10], [527, 586, 9, 100]);
   const blocks = [...model.runs.map(r => [r, 0, WALL]), ...WINDOWS.map(([x, y, w, d]) => [[x, y, w, d], HEAD, WALL])];
   const built = new THREE.Group(); scene.add(built);
   const walls = new THREE.InstancedMesh(unit, plaster, blocks.length);
@@ -433,6 +433,8 @@ async function start() {
     stone: M({ color: 0xece8e1, roughness: .35 }),
     steel: M({ color: 0xc9cbcc, roughness: .3, metalness: .7 }),
     fridge: M({ color: 0xe1e3e3, roughness: .32, metalness: .25 }),
+    glass: M({ color: 0xd6e4e8, roughness: .05, metalness: .2, transparent: true, opacity: .4 }),
+    deck: M({ map: canvasTex(256, 256, (g, w, hh) => { g.fillStyle = '#cfc6b8'; g.fillRect(0, 0, w, hh); g.strokeStyle = 'rgba(70,55,40,.25)'; g.lineWidth = 2; for (let k = 0; k <= w; k += 64) { g.beginPath(); g.moveTo(k, 0); g.lineTo(k, hh); g.stroke(); g.beginPath(); g.moveTo(0, k); g.lineTo(w, k); g.stroke(); } }, [3, 3]), roughness: .95 }),
     black: M({ color: 0x232220, roughness: .4 }),
     dark: M({ color: 0x3a3733, roughness: .6 }),
     linen: M({ map: weave('#efe9de') }),
@@ -547,6 +549,34 @@ async function start() {
   nightstand(76, 212, 42, 46);
   rug(170, 140, 130, 190, mats.rugWarm);
   for (const r of model.closets) closet(...r);
+// the main bathroom (from the revised plan): washer with the dryer on top, beside the reduced vanity
+// with a mirror over it, then the toilet and the bath
+begin();
+add(401, 171, 62, 59, 85, mats.white, 0, .01);                          // washer
+add(401, 171, 62, 59, 85, mats.white, 86, .01);                         // dryer on top
+for (const lift of [42, 128]) { const m = cyl(462, 200, 15, 1, mats.dark, lift); m.rotation.z = Math.PI / 2; m.position.x = wx(463); }
+add(401, 233, 52, 62, 35, mats.paleOak, 50, .01);                       // floating vanity
+add(400, 232, 54, 64, 3, mats.stone, 85, .006);
+add(418, 248, 26, 32, 1, mats.white, 88, .02);                          // basin
+cyl(410, 264, 1.4, 22, mats.steel, 88);
+add(400, 238, 2, 52, 75, mats.glass, 105, .002);                        // mirror
+add(496, 112, 36, 24, 80, mats.white, 0, .02);                          // toilet: cistern and bowl
+add(500, 134, 28, 40, 40, mats.white, 0, .04);
+add(555, 110, 76, 170, 55, mats.white, 0, .03);                         // bath
+add(563, 118, 60, 154, 2, mats.stone, 54, .04);
+cyl(593, 124, 1.6, 20, mats.steel, 55);
+
+// the balcony (mirpeset): outdoor stone, glass railing with a dark top rail, two chairs, a table, a planter
+begin();
+add(185, 1025, 340, 260, 1.5, mats.deck, 0, .002);
+add(185, 820, 150, 205, 1.5, mats.deck, 0, .002);
+const rail = (x, y, w, d) => { add(x, y, w, d, 100, mats.glass, 4, .002); add(x - 1, y - 1, w + 2, d + 2, 4, mats.black, 104, .002); };
+rail(185, 820, 4, 465); rail(185, 1281, 340, 4);
+begin(); add(330, 1110, 52, 52, 3, mats.black, 70, .01); cyl(356, 1136, 2, 70, mats.black);
+for (const [cx, cy] of [[270, 1112], [400, 1160]]) { begin(); add(cx, cy, 46, 46, 6, mats.linen, 40, .02); add(cx, cy, 46, 6, 80, mats.black, 0, .01); for (const [lx, ly] of [[cx + 3, cy + 3], [cx + 41, cy + 3], [cx + 3, cy + 41], [cx + 41, cy + 41]]) cyl(lx, ly, 1.2, 40, mats.black); }
+begin(); add(200, 1230, 46, 46, 50, mats.terracotta, 0, .02);
+const bush = new THREE.Mesh(new THREE.IcosahedronGeometry(h(40), 1), mats.leaf); bush.position.set(wx(223), h(85), wz(1253)); bush.castShadow = true; item.add(bush);
+
   // the bedroom side of the new kitchen: a thin partition, then the pantry and the fridge,
   // their doors facing the kitchen (east)
   begin();
@@ -620,7 +650,7 @@ async function start() {
     const [x0, y0, x1, y1] = rm.r;
     const c = new THREE.Vector3(wx((x0 + x1) / 2), h(60), wz((y0 + y1) / 2));
     const ext = Math.max(x1 - x0, y1 - y0) / U;
-    return { pos: c.clone().addScaledVector(DIR, (ext * 4.6 + 2) * (rm.zoom || 1)), look: c, mid: c.clone().setY(h(90)) };
+    return { pos: c.clone().addScaledVector(DIR, (ext * 3.3 + 1.3) * (rm.zoom || 1)), look: c, mid: c.clone().setY(h(90)) };
   });
   const top = { pos: new THREE.Vector3(), look: new THREE.Vector3() }, bird = { pos: new THREE.Vector3(), look: new THREE.Vector3() };
   const tmpP = new THREE.Vector3(), tmpL = new THREE.Vector3();
