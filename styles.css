@@ -657,3 +657,15 @@ dialog.lb button{position:fixed;top:max(16px,env(safe-area-inset-top,0px));right
 /* Story blocks are now the four stages (Nov 17): number in olive, text link left-aligned. */
 .story-step .label b{color:var(--olive);font-weight:500;margin-right:8px}
 .story-step .textlink{align-self:flex-start}
+
+/* Home copy (Nov 17): the problem first, then "How I help" and five stages, then "The difference". */
+.story-title em{font-style:italic;color:var(--olive)}
+.story-intro p{color:var(--muted)}
+.story-intro .story-turn{font:italic 400 clamp(24px,2.2vw,32px)/1.2 var(--display);color:var(--ink);margin-top:4px}
+.story .story-howto{min-height:48svh}
+.story-step .btn{white-space:normal}
+.with .wrap{max-width:900px}
+.with h2{max-width:20ch}
+.with h2 em{font-style:italic;color:var(--olive)}
+.with .lede{color:var(--ink)}
+@media (max-width:900px){.story .story-howto{min-height:40svh}}
