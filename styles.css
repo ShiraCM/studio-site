@@ -587,3 +587,6 @@ dialog.lb button{position:fixed;top:max(16px,env(safe-area-inset-top,0px));right
   .opener-reel{overflow-x:auto}
 }
 @media (max-width:900px){.rot{display:block}.story .story-intro{min-height:auto;padding-block:48px 24px}}
+/* No picture strip in the opener (the owner did not want it). The headline holds the first screen;
+   the top of the story peeks in below to invite scrolling. */
+.opener{min-height:calc(86svh - 70px);justify-content:center}
