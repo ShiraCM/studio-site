@@ -13,3 +13,15 @@
   document.addEventListener('click', function (e) { if (!panel.hidden && !e.target.closest('header.top')) set(false); });
   addEventListener('resize', function () { if (innerWidth > 760 && !panel.hidden) set(false); });
 })();
+
+// "← Home" links: if you came from another page of this site, they say "← Back" and take you back
+// to exactly where you were (the browser restores the scroll position). Opened directly, they go home.
+(function () {
+  var ref = document.referrer, same = false;
+  try { same = ref && new URL(ref).origin === location.origin && new URL(ref).pathname !== location.pathname; } catch (e) {}
+  if (!same || history.length < 2) return;
+  document.querySelectorAll('a.back').forEach(function (a) {
+    a.textContent = '← Back';
+    a.addEventListener('click', function (e) { e.preventDefault(); history.back(); });
+  });
+})();
