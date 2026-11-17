@@ -21,7 +21,7 @@ const lerp = (a, b, t) => a + (b - a) * t;
 // eraser wipes it, and our plan is sketched line by line (PRE). Everything after starts at D.
 const D = 4.4;
 const PRE = { erase: [1.0, 2.2], draw: [2.3, 4.1], snap: [3.9, 4.4] };
-const T = { plan: D + 1.4, rise: [D + 1.4, D + 4.6], planFade: [D + 3.2, D + 4.8], cam: [D + 3.4, D + 8.6], photo: [D + 9.6, D + 11.2], style: [D + 11.5, D + 12.9], end: D + 16 };
+const T = { plan: D + 1.4, rise: [D + 1.4, D + 4.6], planFade: [D + 3.2, D + 4.8], cam: [D + 3.4, D + 8.6], photo: [D + 9.6, D + 11.2], style: [D + 11.5, D + 13.6], end: D + 16.5 };
 const STAGES = [D + 0.6, D + 7.4, D + 11.2];          // where the Plan / Model / Rendering buttons jump to
 
 
@@ -177,10 +177,42 @@ async function contractorLayer(src, k, clear) {
 // filled in with stone from beside it (patches, in image px: rect, shift, soft edge); the
 // accessory itself is whatever the patch changed.
 const ACCESSORIES = [
-  { name: 'olive', box: [790, 276, 862, 396], patches: [[[795, 279, 857, 345], -64, 0], [[804, 344, 846, 394], -64, 0]] },
-  { name: 'board', box: [566, 256, 636, 342], patches: [[[572, 262, 630, 338], -64, 0]] },
-  { name: 'lemons', box: [180, 370, 282, 430], patches: [], fill: [[186, 376, 262, 426], [246, 391, 278, 426]] }
+  { name: 'olive', box: [790, 276, 862, 396], base: [826, 390], patches: [[[795, 279, 857, 345], -64, 0], [[804, 344, 846, 394], -64, 0]],
+    mask: [['e', 826, 312, 33, 37], ['r', 819, 340, 834, 360], ['r', 809, 354, 846, 393]] },
+  { name: 'board', box: [566, 256, 636, 342], base: [600, 338], patches: [[[572, 262, 630, 338], -64, 0]],
+    mask: [['r', 575, 260, 626, 340]] },
+  // the bowl is as pale as the stone, so it is cut out by its shape alone
+  { name: 'lemons', box: [180, 370, 282, 430], base: [228, 421], patches: [], fill: [[186, 376, 262, 426], [246, 391, 278, 426]], solid: true,
+    mask: [['e', 221, 409, 32, 12], ['e', 222, 392, 22, 12], ['e', 257, 407, 14, 13]] }
 ];
+// Where each accessory is set down (bottom centre, image px) and at what size, in the order they pop on.
+// The owner's styling: lemons on the island, the olive tree on the back counter, two folded towels.
+const PLACE = [
+  { src: 'lemons', at: [805, 392], s: 1.15 },
+  { src: 'olive', at: [688, 341], s: .72 },
+  { src: 'towels', at: [545, 342], s: 1.1 },
+  { src: 'board', at: [600, 338], s: 1 },
+  { src: 'lemons', at: [228, 421], s: 1 }
+];
+// Two folded kitchen towels, drawn: linen on top, oat with an olive stripe underneath.
+function makeTowels() {
+  const k = 3, c = document.createElement('canvas'); c.width = 52 * k; c.height = 20 * k;
+  const g = c.getContext('2d'); g.scale(k, k);
+  const towel = (x0, x1, y0, y1, top, a, b, stripe) => {
+    const rr = (x, y, w, h, r) => { g.beginPath(); if (g.roundRect) g.roundRect(x, y, w, h, r); else g.rect(x, y, w, h); };
+    const gr = g.createLinearGradient(0, y0, 0, y1); gr.addColorStop(0, a); gr.addColorStop(1, b);
+    rr(x0, y0, x1 - x0, y1 - y0, [3.5, 1.5, 1.5, 3.5]); g.fillStyle = gr; g.fill();
+    rr(x0 + .6, y0 - 2.2, x1 - x0 - 1.2, 2.8, [2, 1, 0, 0]); g.fillStyle = top; g.fill();
+    g.strokeStyle = 'rgba(120,105,85,.35)'; g.lineWidth = .5;
+    g.beginPath(); g.moveTo(x0 + 3, (y0 + y1) / 2 + .4); g.lineTo(x1 - 1, (y0 + y1) / 2 + .4); g.stroke();
+    if (stripe) { g.fillStyle = stripe; g.fillRect(x1 - 11, y0, 1.4, y1 - y0); g.fillRect(x1 - 8.4, y0, .8, y1 - y0); }
+    const sh = g.createLinearGradient(x0, 0, x0 + 4, 0); sh.addColorStop(0, 'rgba(90,75,55,.18)'); sh.addColorStop(1, 'rgba(90,75,55,0)');
+    rr(x0, y0, 4, y1 - y0, [3.5, 0, 0, 3.5]); g.fillStyle = sh; g.fill();
+  };
+  towel(2, 50, 11, 18.5, '#F3EDE1', '#E8DFCE', '#CFC3AD', '#7E8762');
+  towel(5, 46, 4.2, 11.2, '#FBF9F4', '#F4F0E8', '#DED7C9', null);
+  return { canvas: c, w: 52, h: 20, base: [26, 18.5] };
+}
 async function styledPhoto(src) {
   const img = new Image();
   await new Promise((resolve, reject) => { img.onload = resolve; img.onerror = reject; img.src = src; });
@@ -242,22 +274,33 @@ for (const a of ACCESSORIES) if (a.fill) {
   }
 }
   g.putImageData(work, 0, 0);
-  const items = ACCESSORIES.map(a => {
-    const [x0, y0, x1, y1] = a.box, w = x1 - x0, h = y1 - y0;
-    const ic = document.createElement('canvas'); ic.width = w; ic.height = h;
-    const ig = ic.getContext('2d'), d = ig.createImageData(w, h);
-    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
-      const i = ((y + y0) * W + x + x0) * 4, j = (y * w + x) * 4;
-      const diff = Math.max(Math.abs(o[i] - p[i]), Math.abs(o[i + 1] - p[i + 1]), Math.abs(o[i + 2] - p[i + 2]));
-      d.data[j] = o[i]; d.data[j + 1] = o[i + 1]; d.data[j + 2] = o[i + 2];
-      d.data[j + 3] = Math.round(255 * clamp01((diff - 5) / 20));
-    }
-    ig.putImageData(d, 0, 0);
-    return { canvas: ic, x0, y0, w, h };
-  });
+// each accessory's cut-out: inside its outline, where the patch changed the picture
+const inMask = (m, x, y) => {
+  let v = 0;
+  for (const [t, a, b, c2, d2] of m) {
+    if (t === 'e') v = Math.max(v, clamp01((1 - Math.hypot((x - a) / c2, (y - b) / d2)) * Math.min(c2, d2) / 1.5));
+    else v = Math.max(v, clamp01(Math.min(x - a, c2 - x, y - b, d2 - y) / 1.5 + .5));
+  }
+  return v;
+};
+const cuts = { towels: makeTowels() };
+for (const a of ACCESSORIES) {
+  const [x0, y0, x1, y1] = a.box, w = x1 - x0, h = y1 - y0;
+  const ic = document.createElement('canvas'); ic.width = w; ic.height = h;
+  const ig = ic.getContext('2d'), d = ig.createImageData(w, h);
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+    const i = ((y + y0) * W + x + x0) * 4, j = (y * w + x) * 4;
+    const diff = Math.max(Math.abs(o[i] - p[i]), Math.abs(o[i + 1] - p[i + 1]), Math.abs(o[i + 2] - p[i + 2]));
+    const m = inMask(a.mask, x + x0 + .5, y + y0 + .5);
+    d.data[j] = o[i]; d.data[j + 1] = o[i + 1]; d.data[j + 2] = o[i + 2];
+    d.data[j + 3] = Math.round(255 * m * (a.solid ? 1 : clamp01((diff - 5) / 20)));
+  }
+  ig.putImageData(d, 0, 0);
+  cuts[a.name] = { canvas: ic, w, h, base: [a.base[0] - x0, a.base[1] - y0] };
+}
   const bare = document.createElement('canvas'); bare.width = W; bare.height = H;
   bare.getContext('2d').drawImage(c, 0, 0);
-  return { bare, items, W, H };
+  return { bare, cuts, W, H };
 }
 // a quick overshoot, like something set down with a little bounce
 const popOut = t => { const s = 2.2; return 1 + (s + 1) * Math.pow(t - 1, 3) + s * Math.pow(t - 1, 2); };
@@ -500,15 +543,22 @@ function drawStyled(t) {
   const g = styled.g;
   g.setTransform(1, 0, 0, 1, 0, 0);
   g.drawImage(styled.bare, 0, 0);
-  const step = (T.style[1] - T.style[0] - .5) / Math.max(1, styled.items.length - 1);
-  styled.items.forEach((it, i) => {
-    const a = T.style[0] + i * step, k = span(t, a, a + .5);
-    if (k <= 0) return;
-    const sc = .3 + .7 * popOut(k), cx = it.x0 + it.w / 2, by = it.y0 + it.h;
-    g.globalAlpha = clamp01(k * 3);
-    g.setTransform(sc, 0, 0, sc, cx - sc * cx, by - sc * by);
-    g.drawImage(it.canvas, it.x0, it.y0);
-  });
+const step = (T.style[1] - T.style[0] - .5) / Math.max(1, PLACE.length - 1);
+PLACE.forEach((pl, i) => {
+  const a = T.style[0] + i * step, k = span(t, a, a + .5), it = styled.cuts[pl.src];
+  if (k <= 0 || !it) return;
+  const sc = pl.s * (.3 + .7 * popOut(k)), [cx, by] = pl.at, f = it.canvas.width / it.w;
+  // a soft contact shadow, so it sits on the stone
+  g.setTransform(1, 0, 0, 1, 0, 0);
+  g.globalAlpha = clamp01(k * 2);
+  const rx = it.w * pl.s * .5, sh = g.createRadialGradient(cx, by, 0, cx, by, rx);
+  sh.addColorStop(0, 'rgba(70,55,40,.32)'); sh.addColorStop(1, 'rgba(70,55,40,0)');
+  g.save(); g.translate(cx, by); g.scale(1, .12); g.translate(-cx, -by);
+  g.fillStyle = sh; g.beginPath(); g.arc(cx, by, rx, 0, Math.PI * 2); g.fill(); g.restore();
+  g.globalAlpha = clamp01(k * 3);
+  g.setTransform(sc / f, 0, 0, sc / f, cx - sc * it.base[0], by - sc * it.base[1]);
+  g.drawImage(it.canvas, 0, 0);
+});
   g.globalAlpha = 1; g.setTransform(1, 0, 0, 1, 0, 0);
 }
   let skLast = -1;
