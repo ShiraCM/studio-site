@@ -392,7 +392,8 @@ async function init(box) {
   part(left, X(173), TOP_ + .006, Z(301), .5, .012, .58, mat.dark);                 // induction cooktop
   part(left, X(218) + .006, .48, Z(427), .012, .56, .58, mat.dark);                 // oven front
   part(left, X(171), TOP_ + .003, Z(535), .4, .01, .62, mat.steel);                 // sink
-  part(left, X(209), TOP_ + .2, Z(535), .025, .4, .025, mat.dark);                  // tap
+  part(left, X(140), TOP_ + .2, Z(535), .025, .4, .025, mat.dark);                  // tap, at the back of the sink by the window
+  part(left, X(140) + .07, TOP_ + .39, Z(535), .14, .022, .022, mat.dark);           // its spout, over the sink
 
   // Back run (order 1): base cabinets, main sink, uppers above (order 3, drop in)
   const back = group(1);
@@ -400,6 +401,7 @@ async function init(box) {
   block(back, 218, 130, 683, 220, BASE, TOP_, mat.stone, false);
   part(back, X(522), TOP_ + .003, Z(174), .78, .01, .42, mat.steel);
   part(back, X(522), TOP_ + .2, Z(140), .025, .4, .025, mat.dark);
+  part(back, X(522), TOP_ + .39, Z(140) + .07, .022, .022, .14, mat.dark);
 // Back wall, from the cabinet maker's elevation of wall B (order PDF p.14):
 // three 90 cm upper modules (270 cm), 50 cm from the window-wall corner, from 135 to 240 cm high:
 // 45 cm lift-up doors (HK) below, 60 cm doors (two per module) on top, LED strip underneath.
@@ -440,9 +442,9 @@ part(uppers, (X(U0) + X(U1)) / 2, UB - .012, Z(UD) - .06, uw - .04, .012, .03, m
   // Stools (order 4), as in the rendering: a cream shell seat, low at the front and rising at the
   // back, on a thin dark sled frame, one each side of the island.
   const stools = group(4);
-  for (const px of [381 - 24, 519 + 24]) {
+  for (const px of [356, 544]) {                                        // where the plan puts them: the island's seating end
     const s = new THREE.Group();
-    s.position.set(X(px), 0, 2.55);
+    s.position.set(X(px), 0, Z(627));
     const shell = new THREE.Mesh(new THREE.SphereGeometry(1, 40, 16, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2), mat.stool);
     shell.scale.set(.21, .085, .2); shell.position.y = .72;                              // a shallow bowl
     const rim = new THREE.Mesh(new THREE.TorusGeometry(1, .06, 10, 40), mat.stool);
@@ -461,10 +463,10 @@ part(uppers, (X(U0) + X(U1)) / 2, UB - .012, Z(UD) - .06, uw - .04, .012, .03, m
   }
 
   // Two clear glass pendants with brass caps over the island (order 5, lowered in on their cords)
-  const pendants = group(5, { drop: true });
+  const pendants = group(5, { drop: true }), cords = [];
   for (const [x, z, y] of [[2.14, 2.45, 1.55], [2.3, 2.05, 1.72]]) {
-    const cord = new THREE.Mesh(new THREE.CylinderGeometry(.004, .004, 6 - y, 6), mat.frame);      // runs up out of the picture, as in the rendering
-    cord.position.set(x, (6 + y + .12) / 2, z);
+    const cord = new THREE.Mesh(new THREE.CylinderGeometry(.004, .004, 1, 6), mat.frame);   // length set each frame
+    cord.userData.y = y + .12; cord.position.set(x, 0, z); cords.push(cord);
     const cap = new THREE.Mesh(new THREE.CylinderGeometry(.03, .04, .08, 20), mat.brass);
     cap.position.set(x, y + .115, z);
     const globe = new THREE.Mesh(new THREE.SphereGeometry(.12, 32, 20), mat.globe);
@@ -614,6 +616,9 @@ function drawStyled(t) {
     camera.fov = lerp(TOP.fov, EYE.fov, c);
     camera.up.set(0, c > 0.02 ? 1 : 0, c > 0.02 ? 0 : -1);
     camera.lookAt(look);
+    // cords reach the ceiling from above; at eye level they run up out of the picture, as in the rendering
+    const top = lerp(H, 6, ease(span(t, T.cam[1] - 1.2, T.cam[1])));
+    for (const cd of cords) { cd.scale.y = top - cd.userData.y; cd.position.y = (top + cd.userData.y) / 2; }
     camera.updateProjectionMatrix();
 
 const st = t < T.rise[0] + .8 ? 0 : t < T.photo[0] + .6 ? 1 : 2;

@@ -681,3 +681,8 @@ dialog.lb button{position:fixed;top:max(16px,env(safe-area-inset-top,0px));right
   .feature-niche{font-size:clamp(22px,6.2vw,28px);padding:10px 16px 12px;margin-top:18px}
 }
 .niche-strong{max-width:36ch;margin:6px 0 4px;padding-left:18px;border-left:3px solid var(--olive)}
+
+/* Materials board in stage 04 (Nov 17) */
+.story-figure{margin:4px 0 0;display:grid;gap:10px}
+.story-figure img{width:100%;height:auto;border-radius:4px}
+.story-figure figcaption{font-size:14px;line-height:1.45;color:var(--muted)}
