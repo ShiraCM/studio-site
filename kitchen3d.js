@@ -28,8 +28,8 @@ function webglOK() {
 
 async function planTexture(src) {
   const img = new Image();
-  img.src = src;
-  await img.decode();
+  // onload, not img.decode(): Safari rejects decode() for SVG images
+  await new Promise((resolve, reject) => { img.onload = resolve; img.onerror = reject; img.src = src; });
   const c = document.createElement('canvas');
   c.width = 1800; c.height = 1720;
   c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
@@ -261,9 +261,9 @@ for (const box of document.querySelectorAll('.k3d')) {
     if (reduceMotion) continue;
     let ready = null;
     box.addEventListener('scene:show', () => {
-      ready ||= init(box).catch(() => null);
+      ready = ready || init(box).catch(e => { console.error('kitchen 3D:', e); return null; });
       ready.then(api => api && api.play());
     });
     if (box.classList.contains('active')) box.dispatchEvent(new Event('scene:show'));
-  } else init(box);
+  } else init(box).catch(e => console.error('kitchen 3D:', e));
 }
