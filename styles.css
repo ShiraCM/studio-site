@@ -843,3 +843,27 @@ nav.links .menu-panel a:first-child{border-top:0}
   .spread .sp-b img{aspect-ratio:4/3}
   .spread .sp-d img{aspect-ratio:16/10}
 }
+
+/* Jerusalem Heights plans, one self-playing sequence (owner, Nov 17: "more streamlined, no buttons"). */
+.jh-anim{display:grid;grid-template-columns:minmax(0,4fr) minmax(0,7fr);gap:clamp(28px,5vw,80px);align-items:center}
+.jh-copy{display:grid;gap:18px;align-content:center}
+.jh-copy p{color:var(--muted);max-width:44ch}
+.jh-legend{display:flex;flex-wrap:wrap;gap:10px 22px;font:500 11px/1.4 var(--body);letter-spacing:.14em;text-transform:uppercase;opacity:.35;transition:opacity .6s ease}
+.jh-legend.on{opacity:1}
+.jh-legend span{display:inline-flex;align-items:center;gap:8px}
+.jh-stage{margin:0;display:flex;flex-direction:column;gap:12px}
+.jh-tag{position:static;display:grid;gap:4px;margin:0;padding:0;background:none}
+.jh-tag-note{color:var(--muted);font-size:15px;min-height:1.5em}
+.jh-view{position:relative;aspect-ratio:1/1;max-height:78svh;overflow:hidden}
+.jh-view canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.jh-fallback{width:100%;height:100%;object-fit:contain}
+.jh-live .jh-fallback{visibility:hidden}
+.jh-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;clip-path:circle(0% at 50% 50%);border-radius:2px;pointer-events:none}
+.jh-anim:not(.jh-live) .jh-photo{display:none}
+@media (max-width:900px){
+  .jh-anim{grid-template-columns:1fr}
+  .jh-tag-note{font-size:14px}
+}
+.jh-legend i{width:22px;height:12px;display:inline-block;border:1px solid var(--muted)}
+.jh-legend i.dash{border-style:dashed}
+.jh-legend i.hatch{background:repeating-linear-gradient(45deg,#a0745a 0 1px,transparent 1px 4px);border-color:#a0745a}
