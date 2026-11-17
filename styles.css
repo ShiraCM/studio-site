@@ -755,3 +755,12 @@ nav.links .btn{padding:0 20px;min-height:44px;font-size:11px}
   .story-media .k3d-stage{height:50svh;gap:8px;padding-top:8px}
   .story-media .k3d-tag{gap:3px}
 }
+
+/* Logo (Nov 17, the owner chose the spaced wordmark): SHIRA SVEI in widely spaced serif capitals,
+   a short olive line, DESIGN STUDIO beneath. */
+.brand{display:grid;justify-items:start;align-content:center;gap:6px;text-decoration:none;color:var(--ink)}
+.brand-word{font:400 19px/1 var(--display);letter-spacing:.24em;text-transform:uppercase;margin-right:-.24em}
+.brand-rule{width:22px;height:1px;background:var(--olive)}
+.brand-sub{font:600 9px/1 var(--body);letter-spacing:.42em;text-transform:uppercase;color:var(--muted);margin-right:-.42em}
+@media (max-width:420px){.brand-word{font-size:16px;letter-spacing:.2em}.brand-sub{font-size:8.5px;letter-spacing:.36em}}
+@media (min-width:721px){.brand-word{font-size:22px}.brand-sub{font-size:9.5px}.brand-rule{width:26px}}
