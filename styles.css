@@ -653,3 +653,7 @@ dialog.lb button{position:fixed;top:max(16px,env(safe-area-inset-top,0px));right
   .feature-niche{font-size:clamp(24px,6.6vw,30px);padding-left:14px;margin-top:16px}
 }
 .feature-copy>.feature-niche{max-width:800px;text-wrap:balance}
+
+/* Story blocks are now the four stages (Nov 17): number in olive, text link left-aligned. */
+.story-step .label b{color:var(--olive);font-weight:500;margin-right:8px}
+.story-step .textlink{align-self:flex-start}

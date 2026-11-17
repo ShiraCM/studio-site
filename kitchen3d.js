@@ -349,7 +349,7 @@ function scrollRange() {
 // Story mode: the page scrolls normally. The text blocks (.story-step) pass the reading line
 // (middle of the free part of the screen) and the kitchen follows them: the intro shows the plan,
 // "01" holds the plan, "02" builds the 3D model, "03" opens the rendering.
-const STEP_T = [0, .6, 7.4, SCROLL_END];
+const STEP_T = [0, .6, 4.6, 8.6, SCROLL_END]; // intro, then one stage each: plan, walls up, eye level, rendering
 const steps = [...box.querySelectorAll('.story-step')];
 function fromStory() {
   const sr = stageEl.getBoundingClientRect();
