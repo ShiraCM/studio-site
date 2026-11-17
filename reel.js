@@ -1,7 +1,9 @@
 /* Hero reel: each scene starts as a drawing, then a reveal line sweeps across
    and turns it into the rendering or result. Cycles on its own; the stage
    buttons jump to a stage and stop the cycle. A stage can have several scenes
-   (data-stage), each with its own caption (data-text). */
+   (data-stage), each with its own caption (data-text) and length in ms
+   (data-duration). Each scene gets a scene:show event when it comes up, which
+   the 3D kitchen (kitchen3d.js) uses to play from the plan. */
 (function () {
   var box = document.getElementById('model');
   if (!box) return;
@@ -33,6 +35,7 @@
     });
     var cur = scenes[i], st = stageOf[i];
     void cur.offsetWidth;
+    cur.dispatchEvent(new Event('scene:show'));
     if (reduce) cur.classList.add('reveal');
     else revealTimer = setTimeout(function () { cur.classList.add('reveal'); }, 1500);
     if (cap) {
@@ -43,7 +46,7 @@
       cap.classList.add('in');
     }
     pips.forEach(function (p, j) { p.setAttribute('aria-pressed', j + 1 === st ? 'true' : 'false'); });
-    if (auto) nextTimer = setTimeout(function () { show((idx + 1) % scenes.length); }, 7200);
+    if (auto) nextTimer = setTimeout(function () { show((idx + 1) % scenes.length); }, +cur.dataset.duration || 7200);
   }
   function goStage(n, user) { show(Math.max(0, stageOf.indexOf(n)), user); }
   pips.forEach(function (p, j) { p.addEventListener('click', function () { goStage(j + 1, true); }); });

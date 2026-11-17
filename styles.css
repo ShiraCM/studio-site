@@ -475,3 +475,29 @@ dialog.lb button{position:fixed;top:max(16px,env(safe-area-inset-top,0px));right
 .btn-ghost-light:hover{border-color:var(--on-night)}
 .oact output{flex-basis:100%;text-align:right}
 @media (max-width:560px){.oact output{text-align:left}}
+
+/* Kitchen: plan -> 3D model -> rendering */
+.k3d{margin:0}
+.k3d-stage{position:relative;aspect-ratio:1452/720;background:#fff;border-radius:3px;overflow:hidden;border:1px solid var(--rule)}
+@media (max-width:719px){.k3d-stage{aspect-ratio:4/3.4}}
+.k3d-stage canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.k3d-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;pointer-events:none}
+.k3d-fallback{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;display:none}
+.k3d-static .k3d-photo{opacity:1}
+.k3d:not(.k3d-live):not(.k3d-static) .k3d-fallback{display:block}
+.k3d-static .k3d-bar{display:none}
+.k3d-bar{display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;align-items:center;margin-top:14px}
+.k3d-steps{display:flex;gap:6px;flex-wrap:wrap}
+.k3d-bar button{font:500 13px/1 var(--body);color:var(--ink);background:transparent;border:1px solid var(--rule);border-radius:999px;padding:0 16px;min-height:44px;cursor:pointer}
+.k3d-bar button span{font-family:var(--mono);font-size:11px;color:var(--muted);margin-right:4px}
+.k3d-steps button[aria-pressed="true"]{background:var(--olive);border-color:var(--olive);color:var(--on-olive)}
+.k3d-steps button[aria-pressed="true"] span{color:inherit;opacity:.8}
+.k3d-replay{border-color:transparent!important;text-decoration:underline;text-underline-offset:3px}
+.k3d-note{color:var(--muted);font-size:15px;margin-top:10px}
+
+/* The 3D kitchen as a hero-reel scene: the canvas replaces the plan/render pair once it runs */
+.scene.k3d .k3d-stage{position:absolute;inset:0;aspect-ratio:auto;border:0;border-radius:0;background:var(--paper);display:none}
+.scene.k3d.k3d-live .k3d-stage{display:block}
+.scene.k3d.k3d-live > img{display:none}
+.scene.k3d.k3d-live::after{display:none}
+.scene.k3d .k3d-stage img.k3d-photo{padding:0;animation:none}
