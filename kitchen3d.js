@@ -156,6 +156,7 @@ async function contractorLayer(src, k, clear) {
   g.beginPath(); g.rect(84, 88, 732, 676); g.clip();
   g.transform(0, s, -s, 0, 128 + 585 * s, 130 - 190 * s);
   g.drawImage(img, 0, 0);
+  g.clearRect(548, 334, 110, 249);                   // leave out the living-room sofa
   if (clear) {
     g.setTransform(1, 0, 0, 1, 0, 0);
     const d = g.getImageData(0, 0, c.width, c.height), p = d.data;
@@ -551,7 +552,7 @@ function scrollRange() {
 // Story mode: the page scrolls normally. The text blocks (.story-step) pass the reading line
 // (middle of the free part of the screen) and the kitchen follows them: the intro shows the plan,
 // "01" holds the plan, "02" builds the 3D model, "03" opens the rendering.
-const STEP_T = [0, .5, 1.0, D + .3, D + 3.4, D + 8.6, SCROLL_END]; // problem and "how we help": the contractor’s plan; 01→02: erased and redrawn; then 3D, eye level, rendering. One entry per .story-step. // two intro blocks, then one per stage. One entry per .story-step.
+const STEP_T = [.6, PRE.draw[0], D, D + 2.6, D + 5.6, D + 8.6, SCROLL_END]; // problem: the contractor’s plan; erased by "how we help"; ours drawn by 01; then 3D, eye level, rendering. One entry per .story-step.
 const steps = [...box.querySelectorAll('.story-step')];
 function fromStory() {
   const sr = stageEl.getBoundingClientRect();
