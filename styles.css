@@ -821,3 +821,25 @@ nav.links .menu-panel a:first-child{border-top:0}
 .story-step.on{opacity:1}
 @media (max-width:900px){.story-step:not(.story-intro){opacity:1}}
 @media (prefers-reduced-motion:reduce){.story-step:not(.story-intro){opacity:1;transition:none}}
+
+/* Project spread (Jerusalem Heights, Nov 17): an editorial layout instead of a grid of tiles.
+   A large picture with a smaller one set lower beside it, then the reverse, then a wide view. */
+.spread{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:clamp(20px,3vw,40px) clamp(16px,2.4vw,32px);align-items:start}
+.spread figure{margin:0;display:grid;gap:10px}
+.spread img{width:100%;height:auto;object-fit:cover;border-radius:2px;cursor:zoom-in}
+.spread figcaption{font:500 11px/1.4 var(--body);letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+.spread .sp-a{grid-column:1/span 8}
+.spread .sp-a img{aspect-ratio:16/10}
+.spread .sp-b{grid-column:9/span 4;margin-top:clamp(60px,12vw,180px)}
+.spread .sp-b img{aspect-ratio:4/5}
+.spread .sp-c{grid-column:3/span 10}
+.spread .sp-c img{aspect-ratio:16/8}
+.spread .sp-d{grid-column:1/-1}
+.spread .sp-d img{aspect-ratio:21/8;object-position:50% 60%}
+@media (max-width:720px){
+  .spread{grid-template-columns:1fr;gap:28px}
+  .spread .sp-a,.spread .sp-b,.spread .sp-c,.spread .sp-d{grid-column:auto;margin-top:0}
+  .spread .sp-a img,.spread .sp-c img{aspect-ratio:4/3}
+  .spread .sp-b img{aspect-ratio:4/3}
+  .spread .sp-d img{aspect-ratio:16/10}
+}
