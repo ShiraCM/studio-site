@@ -550,3 +550,40 @@ dialog.lb button{position:fixed;top:max(16px,env(safe-area-inset-top,0px));right
 .onote{margin-top:18px;color:var(--muted);font-size:15px}
 .onote a{color:var(--olive);font-weight:600}
 .k3d-tag{position:absolute;left:12px;bottom:12px;z-index:3;font:500 11px/1 var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);background:color-mix(in srgb,var(--stone) 85%,transparent);padding:7px 9px;border-radius:999px}
+
+/* Home opener: the first screen. A big headline whose last words keep changing (floor plan,
+   contractor, kitchen, bathrooms, ...) and a slowly moving strip of our work underneath.
+   The plan-to-3D story starts below it. */
+.sr-only{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.opener{min-height:calc(100svh - 70px);display:flex;flex-direction:column;justify-content:space-between;gap:clamp(24px,4vh,48px);padding-top:clamp(28px,5vh,64px);overflow:hidden}
+.opener-head{display:grid;gap:clamp(16px,2.4vh,28px)}
+.opener h1{font-size:clamp(40px,6.4vw,104px);line-height:1}
+.rot-line{display:block;white-space:nowrap}
+.rot{display:inline-block;color:var(--olive);transition:transform .35s cubic-bezier(.4,0,.2,1),opacity .35s}
+.rot em{font-style:italic}
+.rot.out{transform:translateY(-.35em);opacity:0}
+.rot.in{transform:translateY(.35em);opacity:0;transition:none}
+.opener-sub{display:flex;flex-wrap:wrap;gap:16px 40px;align-items:center;justify-content:space-between}
+.opener-sub .lede{max-width:46ch;margin:0}
+.opener-reel{position:relative;-webkit-mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent);mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent)}
+.opener-track{display:flex;gap:14px;width:max-content;animation:reel-drift 70s linear infinite}
+.opener-reel:hover .opener-track{animation-play-state:paused}
+@keyframes reel-drift{to{transform:translateX(-50%)}}
+.reel-tile{margin:0;height:clamp(180px,30vh,320px);position:relative;flex:none}
+.reel-tile img{height:100%;width:auto;max-width:none;border-radius:3px;object-fit:cover}
+.reel-tile.is-plan img{background:#fff;padding:10px;border:1px solid var(--rule)}
+.reel-tile figcaption{position:absolute;left:10px;bottom:10px;font:500 11px/1 var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--ink);background:color-mix(in srgb,var(--stone) 88%,transparent);padding:6px 8px;border-radius:999px}
+.story-title{font-size:clamp(36px,4.4vw,64px)}
+.story .story-intro{min-height:60svh}
+@media (max-width:900px){
+  .opener h1{font-size:clamp(34px,9.6vw,56px)}
+  .rot-line{white-space:normal}
+  .opener-sub{flex-direction:column;align-items:flex-start}
+  .reel-tile{height:24vh}
+  .opener-track{animation-duration:50s}
+}
+@media (prefers-reduced-motion:reduce){
+  .opener-track{animation:none}
+  .opener-reel{overflow-x:auto}
+}
+@media (max-width:900px){.rot{display:block}.story .story-intro{min-height:auto;padding-block:48px 24px}}
