@@ -501,3 +501,19 @@ dialog.lb button{position:fixed;top:max(16px,env(safe-area-inset-top,0px));right
 .scene.k3d.k3d-live > img{display:none}
 .scene.k3d.k3d-live::after{display:none}
 .scene.k3d .k3d-stage img.k3d-photo{padding:0;animation:none}
+
+/* The 3D kitchen as the home-page hero (replaces the old reel) */
+.model.k3d-hero{margin:0;aspect-ratio:1/1}
+.k3d-hero .k3d-stage{position:absolute;inset:0;aspect-ratio:auto;border:0;border-radius:0}
+.k3d-hero .k3d-bar{position:absolute;left:12px;right:12px;bottom:12px;margin:0;z-index:2}
+.k3d-hero .k3d-bar button{background:color-mix(in srgb,var(--sheet) 88%,transparent);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);min-height:40px;padding:0 13px}
+.k3d-hero .k3d-steps button[aria-pressed="true"]{background:var(--olive)}
+@media (max-width:719px){.k3d-hero .k3d-stage{aspect-ratio:auto}}
+/* On phones, bring the 3D kitchen up right under the headline so it's seen on arrival */
+@media (max-width:900px){
+  .hero-grid{gap:24px}
+  .hero-copy{display:contents}
+  .hero-copy>*{order:2}
+  .hero-copy>.label,.hero-copy>h1{order:0}
+  .hero-media{order:1}
+}

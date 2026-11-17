@@ -42,6 +42,8 @@ async function planTexture(src) {
 async function init(box) {
   THREE = await import('./vendor/three.module.min.js');
   const reel = box.classList.contains('k3d-reel');
+  const hero = box.classList.contains('k3d-hero');      // the home-page hero: loops, stage buttons overlaid at the bottom
+  let wrapped = false;                                    // true after the first loop, so the rendering fades back into the plan
   // Camera poses: straight down on the plan, then the rendering's eye-level view.
   const TOP = { pos: new THREE.Vector3(2.15, 9.4, 2.0), look: new THREE.Vector3(2.15, 0, 2.0), fov: 34 };
   const EYE = { pos: new THREE.Vector3(1.95, 1.05, 5.9), look: new THREE.Vector3(1.95, 0.9, 0), fov: 40 };
@@ -212,7 +214,7 @@ async function init(box) {
     camera.lookAt(look);
     camera.updateProjectionMatrix();
 
-    photo.style.opacity = ease(span(t, ...T.photo));
+    photo.style.opacity = Math.max(ease(span(t, ...T.photo)), wrapped ? 1 - ease(span(t, 0, .9)) : 0);
     const st = t < T.rise[0] + .8 ? 0 : t < T.photo[0] + .6 ? 1 : 2;
     buttons.forEach((b, i) => b.setAttribute('aria-pressed', i === st ? 'true' : 'false'));
     renderer.render(scene, camera);
@@ -223,22 +225,23 @@ async function init(box) {
     renderer.setSize(w, h, false);
     camera.aspect = w / h;
     // keep the whole plan in view on narrow screens; in the reel, keep it above the caption
-    TOP.pos.y = reel ? 13.6 : 9.4 * Math.max(1, 1.25 / camera.aspect);
-    TOP.pos.z = TOP.look.z = reel ? 2.0 + .075 * TOP.pos.y * 2 * Math.tan(17 * Math.PI / 180) : 2.0;
+    TOP.pos.y = reel ? 13.6 : (hero ? 8.8 : 9.4) * Math.max(1, 1.25 / camera.aspect);
+    const lift = reel ? .075 : hero ? .05 : 0;            // keep the plan clear of what's overlaid at the bottom
+    TOP.pos.z = TOP.look.z = 2.0 + lift * TOP.pos.y * 2 * Math.tan(17 * Math.PI / 180);
     frame(time);
   }
 
-  let time = reduce ? STAGES[0] : 0, playing = !reduce && !reel, visible = true, last = 0;
+  let time = reduce ? STAGES[hero ? 2 : 0] : 0, playing = !reduce && !reel, visible = true, last = 0;
   function loop(now) {
     requestAnimationFrame(loop);
     if (!playing || !visible) { last = now; return; }
     const dt = Math.min(.05, (now - last) / 1000 || 0); last = now;
     time += dt;
     if (reel && time >= T.photo[1]) { time = T.photo[1]; playing = false; }
-    if (time > T.end) time = 0;
+    if (time > T.end) { time = 0; wrapped = true; }
     frame(time);
   }
-  function jump(t, keepPlaying = false) { time = t; playing = keepPlaying && !reduce; frame(time); }
+  function jump(t, keepPlaying = false) { time = t; wrapped = false; playing = keepPlaying && !reduce; frame(time); }
 
   buttons.forEach((b, i) => b.addEventListener('click', () => jump(STAGES[i])));
   replay?.addEventListener('click', () => { jump(0, true); });

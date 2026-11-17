@@ -47,36 +47,19 @@
         </div>
       </div>
       <div class="hero-media">
-        <div class="model" id="model">
-<div class="scene active" aria-hidden="false">
-  <img class="a fit" src="img/furniture-1-sales.webp" alt="Contractor’s sales plan of the living and dining area" width="1126" height="756">
-  <img class="b fit" src="img/furniture-1-scaled.webp" alt="The same plan with furniture drawn to scale, showing the chair blocking the hallway" width="1124" height="756">
-</div>
-<div class="scene" aria-hidden="true">
-  <img class="a fit" src="img/apartment-original-furnished.webp" alt="Original contractor plan" width="2000" height="1500" loading="lazy">
-  <img class="b fit" src="img/apartment-revised-furnished.webp" alt="Revised plan with a larger living area, laundry room and built-in closets" width="2000" height="1500" loading="lazy">
-</div>
-<div class="scene k3d k3d-reel" aria-hidden="true" data-stage="3" data-duration="14500" data-text="The kitchen plan, built in 3D and rendered before it’s ordered">
-  <div class="k3d-stage"><img class="k3d-photo" src="img/kitchen-render-wide.jpg" alt="" width="1452" height="720" loading="lazy"></div>
-  <img class="a fit" src="img/kitchen-plan-clean.svg" alt="Kitchen plan: sink and cooktop under the windows, a second sink on the back wall, tall units with the oven and fridge, and a central island" width="900" height="860" loading="lazy">
-  <img class="b fit" src="img/kitchen-render.jpg" alt="Photorealistic rendering of the same kitchen with matte greige cabinets, Taj Mahal stone counters, gold fixtures and a waterfall island" width="1060" height="720" loading="lazy">
-</div>
-<div class="scene" aria-hidden="true" data-stage="3">
-  <img class="a fit" src="img/tub-plan-clean.svg" alt="Bathroom plan: vanity on the left, wall-hung toilet under the window, bath with a glass screen on the right" width="900" height="860" loading="lazy">
-  <img class="b" src="img/tub-render-updated.webp" alt="Photorealistic rendering of the same bathroom with dark stone tile, a charcoal vanity and a white tub" width="1135" height="928" loading="lazy">
-</div>
-<div class="scene" aria-hidden="true" data-stage="4">
-  <img class="a" src="img/primary-bedroom-walnut.webp" alt="Rendering of a bedroom with walnut built-ins" width="1754" height="897" loading="lazy" style="object-position:38% 50%">
-  <img class="b" src="img/primary-bedroom-linen.webp" alt="Rendering of the same bedroom toward the linen curtains" width="1756" height="895" loading="lazy" style="object-position:45% 50%">
-</div>
-          <div class="model-cap in" aria-live="polite"><span class="n">Stage 01</span><span class="he" lang="he">תוכנית מכר</span><span class="t">The sales plan, then the furniture drawn to scale</span></div>
-          <div class="model-pips" role="group" aria-label="Show a stage">
-            <button type="button" aria-pressed="true" aria-label="Stage 1, sales plan">01</button>
-            <button type="button" aria-pressed="false" aria-label="Stage 2, layout changes">02</button>
-            <button type="button" aria-pressed="false" aria-label="Stage 3, selections">03</button>
-            <button type="button" aria-pressed="false" aria-label="Stage 4, move-in">04</button>
-          </div>
-        </div>
+<figure class="model k3d k3d-hero" id="model">
+  <div class="k3d-stage">
+    <img class="k3d-photo" src="img/kitchen-render-wide.jpg" width="1452" height="720" alt="Rendering of a finished kitchen designed by the studio: greige cabinets, white stone counters and backsplash, a waterfall island and oak floors.">
+    <img class="k3d-fallback" src="img/kitchen-plan-clean.svg" width="900" height="860" alt="">
+  </div>
+  <figcaption class="k3d-bar">
+    <div class="k3d-steps" role="group" aria-label="Show a stage of the kitchen">
+      <button type="button" aria-pressed="true"><span>01</span> Plan</button>
+      <button type="button" aria-pressed="false"><span>02</span> 3D model</button>
+      <button type="button" aria-pressed="false"><span>03</span> Rendering</button>
+    </div>
+  </figcaption>
+</figure>
       </div>
     </div>
   </section>
@@ -317,5 +300,4 @@
   })});
 })();
 </script>
-<script src="reel.js"></script>
 <script type="module" src="kitchen3d.js"></script>
