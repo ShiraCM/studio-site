@@ -879,3 +879,13 @@ nav.links .menu-panel a:first-child{border-top:0}
 .howto p{color:var(--muted)}
 .howto .textlink{justify-self:start}
 .around-sub{font:400 clamp(24px,2.4vw,32px)/1.15 var(--display);margin:clamp(40px,6vw,72px) 0 22px}
+
+/* How we work by topic, not steps (owner, Nov 17): heading on the left, the answer on the right */
+.topics{display:grid}
+.topic{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.7fr);gap:clamp(16px,4vw,64px);padding-block:clamp(28px,4vw,48px);border-top:1px solid color-mix(in srgb,var(--rule) 65%,transparent)}
+.topic:last-child{border-bottom:1px solid color-mix(in srgb,var(--rule) 65%,transparent)}
+.topic h2{font:400 clamp(28px,3vw,40px)/1.1 var(--display)}
+.topic > div{display:grid;gap:16px;align-content:start;max-width:62ch}
+.topic p{color:var(--muted)}
+.topic .textlink{justify-self:start}
+@media (max-width:720px){.topic{grid-template-columns:1fr}}
