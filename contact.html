@@ -9,6 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Hanken+Grotesk:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Frank+Ruhl+Libre:wght@400;500&display=swap">
 <link rel="icon" href="img/favicon.svg" type="image/svg+xml">
+<script src="menu.js" defer></script>
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -21,6 +22,14 @@
       <a class="hide-sm" href="process.html">How we work</a>
       <a class="hide-sm" href="packages.html">Packages</a>
       <a class="btn btn-primary" href="contact.html">Let’s talk</a>
+      <button class="menu-btn" type="button" aria-expanded="false" aria-controls="site-menu"><span class="menu-icon" aria-hidden="true"></span><span class="menu-word">Menu</span></button>
+      <div class="menu-panel" id="site-menu" hidden>
+        <a href="index.html#model">How we help</a>
+        <a href="index.html#with">The difference</a>
+        <a href="process.html">How we work</a>
+        <a href="packages.html">Packages</a>
+        <a href="contact.html">Let’s talk</a>
+      </div>
     </nav>
   </div>
 </header>
@@ -35,7 +44,7 @@
       <p class="lede">Tell us what you’re buying for, what you need to make room for, and when your next decisions are due.</p>
       <img src="img/evening-kitchen.webp" alt="Open kitchen with dark pendant lights behind a gray sofa" width="800" height="1208" style="width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:3px;margin-top:8px">
     </div>
-    <form class="form" id="inquiry-form" novalidate>
+    <form class="form" id="inquiry-form" data-email="" novalidate>
       <span class="label">Your apartment inquiry</span>
       <label for="f-name">Name<input id="f-name" name="name" autocomplete="name" required></label>
       <div class="row">
@@ -68,11 +77,11 @@
       </div>
       <label for="f-details">Project and upcoming decisions<textarea id="f-details" name="details" rows="5" required placeholder="City and project, number of rooms, what you’d like to work better…"></textarea></label>
       <div class="actions">
-        <button class="btn btn-primary" type="submit">Copy inquiry</button>
+        <button class="btn btn-primary" type="submit">Send inquiry</button>
         <output id="copy-status" aria-live="polite"></output>
       </div>
       <textarea id="copy-fallback" aria-label="Inquiry text to copy" rows="6" hidden readonly></textarea>
-      <p class="fine">This preview builds your inquiry and copies it. A contact address will be added before launch.</p>
+      <p class="fine">Your inquiry is copied, ready to paste into an email or message to us.</p>
     </form>
   </div>
 </section>

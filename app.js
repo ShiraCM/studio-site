@@ -70,6 +70,12 @@
       if (String(v.get('deadline') || '').trim()) lines.push('Next deadline: ' + String(v.get('deadline')).trim());
       lines.push('Project and upcoming decisions: ' + String(v.get('details')).trim());
       var text = lines.join('\n');
+      var to = form.getAttribute('data-email');
+      if (to) {
+        location.href = 'mailto:' + to + '?subject=' + encodeURIComponent('Apartment inquiry: ' + String(v.get('name')).trim()) + '&body=' + encodeURIComponent(text);
+        status.textContent = 'Your email app should open with your message ready. Press Send there.';
+        return;
+      }
       function showFallback() {
         fallback.value = text; fallback.hidden = false; fallback.focus(); fallback.select();
         status.textContent = 'Copy the selected text below.';
