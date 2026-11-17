@@ -330,8 +330,11 @@ async function init(box) {
     wall: M('#f4f1ec'), cab: M('#e2dcd2', { roughness: .62 }), tall: M('#e6e0d6', { roughness: .6 }),
     stone: M('#f3f0ea', { roughness: .35 }), dark: M('#1d1c1b', { roughness: .3, metalness: .3 }),
     steel: M('#bfc0bf', { roughness: .3, metalness: .6 }), glass: new THREE.MeshBasicMaterial({ color: '#f7f8f6', toneMapped: false }),
-    floor: M('#dcc8ac', { roughness: .7, transparent: true, opacity: 0 }), stool: M('#efe9df', { roughness: .9, side: THREE.DoubleSide }),
+    floor: M('#dcc8ac', { roughness: .7, transparent: true, opacity: 0 }), stool: M('#eadbcf', { roughness: .85, side: THREE.DoubleSide }),
     chrome: M('#c9c8c4', { roughness: .3 }), groove: M('#b3ab9e', { roughness: .8 }),
+    brass: M('#d6ae63', { roughness: .38, metalness: .25, emissive: '#3a2a10' }), frame: M('#5c5955', { roughness: .5, metalness: .2 }),
+    globe: new THREE.MeshStandardMaterial({ color: '#ffffff', roughness: .05, metalness: 0, transparent: true, opacity: .22, depthWrite: false }),
+    bulb: new THREE.MeshBasicMaterial({ color: '#ffd9a0', toneMapped: false }),
     led: new THREE.MeshBasicMaterial({ color: '#fff3d6', toneMapped: false }),
   };
   const edgeMat = new THREE.LineBasicMaterial({ color: '#2b2926', transparent: true, opacity: .9 });
@@ -425,27 +428,50 @@ part(uppers, (X(U0) + X(U1)) / 2, UB - .012, Z(UD) - .06, uw - .04, .012, .03, m
   block(island, 381, 379, 519, 674, BASE, TOP_, mat.stone, false);
   block(island, 381, 669, 519, 674, 0, BASE, mat.stone, false);
 
-  // Stools (order 4), as in the rendering: round cream upholstered seats with a low curved back,
-  // thin chrome legs and a footrest ring, tucked in along both sides of the island.
-  const stools = group(4);
-for (const [px, side] of [[381 - 22, -1], [519 + 22, 1]]) {
-  const s = new THREE.Group();
-  s.position.set(X(px), 0, 2.4);         // set back along the island, as in the rendering
-  const seat = new THREE.Mesh(new THREE.CylinderGeometry(.2, .19, .08, 40), mat.stool);
-  seat.position.y = .66;
-  const back = new THREE.Mesh(new THREE.CylinderGeometry(.2, .2, .17, 40, 1, true, side > 0 ? 0 : -Math.PI, Math.PI), mat.stool);
-  back.position.y = .78;
-  const ring = new THREE.Mesh(new THREE.TorusGeometry(.165, .007, 8, 40), mat.chrome);
-  ring.rotation.x = Math.PI / 2; ring.position.y = .26;
-  s.add(seat, back, ring);
-  for (const a of [.25, .75, 1.25, 1.75]) {
-    const ang = a * Math.PI, leg = new THREE.Mesh(new THREE.CylinderGeometry(.008, .008, .64, 8), mat.chrome);
-    leg.position.set(Math.cos(ang) * .17, .31, Math.sin(ang) * .17);
-    leg.rotation.set(Math.sin(ang) * .06, 0, -Math.cos(ang) * .06);
-    s.add(leg);
+  // Brass bar handles, as in the rendering: along the top of the base cabinets and drawers,
+  // and long vertical pulls on the tall units.
+  for (let x = 218 + 45; x < 683; x += 90) {                                          // back run, top row
+    part(back, X(x), TOP_ - .1, Z(220) + .012, .22, .012, .016, mat.brass);
   }
-  s.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
-  stools.add(s);
+  for (const x of [263, 353]) for (const y of [.52, .26]) part(back, X(x), y, Z(220) + .012, .22, .012, .016, mat.brass);   // drawer stack
+  for (const z of [200, 380, 610]) part(left, X(218) + .012, TOP_ - .1, Z(z), .016, .012, .22, mat.brass);                  // window-wall run
+  for (const z of [178, 274, 470, 614]) part(tall, X(682) - .012, 1.05, Z(z), .016, .5, .016, mat.brass);                  // tall units
+
+  // Stools (order 4), as in the rendering: a cream shell seat, low at the front and rising at the
+  // back, on a thin dark sled frame, one each side of the island.
+  const stools = group(4);
+  for (const px of [381 - 24, 519 + 24]) {
+    const s = new THREE.Group();
+    s.position.set(X(px), 0, 2.55);
+    const shell = new THREE.Mesh(new THREE.SphereGeometry(1, 40, 16, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2), mat.stool);
+    shell.scale.set(.21, .085, .2); shell.position.y = .72;                              // a shallow bowl
+    const rim = new THREE.Mesh(new THREE.TorusGeometry(1, .06, 10, 40), mat.stool);
+    rim.scale.set(.21, .2, .21); rim.rotation.x = Math.PI / 2; rim.position.y = .72;
+    s.add(shell, rim);
+    for (const side of [-1, 1]) {                                                        // two sled frames, front and back
+      const z = side * .14, pts = [
+        new THREE.Vector3(-.12, .66, z), new THREE.Vector3(-.17, .3, z), new THREE.Vector3(-.2, .02, z),
+        new THREE.Vector3(0, .015, z), new THREE.Vector3(.2, .02, z), new THREE.Vector3(.17, .3, z), new THREE.Vector3(.12, .66, z)];
+      s.add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 40, .008, 8), mat.frame));
+    }
+    const bar = new THREE.Mesh(new THREE.CylinderGeometry(.007, .007, .28, 8), mat.frame);
+    bar.rotation.x = Math.PI / 2; bar.position.y = .24; s.add(bar);
+    s.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
+    stools.add(s);
+  }
+
+  // Two clear glass pendants with brass caps over the island (order 5, lowered in on their cords)
+  const pendants = group(5, { drop: true });
+  for (const [x, z, y] of [[2.14, 2.45, 1.55], [2.3, 2.05, 1.72]]) {
+    const cord = new THREE.Mesh(new THREE.CylinderGeometry(.004, .004, 6 - y, 6), mat.frame);      // runs up out of the picture, as in the rendering
+    cord.position.set(x, (6 + y + .12) / 2, z);
+    const cap = new THREE.Mesh(new THREE.CylinderGeometry(.03, .04, .08, 20), mat.brass);
+    cap.position.set(x, y + .115, z);
+    const globe = new THREE.Mesh(new THREE.SphereGeometry(.12, 32, 20), mat.globe);
+    globe.position.set(x, y, z);
+    const bulb = new THREE.Mesh(new THREE.SphereGeometry(.028, 16, 10), mat.bulb);
+    bulb.position.set(x, y + .01, z);
+    pendants.add(cord, cap, globe, bulb);
   }
 
   // Floor (oak) and the plan drawing on top of it
