@@ -17,9 +17,12 @@ const ease = t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 const easeOut = t => 1 - Math.pow(1 - t, 3);
 const lerp = (a, b, t) => a + (b - a) * t;
 
-// Timeline in seconds
-const T = { plan: 1.4, rise: [1.4, 4.6], planFade: [3.2, 4.8], cam: [3.4, 8.6], photo: [9.6, 11.2], end: 15 };
-const STAGES = [0.6, 7.4, 11.2];          // where the Plan / Model / Rendering buttons jump to
+// Timeline in seconds. It opens by hand: the contractor's standard kitchen plan, an invisible
+// eraser wipes it, and our plan is sketched line by line (PRE). Everything after starts at D.
+const D = 4.4;
+const PRE = { erase: [1.0, 2.2], draw: [2.3, 4.1], snap: [3.9, 4.4] };
+const T = { plan: D + 1.4, rise: [D + 1.4, D + 4.6], planFade: [D + 3.2, D + 4.8], cam: [D + 3.4, D + 8.6], photo: [D + 9.6, D + 11.2], end: D + 15 };
+const STAGES = [D + 0.6, D + 7.4, D + 11.2];          // where the Plan / Model / Rendering buttons jump to
 
 
 function webglOK() {
@@ -48,6 +51,140 @@ const tex = new THREE.CanvasTexture(c);
   tex.colorSpace = THREE.SRGBColorSpace;
   tex.anisotropy = 8;
   return tex;
+}
+
+// ---- The hand-drawn opening ----
+// Same "paper to transparent" rule as planTexture, for one CSS colour.
+function alphaColor(css, clear) {
+  const m = css && css.match(/rgba?\(([^)]+)\)/); if (!m) return null;
+  const [r, g, b, a = 1] = m[1].split(/[\s,\/]+/).filter(Boolean).map(Number);
+  if (!clear) return `rgba(${r},${g},${b},${a})`;
+  const al = 255 - Math.min(r, g, b);
+  if (al === 0) return 'rgba(0,0,0,0)';
+  const f = v => Math.round(255 - (255 - v) * 255 / al);
+  return `rgba(${f(r)},${f(g)},${f(b)},${(al / 255 * a).toFixed(3)})`;
+}
+
+// Read our plan SVG into a list of strokes to draw one after another, in drawing order:
+// walls first, then everything else as it appears in the file. Text and dimension ticks
+// arrive when the sketch hands over to the finished plan texture.
+async function buildSketch(src, clear) {
+  const holder = document.createElement('div');
+  holder.setAttribute('aria-hidden', 'true');
+  holder.style.cssText = 'position:absolute;left:-10000px;top:0;width:900px;height:860px;overflow:hidden;visibility:hidden;pointer-events:none';
+  holder.innerHTML = await (await fetch(src)).text();
+  document.body.appendChild(holder);
+  const svg = holder.querySelector('svg');
+  const measure = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  svg.appendChild(measure);
+  const num = (el, k) => parseFloat(el.getAttribute(k)) || 0;
+  const walls = [], rest = [], floor = [];
+  function add(el, ctm, list) {
+    const cs = getComputedStyle(el);
+    let stroke = cs.stroke && cs.stroke !== 'none' ? alphaColor(cs.stroke, clear) : null;
+    const fill = cs.fill && cs.fill !== 'none' && !cs.fill.startsWith('url') ? alphaColor(cs.fill, clear) : null;
+    let sw = parseFloat(cs.strokeWidth) || 1;
+    if (!stroke && fill) { stroke = fill; sw = 1; }          // filled shapes are outlined first, then filled
+    const dash = cs.strokeDasharray && cs.strokeDasharray !== 'none' ? cs.strokeDasharray.split(/[\s,]+/).map(parseFloat).filter(v => v > 0) : null;
+    const mx = { a: ctm.a, b: ctm.b, c: ctm.c, d: ctm.d, e: ctm.e, f: ctm.f };
+    const tag = el.tagName.toLowerCase();
+    if (tag === 'path') {
+      const subs = el.getAttribute('d').split(/(?=[Mm])/).filter(s => s.trim());
+      for (const d of subs) { measure.setAttribute('d', d); list.push({ path: new Path2D(d), len: Math.max(1, measure.getTotalLength()), stroke, fill: subs.length > 1 ? null : fill, sw, dash, mx }); }
+      return;
+    }
+    const path = new Path2D(); let len = 1;
+    if (tag === 'rect') {
+      const x = num(el, 'x'), y = num(el, 'y'), w = num(el, 'width'), h = num(el, 'height'), r = Math.min(num(el, 'rx'), w / 2, h / 2);
+      if (r && path.roundRect) path.roundRect(x, y, w, h, r); else path.rect(x, y, w, h);
+      len = 2 * (w + h);
+    } else if (tag === 'circle') { const r = num(el, 'r'); path.arc(num(el, 'cx'), num(el, 'cy'), r, -Math.PI / 2, Math.PI * 1.5); len = 2 * Math.PI * r; }
+    else if (tag === 'line') { path.moveTo(num(el, 'x1'), num(el, 'y1')); path.lineTo(num(el, 'x2'), num(el, 'y2')); len = Math.hypot(num(el, 'x2') - num(el, 'x1'), num(el, 'y2') - num(el, 'y1')); }
+    else return;
+    list.push({ path, len: Math.max(1, len), stroke, fill, sw, dash, mx });
+  }
+  for (const el of svg.querySelectorAll('rect, circle, line, path, use')) {
+    if (el.closest('defs') || el === measure) continue;
+    if (el.parentNode === svg && el.tagName.toLowerCase() === 'rect' && num(el, 'width') >= 900) continue;   // the paper
+    const ctm = el.getCTM(); if (!ctm) continue;
+    if (el.tagName.toLowerCase() === 'use') {
+      const ref = svg.querySelector((el.getAttribute('href') || el.getAttribute('xlink:href')));
+      if (ref) for (const k of ref.querySelectorAll('rect, circle, line, path')) add(k, ctm, rest);
+      continue;
+    }
+    const g = el.parentNode;
+    if (g.hasAttribute && g.hasAttribute('clip-path')) add(el, ctm, floor);
+    else if (g.getAttribute && g.getAttribute('fill') === '#2b2926' && !el.getAttribute('stroke') && g !== svg) add(el, ctm, walls);
+    else add(el, ctm, rest);
+  }
+  holder.remove();
+  const items = [...walls, ...rest];
+  let total = 0;
+  for (const it of items) { it.start = total; total += it.len; }
+  return { items, floor, total, clear };
+}
+
+function paintItem(g, it, p, k, clear, fade) {
+  const m = it.mx;
+  g.setTransform(k * m.a, k * m.b, k * m.c, k * m.d, k * m.e, k * m.f);
+  if (it.fill) {
+    const fa = fade ? p : clamp01((p - .8) / .2);
+    if (fa > 0) {
+      g.globalAlpha = fa;
+      if (clear && !fade) { g.globalCompositeOperation = 'destination-out'; g.fill(it.path); g.globalCompositeOperation = 'source-over'; }
+      g.fillStyle = it.fill; g.fill(it.path);
+    }
+  }
+  if (it.stroke) {
+    g.lineWidth = it.sw; g.strokeStyle = it.stroke; g.lineCap = 'round'; g.lineJoin = 'round';
+    if (it.dash || fade) { g.globalAlpha = p; g.setLineDash(it.dash || []); }
+    else { g.globalAlpha = 1; g.setLineDash(p < 1 ? [it.len * p, it.len + 2] : []); }
+    g.stroke(it.path);
+  }
+  g.globalAlpha = 1; g.setLineDash([]);
+}
+
+// The contractor's original kitchen plan, turned and scaled onto our plan: its window wall
+// becomes our left wall and its long counter wall our back wall (435 px there = 430 cm here).
+async function contractorLayer(src, k, clear) {
+  const img = new Image();
+  await new Promise((resolve, reject) => { img.onload = resolve; img.onerror = reject; img.src = src; });
+  const c = document.createElement('canvas'); c.width = 900 * k; c.height = 860 * k;
+  const g = c.getContext('2d', { willReadFrequently: clear });
+  const s = 645 / 435;
+  g.setTransform(k, 0, 0, k, 0, 0);
+  g.beginPath(); g.rect(84, 88, 732, 676); g.clip();
+  g.transform(0, s, -s, 0, 128 + 585 * s, 130 - 190 * s);
+  g.drawImage(img, 0, 0);
+  if (clear) {
+    g.setTransform(1, 0, 0, 1, 0, 0);
+    const d = g.getImageData(0, 0, c.width, c.height), p = d.data;
+    for (let i = 0; i < p.length; i += 4) {
+      if (!p[i + 3]) continue;
+      const a = 255 - Math.min(p[i], p[i + 1], p[i + 2]);
+      if (a < 6) { p[i + 3] = 0; continue; }
+      for (let j = 0; j < 3; j++) p[i + j] = Math.round(255 - (255 - p[i + j]) * 255 / a);
+      p[i + 3] = Math.round(a * p[i + 3] / 255);
+    }
+    g.putImageData(d, 0, 0);
+  }
+  return c;
+}
+
+// The eraser's path: back and forth across the drawing, a little uneven, like a hand.
+function eraserPath() {
+  const pts = [];
+  let row = 0;
+  for (let y = 70; y <= 800; y += 70, row++) {
+    const xs = row % 2 ? [830, 70] : [70, 830];
+    for (let i = 0; i <= 12; i++) {
+      const x = lerp(xs[0], xs[1], i / 12);
+      pts.push([x, y + Math.sin(x * .018 + row * 1.7) * 14 + (i / 12) * 22]);
+    }
+  }
+  const cum = [0];
+  for (let i = 1; i < pts.length; i++) cum.push(cum[i - 1] + Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]));
+  return { pts, cum, total: cum[cum.length - 1] };
 }
 
 async function init(box) {
@@ -237,6 +374,62 @@ if (scrolled) {
   plan.rotation.x = -Math.PI / 2; plan.position.set(X(450), .003, Z(430));
   scene.add(plan);
 
+  // The hand-drawn opening lives on its own canvas, laid exactly over the finished plan.
+  const SK = 1.5;                                                    // canvas px per SVG px
+  const [sketch, oldPlan] = await Promise.all([
+    buildSketch('img/kitchen-plan-clean.svg', scrolled),
+    contractorLayer('img/kitchen-plan-contractor.png', SK, scrolled)
+  ]);
+  const eraser = eraserPath();
+  const skCanvas = document.createElement('canvas'); skCanvas.width = 900 * SK; skCanvas.height = 860 * SK;
+  const skg = skCanvas.getContext('2d');
+  const skTex = new THREE.CanvasTexture(skCanvas); skTex.colorSpace = THREE.SRGBColorSpace; skTex.anisotropy = 8;
+  const skMat = new THREE.MeshBasicMaterial({ map: skTex, transparent: true, toneMapped: false, depthWrite: false });
+  const skMesh = new THREE.Mesh(plan.geometry, skMat);
+  skMesh.rotation.x = -Math.PI / 2; skMesh.position.set(X(450), .004, Z(430));
+  scene.add(skMesh);
+  const tag = box.querySelector('.k3d-tag'), tagText = tag ? tag.textContent : '';
+  let skLast = -1;
+  function drawOpening(t) {
+    const q = Math.round(Math.min(t, PRE.snap[1]) * 120) / 120;
+    if (q === skLast) return;
+    skLast = q;
+    skg.setTransform(1, 0, 0, 1, 0, 0);
+    skg.clearRect(0, 0, skCanvas.width, skCanvas.height);
+    const e = span(t, ...PRE.erase);
+    if (e < 1) {
+      skg.drawImage(oldPlan, 0, 0);
+      if (e > 0) {
+        // rub out the contractor's plan along the eraser's path so far
+        const L = e * eraser.total, P = eraser.pts;
+        skg.setTransform(SK, 0, 0, SK, 0, 0);
+        skg.globalCompositeOperation = 'destination-out';
+        skg.lineWidth = 120; skg.lineCap = 'round'; skg.lineJoin = 'round';
+        skg.beginPath(); skg.moveTo(P[0][0], P[0][1]);
+        for (let i = 1; i < P.length; i++) {
+          if (eraser.cum[i] <= L) { skg.lineTo(P[i][0], P[i][1]); continue; }
+          const u = (L - eraser.cum[i - 1]) / (eraser.cum[i] - eraser.cum[i - 1]);
+          skg.lineTo(lerp(P[i - 1][0], P[i][0], u), lerp(P[i - 1][1], P[i][1], u));
+          break;
+        }
+        skg.stroke();
+        skg.globalCompositeOperation = 'source-over';
+      }
+    }
+    const P = span(t, ...PRE.draw);
+    if (P > 0) {
+      const fp = span(P, .55, 1);
+      if (fp > 0) for (const it of sketch.floor) paintItem(skg, it, fp, SK, scrolled, true);
+      const pos = P * sketch.total;
+      for (const it of sketch.items) {
+        if (pos <= it.start) break;
+        paintItem(skg, it, clamp01((pos - it.start) / it.len), SK, scrolled, false);
+      }
+    }
+    skg.setTransform(1, 0, 0, 1, 0, 0);
+    skTex.needsUpdate = true;
+  }
+
   // ---- timeline ----
   const look = new THREE.Vector3();
   function frame(t) {
@@ -249,9 +442,18 @@ if (scrolled) {
       else g.scale.y = Math.max(k, 0.001);
     }
     const f = ease(span(t, ...T.planFade));
-    planMat.opacity = 1 - f;
+    // the sketch hands over to the finished plan (with its labels and dimensions)
+    const snap = ease(span(t, ...PRE.snap));
+    skMesh.visible = snap < 1;
+    if (skMesh.visible) drawOpening(t);
+    skMat.opacity = 1 - snap;
+    planMat.opacity = snap * (1 - f);
+    if (tag) {
+      const label = t < PRE.erase[0] + .3 ? 'Before · the contractor’s kitchen plan' : t < T.rise[0] ? 'After · our kitchen plan' : tagText;
+      if (tag.textContent !== label) tag.textContent = label;
+    }
     mat.floor.opacity = f;
-    edgeMat.opacity = .9 - .7 * span(t, 5, 8);
+    edgeMat.opacity = .9 - .7 * span(t, D + 5, D + 8);
     if (scene.background) scene.background.copy(paper).lerp(room, f);
 
     const c = ease(span(t, ...T.cam));
@@ -349,7 +551,7 @@ function scrollRange() {
 // Story mode: the page scrolls normally. The text blocks (.story-step) pass the reading line
 // (middle of the free part of the screen) and the kitchen follows them: the intro shows the plan,
 // "01" holds the plan, "02" builds the 3D model, "03" opens the rendering.
-const STEP_T = [0, 0, .6, 3.4, 6.2, 8.6, SCROLL_END]; // two intro blocks, then one per stage. One entry per .story-step.
+const STEP_T = [0, .5, 1.0, D + .3, D + 3.4, D + 8.6, SCROLL_END]; // problem and "how we help": the contractor’s plan; 01→02: erased and redrawn; then 3D, eye level, rendering. One entry per .story-step. // two intro blocks, then one per stage. One entry per .story-step.
 const steps = [...box.querySelectorAll('.story-step')];
 function fromStory() {
   const sr = stageEl.getBoundingClientRect();
