@@ -502,18 +502,14 @@ dialog.lb button{position:fixed;top:max(16px,env(safe-area-inset-top,0px));right
 .scene.k3d.k3d-live::after{display:none}
 .scene.k3d .k3d-stage img.k3d-photo{padding:0;animation:none}
 
-/* The 3D kitchen as the home-page hero (replaces the old reel) */
-.model.k3d-hero{margin:0;aspect-ratio:1/1}
-.k3d-hero .k3d-stage{position:absolute;inset:0;aspect-ratio:auto;border:0;border-radius:0}
-.k3d-hero .k3d-bar{position:absolute;left:12px;right:12px;bottom:12px;margin:0;z-index:2}
-.k3d-hero .k3d-bar button{background:color-mix(in srgb,var(--sheet) 88%,transparent);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);min-height:40px;padding:0 13px}
+/* Home hero: the 3D kitchen runs full width under the header, big; headline and copy below it */
+.hero-3d{padding-top:0}
+.k3d-hero{position:relative;margin:0 0 clamp(32px,5vw,64px);height:clamp(380px,50vw,calc(100svh - 140px));background:#fff;border-bottom:1px solid var(--rule)}
+.k3d-hero .k3d-stage{position:absolute;inset:0;aspect-ratio:auto;border:0;border-radius:0;background:#fff}
+.k3d-hero .k3d-bar{position:absolute;left:0;right:0;bottom:clamp(14px,2.4vw,28px);margin:0;z-index:2;max-width:var(--max);margin-inline:auto;padding-inline:max(16px,env(safe-area-inset-left,0px));justify-content:flex-start}
+@media (min-width:720px){.k3d-hero .k3d-bar{padding-inline:40px}}
+.k3d-hero .k3d-bar button{background:color-mix(in srgb,var(--sheet) 86%,transparent);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
 .k3d-hero .k3d-steps button[aria-pressed="true"]{background:var(--olive)}
-@media (max-width:719px){.k3d-hero .k3d-stage{aspect-ratio:auto}}
-/* On phones, bring the 3D kitchen up right under the headline so it's seen on arrival */
-@media (max-width:900px){
-  .hero-grid{gap:24px}
-  .hero-copy{display:contents}
-  .hero-copy>*{order:2}
-  .hero-copy>.label,.hero-copy>h1{order:0}
-  .hero-media{order:1}
-}
+.hero-3d .hero-grid{align-items:start}
+.hero-side{display:grid;gap:24px;min-width:0}
+@media (max-width:719px){.k3d-hero{height:min(118vw,66svh)}}

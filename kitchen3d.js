@@ -85,7 +85,9 @@ async function init(box) {
     wall: M('#f4f1ec'), cab: M('#e2dcd2', { roughness: .62 }), tall: M('#e6e0d6', { roughness: .6 }),
     stone: M('#f3f0ea', { roughness: .35 }), dark: M('#1d1c1b', { roughness: .3, metalness: .3 }),
     steel: M('#bfc0bf', { roughness: .3, metalness: .6 }), glass: new THREE.MeshBasicMaterial({ color: '#f7f8f6', toneMapped: false }),
-    floor: M('#dcc8ac', { roughness: .7, transparent: true, opacity: 0 }), stool: M('#eae6df', { roughness: .5 }),
+    floor: M('#dcc8ac', { roughness: .7, transparent: true, opacity: 0 }), stool: M('#efe9df', { roughness: .9, side: THREE.DoubleSide }),
+    chrome: M('#c9c8c4', { roughness: .3 }), groove: M('#b3ab9e', { roughness: .8 }),
+    led: new THREE.MeshBasicMaterial({ color: '#fff3d6', toneMapped: false }),
   };
   const edgeMat = new THREE.LineBasicMaterial({ color: '#2b2926', transparent: true, opacity: .9 });
 
@@ -150,9 +152,19 @@ async function init(box) {
   block(back, 218, 130, 683, 220, BASE, TOP_, mat.stone, false);
   part(back, X(522), TOP_ + .003, Z(174), .78, .01, .42, mat.steel);
   part(back, X(522), TOP_ + .2, Z(140), .025, .4, .025, mat.dark);
-  const uppers = group(3, { drop: true });
-  block(uppers, 340, 130, 683, 183, 1.42, 2.36, mat.cab);
-  for (const px of [409, 478, 546, 614]) part(uppers, X(px), 1.89, Z(184), .004, .92, .004, edgeMat);
+// Back wall, as in the rendering: stone backsplash from the counter to the ceiling,
+// uppers up to the ceiling from the corner run to past the sink (6 doors on top, 3 below),
+// with a warm light strip underneath. The tall units stand apart on the right.
+const splash = group(1);
+block(splash, 128, 130, 683, 132, TOP_, H, mat.stone, false);
+const uppers = group(3, { drop: true });
+const U0 = 218, U1 = 608, UB = 1.45, US = 2.12, UD = 183;
+block(uppers, U0, 130, U1, UD, UB, H, mat.cab);
+const uw = X(U1) - X(U0), front = Z(UD) + .002;
+part(uppers, (X(U0) + X(U1)) / 2, US, front, uw, .006, .004, mat.groove);
+for (let i = 1; i < 6; i++) part(uppers, X(U0) + uw * i / 6, (US + H) / 2, front, .006, H - US, .004, mat.groove);
+for (let i = 1; i < 3; i++) part(uppers, X(U0) + uw * i / 3, (UB + US) / 2, front, .006, US - UB, .004, mat.groove);
+part(uppers, (X(U0) + X(U1)) / 2, UB - .012, Z(UD) - .06, uw - .04, .012, .03, mat.led);
 
   // Tall wall (order 2): pantries, oven column, fridge, utility
   const tall = group(2);
@@ -167,16 +179,27 @@ async function init(box) {
   block(island, 381, 379, 519, 674, BASE, TOP_, mat.stone, false);
   block(island, 381, 669, 519, 674, 0, BASE, mat.stone, false);
 
-  // Stools (order 4): 40 cm seats with a low back, at counter height
+  // Stools (order 4), as in the rendering: round cream upholstered seats with a low curved back,
+  // thin chrome legs and a footrest ring, tucked in along both sides of the island.
   const stools = group(4);
-  for (const [px, rot] of [[356, -1], [544, 1]]) {
-    const s = new THREE.Group();
-    s.position.set(X(px), 0, Z(627));
-    const seat = part(s, 0, .64, 0, .4, .05, .4, mat.stool);
-    part(s, rot * .19, .82, 0, .04, .32, .36, mat.stool);
-    for (const [dx, dz] of [[-.16, -.16], [.16, -.16], [-.16, .16], [.16, .16]]) part(s, dx, .31, dz, .022, .62, .022, mat.dark);
-    seat.castShadow = true;
-    stools.add(s);
+for (const [px, side] of [[381 - 22, -1], [519 + 22, 1]]) {
+  const s = new THREE.Group();
+  s.position.set(X(px), 0, 2.4);         // set back along the island, as in the rendering
+  const seat = new THREE.Mesh(new THREE.CylinderGeometry(.2, .19, .08, 40), mat.stool);
+  seat.position.y = .66;
+  const back = new THREE.Mesh(new THREE.CylinderGeometry(.2, .2, .17, 40, 1, true, side > 0 ? 0 : -Math.PI, Math.PI), mat.stool);
+  back.position.y = .78;
+  const ring = new THREE.Mesh(new THREE.TorusGeometry(.165, .007, 8, 40), mat.chrome);
+  ring.rotation.x = Math.PI / 2; ring.position.y = .26;
+  s.add(seat, back, ring);
+  for (const a of [.25, .75, 1.25, 1.75]) {
+    const ang = a * Math.PI, leg = new THREE.Mesh(new THREE.CylinderGeometry(.008, .008, .64, 8), mat.chrome);
+    leg.position.set(Math.cos(ang) * .17, .31, Math.sin(ang) * .17);
+    leg.rotation.set(Math.sin(ang) * .06, 0, -Math.cos(ang) * .06);
+    s.add(leg);
+  }
+  s.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
+  stools.add(s);
   }
 
   // Floor (oak) and the plan drawing on top of it
@@ -225,7 +248,7 @@ async function init(box) {
     renderer.setSize(w, h, false);
     camera.aspect = w / h;
     // keep the whole plan in view on narrow screens; in the reel, keep it above the caption
-    TOP.pos.y = reel ? 13.6 : (hero ? 8.8 : 9.4) * Math.max(1, 1.25 / camera.aspect);
+    TOP.pos.y = reel ? 13.6 : (hero ? 9.9 : 9.4) * Math.max(1, 1.25 / camera.aspect);
     const lift = reel ? .075 : hero ? .05 : 0;            // keep the plan clear of what's overlaid at the bottom
     TOP.pos.z = TOP.look.z = 2.0 + lift * TOP.pos.y * 2 * Math.tan(17 * Math.PI / 180);
     frame(time);
