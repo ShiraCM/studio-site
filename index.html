@@ -27,9 +27,11 @@
   <div class="feature-pic"><img src="img/primary-bedroom-walnut.webp" width="1754" height="897" fetchpriority="high" alt="A bedroom we designed: walnut built-ins, a recessed bookshelf and layered linen bedding."></div>
   <div class="feature-scrim" aria-hidden="true"></div>
   <div class="wrap feature-copy">
-    <span class="label">For American buyers of pre-construction apartments in Israel</span>
-    <h1 id="hero-h"><span class="sr-only">Buying a new build in Israel? We take care of the floor plan, the contractor, the kitchen, the bathrooms, the furniture and move-in.</span><span aria-hidden="true">Buying a new build in Israel?<br><span class="rot-line">We take care of the <span class="rot" data-words="floor plan.|contractor.|kitchen.|bathrooms.|tiles.|furniture.|move‑in."><em>floor plan.</em></span></span></span></h1>
-    <p class="lede">We work only on apartments bought from the developer before they’re built: a “project” in Israel, pre-construction in the U.S. Your design team on the ground, in English, from plans to pillows.</p>
+    <h1 id="hero-h">Buying an apartment in Israel shouldn’t mean navigating the process <em>alone.</em></h1>
+    <p class="feature-niche">Specializing in pre-construction apartments in Israel</p>
+    <p class="lede">From reimagining your floor plan to selecting finishes and navigating the complexities of the Israeli contractor process, I guide overseas buyers through every stage of transforming a pre-construction apartment into a home designed around their needs.</p>
+    <p class="feature-services"><span>Architectural planning</span><span>Interior design</span><span>Contractor-process guidance</span></p>
+    <p class="feature-tag">Your trusted advisor on the ground in Israel.</p>
     <div class="hero-actions">
       <a class="btn btn-primary" href="contact.html">Tell us about your apartment
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg></a>
@@ -180,19 +182,6 @@
     addEventListener('scroll',function(){ if(!queued){queued=true;requestAnimationFrame(update);} },{passive:true});
     update();
     window.__feature=update;
-  })();
-</script>
-<script>
-  // opener: the last words of the headline change every couple of seconds
-  (function(){
-    var el=document.querySelector('.rot'); if(!el) return;
-    if(matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    var words=el.dataset.words.split('|'), i=0;
-    setInterval(function(){
-      i=(i+1)%words.length;
-      el.classList.add('out');
-      setTimeout(function(){ el.firstElementChild.textContent=words[i]; el.classList.remove('out'); el.classList.add('in'); void el.offsetWidth; el.classList.remove('in'); }, 350);
-    }, 2200);
   })();
 </script>
 <script>
