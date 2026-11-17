@@ -63,6 +63,10 @@ async function init(box) {
   const photo = box.querySelector('.k3d-photo');
   const buttons = box.querySelectorAll('.k3d-steps button');
   const replay = box.querySelector('.k3d-replay');
+  const full = box.classList.contains('k3d-full');        // full-screen pinned hero: words on one side, kitchen in the free space
+  const copyEl = box.querySelector('.k3d-copy');
+  const marks = box.querySelectorAll('.k3d-line li');
+  const focus = { x: 0, y: 0, w: 1, h: 1 };              // where the kitchen sits on screen, in px
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: scrolled });
@@ -258,9 +262,15 @@ if (scrolled) {
     camera.lookAt(look);
     camera.updateProjectionMatrix();
 
-    photo.style.opacity = Math.max(ease(span(t, ...T.photo)), wrapped ? 1 - ease(span(t, 0, .9)) : 0);
-    const st = t < T.rise[0] + .8 ? 0 : t < T.photo[0] + .6 ? 1 : 2;
-    buttons.forEach((b, i) => b.setAttribute('aria-pressed', i === st ? 'true' : 'false'));
+const st = t < T.rise[0] + .8 ? 0 : t < T.photo[0] + .6 ? 1 : 2;
+if (full) {
+  // the rendering opens in a growing circle from the middle of the kitchen
+  const k = ease(span(t, ...T.photo)), R = Math.hypot(Math.max(focus.x, focus.w - focus.x), Math.max(focus.y, focus.h - focus.y));
+  photo.style.opacity = k > 0 ? 1 : 0;
+  photo.style.clipPath = `circle(${(k * R).toFixed(1)}px at ${focus.x.toFixed(1)}px ${focus.y.toFixed(1)}px)`;
+  marks.forEach((m, i) => { m.classList.toggle('on', i === st); m.classList.toggle('done', i < st); });
+} else photo.style.opacity = Math.max(ease(span(t, ...T.photo)), wrapped ? 1 - ease(span(t, 0, .9)) : 0);
+buttons.forEach((b, i) => b.setAttribute('aria-pressed', i === st ? 'true' : 'false'));
     renderer.render(scene, camera);
   }
 
@@ -271,8 +281,35 @@ if (scrolled) {
     // keep the whole plan in view on narrow screens; in the reel, keep it above the caption
     TOP.pos.y = reel ? 13.6 : (hero ? 9.9 : 9.4) * Math.max(1, 1.25 / camera.aspect);
     const lift = reel ? .075 : hero && !scrolled ? .05 : 0;            // keep the plan clear of what's overlaid at the bottom
-    TOP.pos.z = TOP.look.z = 2.0 + lift * TOP.pos.y * 2 * Math.tan(17 * Math.PI / 180);
-    frame(time);
+TOP.pos.z = TOP.look.z = 2.0 + lift * TOP.pos.y * 2 * Math.tan(17 * Math.PI / 180);
+if (full) {
+  // Free space beside the words (wide screens) or below them (phones). Centre the kitchen
+  // there with a view offset, and size the plan to fit it.
+  const sr = stageEl.getBoundingClientRect(), cr = copyEl.getBoundingClientRect();
+  const wide = w > 900;
+  const x0 = wide ? cr.right - sr.left + 16 : 0, y0 = wide ? 0 : cr.bottom - sr.top + 4;
+  if (wide) {
+    const x1 = w, y1 = h - 72;
+    focus.x = (x0 + x1) / 2; focus.y = (y0 + y1) / 2; focus.w = w; focus.h = h;
+    const fw = Math.max(.2, (x1 - x0) / w), fh = Math.max(.2, (y1 - y0) / h);
+    const V = Math.max((860 / 150) / fh, (900 / 150) / (fw * camera.aspect)) * 1.02;
+    TOP.pos.y = V / (2 * Math.tan(TOP.fov * Math.PI / 360));
+    stageEl.style.setProperty('--k3d-top', '0px');
+    camera.setViewOffset(w, h, -(focus.x - w / 2), -(focus.y - h / 2), w, h);
+  } else {
+    // phones: the canvas and the rendering fill only the space under the words
+    const ch = Math.max(180, h - y0);
+    stageEl.style.setProperty('--k3d-top', y0 + 'px');
+    renderer.setSize(w, ch, false);
+    camera.aspect = w / ch;
+    camera.clearViewOffset();
+    focus.x = w / 2; focus.y = ch / 2; focus.w = w; focus.h = ch;
+    const V = Math.max(860 / 150, (900 / 150) / camera.aspect) * 1.04;
+    TOP.pos.y = V / (2 * Math.tan(TOP.fov * Math.PI / 360));
+  }
+  TOP.pos.z = TOP.look.z = 2.0;
+}
+frame(time);
   }
 
   let time = reduce ? STAGES[hero ? 2 : 0] : 0, playing = !reduce && !reel && !scrolled, visible = true, last = 0;
@@ -293,7 +330,8 @@ const SCROLL_END = T.photo[1] + .4;
 function scrollRange() {
   const pin = box.closest('.hero-pin'), section = box.closest('.hero-scroll'), track = box.closest('.k3d-track');
   let el, child;
-  if (pin && getComputedStyle(pin).position === 'sticky') { el = section; child = pin; }
+  if (full && getComputedStyle(stageEl).position === 'sticky') { el = box; child = stageEl; }
+  else if (pin && getComputedStyle(pin).position === 'sticky') { el = section; child = pin; }
   else if (getComputedStyle(box).position === 'sticky') { el = track; child = box; }
   else return null;
   const r = el.getBoundingClientRect(), top = parseFloat(getComputedStyle(child).top) || 0;

@@ -1,7 +1,8 @@
+<!doctype html>
+<html lang="en">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Shira Svei Design Studio</title>
-<meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Hanken+Grotesk:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Frank+Ruhl+Libre:wght@400;500&display=swap">
@@ -16,236 +17,110 @@
     <nav class="links" aria-label="Main">
       <a class="hide-sm" href="process.html">How we work</a>
       <a class="hide-sm" href="packages.html">Packages</a>
-      <a class="hide-sm" href="order.html">Order</a>
-      
       <a class="btn btn-primary" href="contact.html">Let’s talk</a>
     </nav>
   </div>
 </header>
 
 <main id="top">
-<section class="hero hero-scroll">
-  <div class="hero-pin">
-    <div class="wrap hero-grid">
-      <div class="hero-copy">
+<section class="hero-full k3d k3d-hero k3d-scroll k3d-full" id="model" aria-labelledby="hero-h">
+  <div class="k3d-stage">
+    <img class="k3d-photo" src="img/kitchen-render-wide.jpg" width="1452" height="720" fetchpriority="high" alt="Rendering of a finished kitchen designed by the studio: greige cabinets, white stone counters and backsplash, a waterfall island and oak floors.">
+    <div class="k3d-scrim" aria-hidden="true"></div>
+    <div class="wrap k3d-copy-wrap">
+      <div class="k3d-copy">
         <span class="label">For American buyers of new-build apartments in Israel</span>
-        <h1>Your apartment in Israel, <em>from plan to move&#8209;in.</em></h1>
+        <h1 id="hero-h">Your apartment in Israel, <em>from plan to move&#8209;in.</em></h1>
         <p class="lede">You’re buying a home from a floor plan, in another country, in another language. We’re your design team on the ground: we review the plan, talk to the contractor for you, and get the apartment ready to live in.</p>
         <div class="hero-actions">
           <a class="btn btn-primary" href="contact.html">Tell us about your apartment
             <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg></a>
-          <a class="btn btn-ghost" href="#stages">See how it works</a>
+          <a class="btn btn-ghost" href="#stages">See how we work</a>
         </div>
-      </div>
-      <div class="hero-media k3d-track">
-        <figure class="k3d k3d-hero k3d-scroll" id="model">
-          <div class="k3d-stage">
-            <img class="k3d-photo" src="img/kitchen-render-wide.jpg" width="1452" height="720" alt="Rendering of a finished kitchen designed by the studio: greige cabinets, white stone counters and backsplash, a waterfall island and oak floors.">
-            <img class="k3d-fallback" src="img/kitchen-plan-clean.svg" width="900" height="860" alt="">
-          </div>
-          <figcaption class="k3d-bar">
-            <div class="k3d-steps" role="group" aria-label="Show a stage of the kitchen">
-              <button type="button" aria-pressed="true"><span>01</span> Plan</button>
-              <button type="button" aria-pressed="false"><span>02</span> 3D model</button>
-              <button type="button" aria-pressed="false"><span>03</span> Rendering</button>
-            </div>
-            <span class="k3d-hint" aria-hidden="true">Scroll to build it ↓</span>
-          </figcaption>
-        </figure>
       </div>
     </div>
+    <ol class="k3d-line" aria-hidden="true"><li>Plan</li><li>3D model</li><li>Rendering</li></ol>
   </div>
 </section>
-<section class="hero-after">
-  <div class="wrap">
-    <div class="finder" role="group" aria-labelledby="finder-q">
-          <span class="label" id="finder-q">Where are you right now?</span>
-          <div class="finder-row">
-            <button type="button" data-stage="1" aria-pressed="false"><b>01</b> Just got the prospectus</button>
-            <button type="button" data-stage="2" aria-pressed="false"><b>02</b> Signed on an apartment</button>
-            <button type="button" data-stage="3" aria-pressed="false"><b>03</b> Making selections</button>
-            <button type="button" data-stage="4" aria-pressed="false"><b>04</b> Moving in soon</button>
-          </div>
-          <p class="finder-answer" id="finder-answer" aria-live="polite">Bring us in at any stage, or for the whole process.</p>
-        </div>
-  </div>
-</section>
-
-  <section class="process" aria-labelledby="stages-h">
-    <div class="wrap">
-      <div class="process-head">
-        <div style="display:grid;gap:16px">
-          <span class="label">The process</span>
-          <h2 id="stages-h">Four stages, one team on the ground.</h2>
-        </div>
-        <p class="lede">Each stage has its own Hebrew name on the contractor’s side. Here’s what happens at each one, and what we do for you.</p>
-      </div>
-      <nav class="index" aria-label="Stages">
-        <a href="#stage-1"><span class="label">01 · Prospectus</span><span class="he" lang="he">תוכנית מכר</span><h3>Is this the right apartment?</h3></a>
-        <a href="#stage-2"><span class="label">02 · Layout</span><span class="he" lang="he">שינויי דיירים</span><h3>Make the layout work for you</h3></a>
-        <a href="#stage-3"><span class="label">03 · Selections</span><span class="he" lang="he">מפרט טכני</span><h3>Choose what goes in</h3></a>
-        <a href="#stage-4"><span class="label">04 · Move-in</span><span class="he" lang="he">מסירת דירה</span><h3>Furnish and style it</h3></a>
-      </nav>
-    </div>
-  </section>
 
   <div id="stages">
-    <!-- 01 -->
+    <section class="stages-head" aria-labelledby="stages-h">
+      <div class="wrap">
+        <h2 id="stages-h">Four stages, one team on the ground.</h2>
+        <p class="lede">Buying off-plan happens in stages. Bring us in at any one of them, or have us with you through all four.</p>
+      </div>
+    </section>
+
     <section class="stage" id="stage-1" aria-labelledby="s1-h">
-      <div class="wrap">
-        <div class="titleblock">
-          <span class="num">Stage 01</span>
-          <span class="he" lang="he">תוכנית מכר</span>
-          <span class="gloss">“sales plan”</span>
-          <span class="when">When you get the prospectus</span>
+      <div class="wrap stage-grid">
+        <div class="stage-copy">
+          <span class="when"><b>01</b> When you get the prospectus</span>
+          <h2 id="s1-h">Is this the right apartment for you?</h2>
+          <p>Before you commit, we review the contractor’s sales plan with you. We check real dimensions, furniture clearances, circulation and storage, so you know whether the space fits the way you live.</p>
         </div>
-        <div class="stage-grid">
-          <div class="stage-copy">
-            <h2 id="s1-h">Is this the right apartment for you?</h2>
-            <p>Before you commit, we review the contractor’s sales plan with you. We check <strong>actual dimensions, furniture clearances, circulation and storage</strong> so you can decide whether the space suits the way you live.</p>
-            <p class="callout">Checking the plan early is the cheapest moment to find a problem. After you sign, the options narrow.</p>
+        <div class="case">
+          <h3>A spacious living room. Or is it?</h3>
+          <p>Drawn to scale, the dining chair overlaps the loveseat and blocks the way to the hallway. Drag to compare.</p>
+          <div class="compare" id="compare" style="--pos:50%">
+            <img src="img/living-area-sales.webp" alt="Contractor’s sales plan showing an apparent gap between the dining table and loveseat" width="394" height="388">
+            <img class="after" src="img/living-area-scaled.webp" alt="The same plan with furniture drawn to scale: the dining chair overlaps the loveseat" width="393" height="388">
+            <span class="tag l">Sales plan</span><span class="tag r">Drawn to scale</span>
+            <div class="handle" aria-hidden="true"></div>
+            <input type="range" id="compare-range" min="0" max="100" value="50" aria-label="Drag to compare the sales plan with the plan drawn to scale">
           </div>
-          <div class="case">
-            <span class="label">Case study</span>
-            <h3>A spacious living room. Or is it?</h3>
-            <p>The prospectus makes the living and dining area look roomy. When we drew the furniture to scale, the dining chair overlapped the loveseat and blocked the path to the hallway.</p>
-            <div class="compare" id="compare" style="--pos:50%">
-              <img src="img/living-area-sales.webp" alt="Contractor’s sales plan showing an apparent gap between the dining table and loveseat" width="394" height="388">
-              <img class="after" src="img/living-area-scaled.webp" alt="The same plan with furniture drawn to scale: the dining chair overlaps the loveseat" width="393" height="388">
-              <span class="tag l">Sales plan</span><span class="tag r">Drawn to scale</span>
-              <div class="handle" aria-hidden="true"></div>
-              <input type="range" id="compare-range" min="0" max="100" value="50" aria-label="Drag to compare the sales plan with the plan drawn to scale">
-            </div>
-            <div class="compare-note">
-              <span class="label">Drag to compare</span>
-              <a class="textlink" href="project-furniture-study.html">See the full comparison →</a>
-            </div>
-          </div>
+          <a class="textlink" href="project-furniture-study.html">See the full study →</a>
         </div>
       </div>
     </section>
 
-    <!-- 02 -->
     <section class="stage" id="stage-2" aria-labelledby="s2-h">
-      <div class="wrap">
-        <div class="titleblock">
-          <span class="num">Stage 02</span>
-          <span class="he" lang="he">שינויי דיירים</span>
-          <span class="gloss">“buyer changes”</span>
-          <span class="when">Once you’ve chosen your apartment</span>
+      <div class="wrap stage-grid">
+        <div class="stage-copy">
+          <span class="when"><b>02</b> Once you’ve chosen the apartment</span>
+          <h2 id="s2-h">Make the layout work for you.</h2>
+          <p>We rethink the rooms around your family: room for another bedroom, a more open living area, more built-in storage. We draw the changes and take them to the contractor’s team.</p>
+          <p class="callout">Every contractor limits what can change. We know where the room to move is, and use it.</p>
         </div>
-        <div class="stage-grid">
-          <div class="stage-copy">
-            <h2 id="s2-h">Make the layout work for you.</h2>
-            <p>We rethink the rooms around the way you live. That might mean <strong>finding space for another bedroom, opening up the living area, or building in more storage</strong>. We prepare the changes and discuss them directly with the contractor’s team.</p>
-            <p class="callout">Every contractor sets limits on what can change. Our expertise is knowing where there’s flexibility, and using it to fit as many details as possible to your life.</p>
-          </div>
-          <div class="projects">
-            <a class="project" href="project-apartment-layout.html">
-              <div class="frame"><img src="img/apartment-revised-sequence.webp" alt="Revised plan with the former bedroom opened into the living area" width="1000" height="750" loading="lazy"></div>
-              <h4>Expanded living space <span aria-hidden="true">→</span></h4>
-              <p>Room for a larger living area, a dedicated laundry and better storage.</p>
-            </a>
-            <a class="project" href="project-jerusalem-heights.html">
-              <div class="frame"><img src="img/plan-jh-revised-no-ac.webp" alt="Revised floor plan showing the relocated kitchen and new third bedroom" width="1250" height="1340" loading="lazy"></div>
-              <h4>From two bedrooms to three <span aria-hidden="true">→</span></h4>
-              <p>We moved the kitchen to make room for a third bedroom, which let the owners raise the rent.</p>
-            </a>
-          </div>
-        </div>
+        <a class="project" href="project-jerusalem-heights.html">
+          <div class="frame"><img src="img/plan-jh-revised-no-ac.webp" alt="Revised floor plan showing the relocated kitchen and new third bedroom" width="1250" height="1340" loading="lazy"></div>
+          <h4>Two bedrooms become three <span aria-hidden="true">→</span></h4>
+          <p>The kitchen moved to make room for a third bedroom.</p>
+        </a>
       </div>
     </section>
 
-    <!-- 03 -->
     <section class="stage" id="stage-3" aria-labelledby="s3-h">
-      <div class="wrap">
-        <div class="titleblock">
-          <span class="num">Stage 03</span>
-          <span class="he" lang="he">מפרט טכני</span>
-          <span class="gloss">“technical specification”</span>
-          <span class="when">When it’s time to make selections</span>
+      <div class="wrap stage-grid">
+        <div class="stage-copy">
+          <span class="when"><b>03</b> When selections are due</span>
+          <h2 id="s3-h">Choose what goes into your home.</h2>
+          <p>Tiles, the kitchen, air conditioning, doors and fixtures. We work with the contractor’s kitchen supplier or design the kitchen ourselves, and help you pick tiles in person or remotely.</p>
         </div>
-        <div class="stage-grid">
-          <div class="stage-copy">
-            <h2 id="s3-h">Choose what goes into your home.</h2>
-            <p>We help you <strong>choose tiles, plan the kitchen</strong>, and work through choices like air conditioning, doors and fixtures.</p>
-            <p>We can work with the contractor’s kitchen supplier or design the kitchen independently, and help with tile selections in person or remotely.</p>
-            <a class="textlink" href="project-bathrooms.html">See two bathrooms from plan to rendering →</a>
-          </div>
-          <div class="duo">
-            <figure class="a"><img src="img/island.webp" alt="Stone kitchen island with wood cabinetry and slim pendant lights" width="602" height="774" loading="lazy"><figcaption>Stone island, wood cabinetry</figcaption></figure>
-            <figure class="b"><img src="img/backsplash.webp" alt="Wood kitchen cabinetry and an illuminated stone backsplash" width="834" height="1152" loading="lazy"><figcaption>Lit stone backsplash</figcaption></figure>
-          </div>
-        </div>
+        <a class="project" href="project-bathrooms.html">
+          <div class="frame"><img src="img/tub-render-updated.webp" alt="Rendering of a bathroom with dark stone tile, a charcoal vanity and a white tub" width="1135" height="928" loading="lazy"></div>
+          <h4>Two bathrooms, from plan to rendering <span aria-hidden="true">→</span></h4>
+        </a>
       </div>
     </section>
 
-    <!-- 04 -->
     <section class="stage" id="stage-4" aria-labelledby="s4-h">
-      <div class="wrap">
-        <div class="titleblock">
-          <span class="num">Stage 04</span>
-          <span class="he" lang="he">מסירת דירה</span>
-          <span class="gloss">“handover”</span>
-          <span class="when">Getting ready to move in</span>
+      <div class="wrap stage-grid">
+        <div class="stage-copy">
+          <span class="when"><b>04</b> Getting ready to move in</span>
+          <h2 id="s4-h">Furnish and style your home.</h2>
+          <p>We plan and source furniture room by room, and design built-ins where they use the space better: a vanity fitted to the bathroom, storage set into a niche, a piece sized to keep a walkway clear. Then curtains, rugs, lighting, art and the last details.</p>
+          <a class="textlink" href="packages.html#furnishing">Furnishing and styling →</a>
         </div>
-        <div class="stage-grid">
-          <div class="stage-copy">
-            <h2 id="s4-h">Furnish and style your home.</h2>
-            <p>We can get the entire apartment ready to live in. We plan and source furniture room by room, and design <strong>custom cabinetry</strong> where a built-in makes better use of the space: a vanity fitted to the bathroom, storage built into a niche, a piece sized to keep a walkway clear.</p>
-            <p>We finish the rooms with window treatments, rugs, lighting, art and accessories, working with our own network of local tradespeople and suppliers.</p>
-            <a class="textlink" href="packages.html#furnishing">Explore furnishing and styling →</a>
-          </div>
-          <div class="stage-copy" style="align-self:center">
-            <span class="label">Custom bedroom cabinetry</span>
-            <p style="font:400 clamp(24px,2.6vw,32px)/1.25 var(--display);color:var(--ink);max-width:22ch">Walnut built-ins, linen curtains and a reading corner, designed around one room.</p>
-          </div>
-        </div>
-        <div class="wide">
-          <figure><img src="img/primary-bedroom-walnut.webp" alt="Bedroom rendering with walnut built-ins, a recessed bookshelf and layered bedding" width="1754" height="897" loading="lazy"><figcaption>Walnut built-ins and layered bedding</figcaption></figure>
-          <figure><img src="img/primary-bedroom-linen.webp" alt="Bedroom view toward linen curtains, with fitted wardrobes and a reading chair" width="1756" height="895" loading="lazy"><figcaption>Linen window treatments and a reading corner</figcaption></figure>
-        </div>
+        <figure class="stage-pic"><img src="img/primary-bedroom-walnut.webp" alt="Bedroom rendering with walnut built-ins, a recessed bookshelf and layered bedding" width="1754" height="897" loading="lazy"></figure>
       </div>
     </section>
   </div>
 
   <section class="with" aria-labelledby="with-h">
-    <div class="wrap with-grid">
-      <div class="with-copy">
-        <span class="label">Between the stages</span>
-        <h2 id="with-h">We’re with you throughout.</h2>
-        <p>Things keep moving between your visits. When something comes in from Israel, we deal with it there and explain it to you in English.</p>
-        <div style="display:flex;flex-wrap:wrap;gap:20px">
-          <a class="textlink" href="packages.html#full-service">See full-service support →</a>
-        </div>
-      </div>
-      <ul class="log" aria-label="What we handle for you">
-        <li><span class="from">Contractor</span><div><b>A revised drawing comes in</b><span>We check it against what was agreed and tell you what changed.</span></div></li>
-        <li><span class="from">Supplier</span><div><b>A supplier has a question</b><span>We answer what we can and bring you only the choices that need you.</span></div></li>
-        <li><span class="from">Deadline</span><div><b>The contractor needs a decision</b><span>We explain the options in English and follow up with the team on your behalf.</span></div></li>
-      </ul>
-    </div>
     <div class="wrap">
-      <figure class="film" id="film">
-        <video controls playsinline preload="none" poster="media/buying-on-paper.webp" width="1280" height="720" aria-label="Buying on paper, a 34-second film about the buyer’s inbox"><source src="media/buying-on-paper.mp4" type="video/mp4"></video>
-        <figcaption>Buying on paper · a 34-second film about the buyer’s inbox</figcaption>
-      </figure>
-    </div>
-  </section>
-
-  <section class="faq" id="faq" aria-labelledby="faq-h">
-    <div class="wrap faq-grid">
-      <div style="display:grid;gap:16px;align-content:start">
-        <span class="label">Questions</span>
-        <h2 id="faq-h">Before you reach out.</h2>
-      </div>
-      <div>
-        <details open><summary>Can I bring you in partway through?</summary><p>Yes. You can bring us in when you first get the prospectus, for one specific stage, or for the entire process, from plan to move-in.</p></details>
-        <details><summary>Do I need to be in Israel?</summary><p>No. We’re on the ground for you and explain every decision in English. Tile selections can happen in person or remotely.</p></details>
-        <details><summary>Will you speak to the contractor for me?</summary><p>Yes. We prepare layout changes and discuss them directly with the contractor’s team, and we follow up with suppliers on your behalf.</p></details>
-        <details><summary>Do I have to use the contractor’s kitchen supplier?</summary><p>No. We can work with the contractor’s kitchen supplier or design the kitchen independently.</p></details>
-        <details><summary>Can you furnish the whole apartment?</summary><p>Yes. We plan and source furniture room by room, design custom cabinetry, and finish each room with lighting, rugs, window treatments, art and accessories.</p></details>
-      </div>
+      <h2 id="with-h">We’re with you the whole way.</h2>
+      <p class="lede">A revised drawing arrives, a supplier has a question, the contractor needs a decision by Thursday. We explain it in English and follow up with the team in Israel for you.</p>
+      <a class="textlink" href="packages.html#liaison">Contractor liaison →</a>
     </div>
   </section>
 
@@ -256,40 +131,22 @@
           <h2 id="close-h">Let’s talk about <em>your new build.</em></h2>
           <div class="actions">
             <a class="btn btn-primary" href="contact.html">Tell us about your apartment</a>
-            <a class="btn btn-ghost" href="packages.html">See packages</a>
+            <a class="btn btn-ghost" href="packages.html">See packages and prices</a>
           </div>
         </div>
         <p>Tell us where you are in the process and what’s coming up next. We’ll tell you how we can help.</p>
       </div>
       <div class="foot">
         <span>Shira Svei Design Studio · Israel</span>
-        <span><a href="process.html">How we work</a> · <a href="packages.html">Packages</a> · <a href="order.html">Order</a> · <a href="contact.html">Contact</a></span>
+        <span><a href="process.html">How we work</a> · <a href="packages.html">Packages</a> · <a href="contact.html">Contact</a></span>
       </div>
     </div>
   </section>
 </main>
 
 <script>
-(function(){
   // compare slider
-  var box=document.getElementById('compare'),r=document.getElementById('compare-range');
-  if(box&&r){r.addEventListener('input',function(){box.style.setProperty('--pos',r.value+'%')});}
-
-  // stage finder
-  var notes={
-    1:'Start with a plan review. We’ll check the dimensions and furniture before you commit. <a href="#stage-1">See stage 01 ↓</a>',
-    2:'Now is when layout changes are possible. We’ll work within the contractor’s limits for you. <a href="#stage-2">See stage 02 ↓</a>',
-    3:'Tiles, kitchen, fixtures. We’ll help you choose, in person or remotely. <a href="#stage-3">See stage 03 ↓</a>',
-    4:'Furniture, built-ins and styling, room by room. <a href="#stage-4">See stage 04 ↓</a>'
-  };
-  var btns=document.querySelectorAll('.finder button'),ans=document.getElementById('finder-answer');
-  btns.forEach(function(b){b.addEventListener('click',function(){
-    var s=b.dataset.stage;
-    btns.forEach(function(x){x.setAttribute('aria-pressed',x===b?'true':'false')});
-    ans.innerHTML=notes[s];
-    document.querySelectorAll('.stage').forEach(function(el){el.classList.toggle('is-target',el.id==='stage-'+s)});
-    if(window.__model) window.__model.go(+s);
-  })});
-})();
+  (function(){var box=document.getElementById('compare'),r=document.getElementById('compare-range');
+  if(box&&r){r.addEventListener('input',function(){box.style.setProperty('--pos',r.value+'%')});}})();
 </script>
 <script type="module" src="kitchen3d.js"></script>
