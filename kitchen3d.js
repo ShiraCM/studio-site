@@ -21,7 +21,7 @@ const lerp = (a, b, t) => a + (b - a) * t;
 // eraser wipes it, and our plan is sketched line by line (PRE). Everything after starts at D.
 const D = 4.4;
 const PRE = { erase: [1.0, 2.2], draw: [2.3, 4.1], snap: [3.9, 4.4] };
-const T = { plan: D + 1.4, rise: [D + 1.4, D + 4.6], planFade: [D + 3.2, D + 4.8], cam: [D + 3.4, D + 8.6], photo: [D + 9.6, D + 11.2], end: D + 15 };
+const T = { plan: D + 1.4, rise: [D + 1.4, D + 4.6], planFade: [D + 3.2, D + 4.8], cam: [D + 3.4, D + 8.6], photo: [D + 9.6, D + 11.2], style: [D + 11.5, D + 12.9], end: D + 16 };
 const STAGES = [D + 0.6, D + 7.4, D + 11.2];          // where the Plan / Model / Rendering buttons jump to
 
 
@@ -172,6 +172,96 @@ async function contractorLayer(src, k, clear) {
   return c;
 }
 
+// ---- Styling: the rendering first shows bare counters, then the accessories pop on ----
+// The three accessories already in the rendering are lifted out of it. Behind each, the stone is
+// filled in with stone from beside it (patches, in image px: rect, shift, soft edge); the
+// accessory itself is whatever the patch changed.
+const ACCESSORIES = [
+  { name: 'olive', box: [790, 276, 862, 396], patches: [[[795, 279, 857, 345], -64, 0], [[804, 344, 846, 394], -64, 0]] },
+  { name: 'board', box: [566, 256, 636, 342], patches: [[[572, 262, 630, 338], -64, 0]] },
+  { name: 'lemons', box: [180, 370, 282, 430], patches: [], fill: [[186, 376, 262, 426], [246, 391, 278, 426]] }
+];
+async function styledPhoto(src) {
+  const img = new Image();
+  await new Promise((resolve, reject) => { img.onload = resolve; img.onerror = reject; img.src = src; });
+  const W = img.naturalWidth, H = img.naturalHeight;
+  const c = document.createElement('canvas'); c.width = W; c.height = H;
+  const g = c.getContext('2d', { willReadFrequently: true });
+  g.drawImage(img, 0, 0);
+  const orig = g.getImageData(0, 0, W, H), work = g.getImageData(0, 0, W, H);
+  const o = orig.data, p = work.data, F = 3;
+// Copy stone from beside each accessory, row by row, and match its light to the stone around the
+// hole: the colour difference at the patch's left and right edges is spread across each row.
+const px = (d, x, y, k) => d[(y * W + x) * 4 + k];
+for (const a of ACCESSORIES) for (const [[x0, y0, x1, y1], dx, dy, edges] of a.patches) {
+  const rows = y1 - y0, L = [], R = [];
+  for (let y = y0; y < y1; y++) {
+    const l = [], rr = [];
+    for (let k = 0; k < 3; k++) {
+      l.push(px(p, x0 - 1, y, k) - px(p, x0 - 1 + dx, y + dy, k));
+      rr.push(px(p, x1, y, k) - px(p, x1 + dx, y + dy, k));
+    }
+    L.push(l); R.push(edges === 'l' ? l : rr);
+  }
+  const smooth = (arr, i, k) => { let s = 0, n = 0; for (let j = Math.max(0, i - 4); j <= Math.min(rows - 1, i + 4); j++) { s += arr[j][k]; n++; } return s / n; };
+  const src = p.slice();
+  for (let y = y0; y < y1; y++) for (let x = x0; x < x1; x++) {
+    const w = clamp01(Math.min(x - x0 + 1, x1 - x, y - y0 + 1, y1 - y) / F), u = (x - x0) / Math.max(1, x1 - x0 - 1);
+    const i = (y * W + x) * 4, j = ((y + dy) * W + x + dx) * 4;
+    for (let k = 0; k < 3; k++) {
+      const corr = lerp(smooth(L, y - y0, k), smooth(R, y - y0, k), u);
+      p[i + k] = p[i + k] + (src[j + k] + corr - p[i + k]) * w;
+    }
+  }
+}
+// Where the stone beside it doesn't match (the lemons sit against a veined side panel), fill the
+// hole smoothly from its edges instead: start from a row-by-row blend, then let it settle.
+for (const a of ACCESSORIES) if (a.fill) {
+  let bx0 = 1e9, by0 = 1e9, bx1 = 0, by1 = 0;
+  for (const [x0, y0, x1, y1] of a.fill) { bx0 = Math.min(bx0, x0); by0 = Math.min(by0, y0); bx1 = Math.max(bx1, x1); by1 = Math.max(by1, y1); }
+  const bw = bx1 - bx0, bh = by1 - by0, inside = new Uint8Array(bw * bh);
+  for (const [x0, y0, x1, y1] of a.fill) for (let y = y0; y < y1; y++) for (let x = x0; x < x1; x++) inside[(y - by0) * bw + x - bx0] = 1;
+  const isIn = (x, y) => x >= bx0 && x < bx1 && y >= by0 && y < by1 && inside[(y - by0) * bw + x - bx0];
+  for (let y = by0; y < by1; y++) {
+    let xl = bx0; while (xl < bx1 && !isIn(xl, y)) xl++;
+    let xr = bx1 - 1; while (xr >= bx0 && !isIn(xr, y)) xr--;
+    for (let x = xl; x <= xr; x++) {
+      const u = (x - xl + 1) / (xr - xl + 2), i = (y * W + x) * 4, l = (y * W + xl - 1) * 4, rr = (y * W + xr + 1) * 4;
+      for (let k = 0; k < 3; k++) p[i + k] = lerp(p[l + k], p[rr + k], u);
+    }
+  }
+  for (let it = 0; it < 300; it++) for (let y = by0; y < by1; y++) for (let x = bx0; x < bx1; x++) {
+    if (!isIn(x, y)) continue;
+    const i = (y * W + x) * 4;
+    for (let k = 0; k < 3; k++) p[i + k] = (p[i - 4 + k] + p[i + 4 + k] + p[i - W * 4 + k] + p[i + W * 4 + k]) / 4;
+  }
+  // a whisper of grain so the fill doesn't look airbrushed
+  for (let y = by0; y < by1; y++) for (let x = bx0; x < bx1; x++) if (isIn(x, y)) {
+    const i = (y * W + x) * 4, n = ((Math.sin(x * 12.9898 + y * 78.233) * 43758.5453) % 1) * 3;
+    for (let k = 0; k < 3; k++) p[i + k] += n;
+  }
+}
+  g.putImageData(work, 0, 0);
+  const items = ACCESSORIES.map(a => {
+    const [x0, y0, x1, y1] = a.box, w = x1 - x0, h = y1 - y0;
+    const ic = document.createElement('canvas'); ic.width = w; ic.height = h;
+    const ig = ic.getContext('2d'), d = ig.createImageData(w, h);
+    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+      const i = ((y + y0) * W + x + x0) * 4, j = (y * w + x) * 4;
+      const diff = Math.max(Math.abs(o[i] - p[i]), Math.abs(o[i + 1] - p[i + 1]), Math.abs(o[i + 2] - p[i + 2]));
+      d.data[j] = o[i]; d.data[j + 1] = o[i + 1]; d.data[j + 2] = o[i + 2];
+      d.data[j + 3] = Math.round(255 * clamp01((diff - 5) / 20));
+    }
+    ig.putImageData(d, 0, 0);
+    return { canvas: ic, x0, y0, w, h };
+  });
+  const bare = document.createElement('canvas'); bare.width = W; bare.height = H;
+  bare.getContext('2d').drawImage(c, 0, 0);
+  return { bare, items, W, H };
+}
+// a quick overshoot, like something set down with a little bounce
+const popOut = t => { const s = 2.2; return 1 + (s + 1) * Math.pow(t - 1, 3) + s * Math.pow(t - 1, 2); };
+
 // The eraser's path: back and forth across the drawing, a little uneven, like a hand.
 function eraserPath() {
   const pts = [];
@@ -198,7 +288,7 @@ async function init(box) {
   const TOP = { pos: new THREE.Vector3(2.15, 9.4, 2.0), look: new THREE.Vector3(2.15, 0, 2.0), fov: 34 };
   const EYE = { pos: new THREE.Vector3(1.95, 1.05, 5.9), look: new THREE.Vector3(1.95, 0.9, 0), fov: 40 };
   const stageEl = box.querySelector('.k3d-stage');
-  const photo = box.querySelector('.k3d-photo');
+  let photo = box.querySelector('.k3d-photo');
   const buttons = box.querySelectorAll('.k3d-steps button');
   const replay = box.querySelector('.k3d-replay');
   const full = box.classList.contains('k3d-full');        // full-screen pinned hero: words on one side, kitchen in the free space
@@ -389,7 +479,38 @@ if (scrolled) {
   const skMesh = new THREE.Mesh(plan.geometry, skMat);
   skMesh.rotation.x = -Math.PI / 2; skMesh.position.set(X(450), .004, Z(430));
   scene.add(skMesh);
-  const tag = box.querySelector('.k3d-tag'), tagText = tag ? tag.textContent : '';
+const tag = box.querySelector('.k3d-tag'), tagText = tag ? tag.textContent : '';
+
+// The rendering is drawn on a canvas: bare counters first, then the accessories pop on.
+let styled = null, styleLast = -1;
+if (full || story) {
+  styled = await styledPhoto(photo.getAttribute('src')).catch(e => { console.warn('kitchen styling:', e); return null; });
+  if (styled) {
+    const pc = document.createElement('canvas'); pc.width = styled.W; pc.height = styled.H;
+    pc.className = photo.className;
+    pc.setAttribute('role', 'img'); pc.setAttribute('aria-label', photo.alt);
+    photo.after(pc); photo.style.display = 'none'; photo = pc;
+    styled.g = pc.getContext('2d');
+  }
+}
+function drawStyled(t) {
+  const q = Math.round(clamp01(span(t, T.style[0], T.style[1] + .2)) * 400);
+  if (q === styleLast) return;
+  styleLast = q;
+  const g = styled.g;
+  g.setTransform(1, 0, 0, 1, 0, 0);
+  g.drawImage(styled.bare, 0, 0);
+  const step = (T.style[1] - T.style[0] - .5) / Math.max(1, styled.items.length - 1);
+  styled.items.forEach((it, i) => {
+    const a = T.style[0] + i * step, k = span(t, a, a + .5);
+    if (k <= 0) return;
+    const sc = .3 + .7 * popOut(k), cx = it.x0 + it.w / 2, by = it.y0 + it.h;
+    g.globalAlpha = clamp01(k * 3);
+    g.setTransform(sc, 0, 0, sc, cx - sc * cx, by - sc * by);
+    g.drawImage(it.canvas, it.x0, it.y0);
+  });
+  g.globalAlpha = 1; g.setTransform(1, 0, 0, 1, 0, 0);
+}
   let skLast = -1;
   function drawOpening(t) {
     const q = Math.round(Math.min(t, PRE.snap[1]) * 120) / 120;
@@ -471,6 +592,7 @@ if (full || story) {
   // the rendering opens in a growing circle from the middle of the kitchen
   const k = ease(span(t, ...T.photo)), R = Math.hypot(Math.max(focus.x, focus.w - focus.x), Math.max(focus.y, focus.h - focus.y));
   photo.style.opacity = k > 0 ? 1 : 0;
+  if (styled && k > 0) drawStyled(t);
   photo.style.clipPath = `circle(${(k * R).toFixed(1)}px at ${focus.x.toFixed(1)}px ${focus.y.toFixed(1)}px)`;
   marks.forEach((m, i) => { m.classList.toggle('on', i === st); m.classList.toggle('done', i < st); });
 } else photo.style.opacity = Math.max(ease(span(t, ...T.photo)), wrapped ? 1 - ease(span(t, 0, .9)) : 0);
@@ -538,7 +660,7 @@ frame(time);
 
 // Scroll mode: the page's scroll position is the timeline. The scroll range is the pinned
 // hero on wide screens (.hero-pin is sticky) or the figure's own track on phones (figure is sticky).
-const SCROLL_END = T.photo[1] + .4;
+const SCROLL_END = T.style[1] + .3;
 function scrollRange() {
   const pin = box.closest('.hero-pin'), section = box.closest('.hero-scroll'), track = box.closest('.k3d-track');
   let el, child;
