@@ -287,7 +287,7 @@ async function init(box) {
   // Camera poses: straight down on the plan, then the rendering's eye-level view.
   const TOP = { pos: new THREE.Vector3(2.15, 9.4, 2.0), look: new THREE.Vector3(2.15, 0, 2.0), fov: 34 };
   const EYE = { pos: new THREE.Vector3(1.95, 1.05, 5.9), look: new THREE.Vector3(1.95, 0.9, 0), fov: 40 };
-  const stageEl = box.querySelector('.k3d-stage');
+  const stageEl = box.querySelector('.k3d-view') || box.querySelector('.k3d-stage');   // the area the kitchen is drawn in
   let photo = box.querySelector('.k3d-photo');
   const buttons = box.querySelectorAll('.k3d-steps button');
   const replay = box.querySelector('.k3d-replay');
@@ -512,7 +512,7 @@ if (scrolled) {
   scene.add(skMesh);
 // The caption names each step for people who have never seen a plan become a kitchen.
 const tag = box.querySelector('.k3d-tag-step');
-const STEP_NAMES = ['The kitchen that comes with the apartment', 'Our new kitchen design', '3D model', 'Photo-realistic rendering'];
+const STEP_NAMES = ['Standard contractor kitchen', 'Our new kitchen design', '3D model', 'Photo-realistic rendering'];
 let tagStep = -1;
 
 // The rendering is drawn on a canvas: bare counters first, then the accessories pop on.

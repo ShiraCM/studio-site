@@ -746,3 +746,12 @@ nav.links .btn{padding:0 20px;min-height:44px;font-size:11px}
   .feature-scrim{inset:0 0 auto;height:clamp(240px,38svh,380px);background:linear-gradient(180deg,color-mix(in srgb,var(--stone) 0%,transparent) 50%,var(--stone) 100%)}
   .feature-copy{margin-top:-28px;padding-top:0;padding-bottom:56px}
 }
+
+/* The caption sits in its own strip above the kitchen, never over it (owner, Nov 17). */
+.story-media .k3d-stage{display:flex;flex-direction:column;gap:14px}
+.k3d-view{position:relative;flex:1;min-height:0;overflow:hidden}
+.story-media .k3d-tag{position:static;max-width:none;padding:0;background:none;border-radius:0;gap:6px}
+@media (max-width:900px){
+  .story-media .k3d-stage{height:50svh;gap:8px;padding-top:8px}
+  .story-media .k3d-tag{gap:3px}
+}
