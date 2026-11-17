@@ -889,3 +889,22 @@ nav.links .menu-panel a:first-child{border-top:0}
 .topic p{color:var(--muted)}
 .topic .textlink{justify-self:start}
 @media (max-width:720px){.topic{grid-template-columns:1fr}}
+
+/* How we work, with the studio's own work as the visuals (owner, Nov 17: the plain layout "doesn't excite me").
+   Text and a large piece of work side by side, alternating sides; plans sit on white paper. */
+.topic{grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);align-items:center;gap:clamp(28px,6vw,96px);padding-block:clamp(48px,7vw,96px)}
+.topic:nth-child(even) .topic-text{order:2}
+.topic-text{display:grid;gap:18px;align-content:start;max-width:52ch}
+.topic-text > div, .topic-text{min-width:0}
+.topic h2{font:400 clamp(36px,4.4vw,60px)/1.02 var(--display);letter-spacing:-.01em}
+.topic-text p{color:var(--muted)}
+.topic-text .textlink{justify-self:start}
+.topic-fig{margin:0;display:grid;gap:10px}
+.topic-fig img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:2px;display:block}
+.topic-fig.paper img{object-fit:contain;background:#fff;padding:clamp(12px,2vw,24px);box-shadow:0 1px 0 rgba(0,0,0,.04),0 18px 40px -28px rgba(30,34,20,.45)}
+.topic-fig figcaption{font:500 11px/1.4 var(--body);letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+@media (max-width:720px){
+  .topic{grid-template-columns:1fr}
+  .topic:nth-child(even) .topic-text{order:0}
+}
+.topic-fig.paper img{aspect-ratio:1/1}

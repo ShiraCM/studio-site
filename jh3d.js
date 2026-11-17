@@ -42,9 +42,9 @@ const leg = i => { const a = TOUR + i * LEG; return { fly: [a, a + 2.2], open: [
 const STEPS = [
   [0, '1/3', 'Developer’s plan', 'The kitchen has its own room off the living area.'],
   [T.erase[0], '2/3', 'Demolition and new walls', 'The kitchen walls come out and new walls go in.'],
-  [T.rise[0], '3/3', '3D model', 'Three bedrooms, with the kitchen open to the living area.'],
+  [T.rise[0], '3/3', '3D model', 'Three bedrooms within the same outer walls, with no extension.'],
   ...ROOMS.map((rm, i) => [leg(i).fly[0] + 1.2, '', rm.name, rm.note]),
-  [T.back[0], '3/3', '3D model', 'Three bedrooms, with the kitchen open to the living area.']
+  [T.back[0], '3/3', '3D model', 'Three bedrooms within the same outer walls, with no extension.']
 ];
 
 const box = document.querySelector('.jh-anim');
@@ -650,7 +650,7 @@ const bush = new THREE.Mesh(new THREE.IcosahedronGeometry(h(40), 1), mats.leaf);
     const [x0, y0, x1, y1] = rm.r;
     const c = new THREE.Vector3(wx((x0 + x1) / 2), h(60), wz((y0 + y1) / 2));
     const ext = Math.max(x1 - x0, y1 - y0) / U;
-    return { pos: c.clone().addScaledVector(DIR, (ext * 3.3 + 1.3) * (rm.zoom || 1)), look: c, mid: c.clone().setY(h(90)) };
+    return { pos: c.clone().addScaledVector(DIR, (ext * 2.35 + .6) * (rm.zoom || 1)), look: c, mid: c.clone().setY(h(90)) };
   });
   const top = { pos: new THREE.Vector3(), look: new THREE.Vector3() }, bird = { pos: new THREE.Vector3(), look: new THREE.Vector3() };
   const tmpP = new THREE.Vector3(), tmpL = new THREE.Vector3();
