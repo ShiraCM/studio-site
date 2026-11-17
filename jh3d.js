@@ -330,7 +330,7 @@ async function start() {
   Object.assign(sun.shadow.camera, { left: -9, right: 9, top: 9, bottom: -9, near: 1, far: 40 });
   sun.shadow.bias = -.0004; sun.shadow.radius = 4;
   scene.add(sun);
-  const fill = new THREE.DirectionalLight(0xe8eef5, .6); fill.position.set(8, 10, -6); scene.add(fill);
+  const fill = new THREE.DirectionalLight(0xf1f3f5, 1.1); fill.position.set(9, 9, -7); scene.add(fill);   // keeps the walls in shade white, not grey
 
   const tex = new THREE.CanvasTexture(sheet);
   tex.colorSpace = THREE.SRGBColorSpace;
@@ -349,7 +349,8 @@ async function start() {
   const WINDOWS = [[80, 408, 90, 32, 100], [230, 795, 100, 20, 0], [335, 805, 30, 195, 90], [910, 880, 20, 140, 60], [935, 795, 135, 15, 90]];
   // new walls that the revised plan draws only as thin lines: the wall that wraps the bar
   // (the children's room wall, then a short return under the bar)
-  model.runs.push([954, 438, 11, 272], [904, 700, 61, 10], [904, 686, 10, 24]);
+  // and the short wall that closes the fridge niche on the living-room side (white, as seen from the salon)
+  model.runs.push([954, 438, 11, 272], [904, 700, 61, 10], [904, 686, 10, 24], [560, 587, 72, 9]);
   const blocks = [...model.runs.map(r => [r, 0, WALL]), ...WINDOWS.map(([x, y, w, d]) => [[x, y, w, d], HEAD, WALL])];
   const built = new THREE.Group(); scene.add(built);
   const walls = new THREE.InstancedMesh(unit, plaster, blocks.length);
@@ -431,6 +432,7 @@ async function start() {
     lacquer: M({ color: 0xf4f3f0, roughness: .25 }),
     stone: M({ color: 0xece8e1, roughness: .35 }),
     steel: M({ color: 0xc9cbcc, roughness: .3, metalness: .7 }),
+    fridge: M({ color: 0xe1e3e3, roughness: .32, metalness: .25 }),
     black: M({ color: 0x232220, roughness: .4 }),
     dark: M({ color: 0x3a3733, roughness: .6 }),
     linen: M({ map: weave('#efe9de') }),
@@ -545,14 +547,16 @@ async function start() {
   nightstand(76, 212, 42, 46);
   rug(170, 140, 130, 190, mats.rugWarm);
   for (const r of model.closets) closet(...r);
-  // the bedroom side of the new kitchen: thin partition, pantry and fridge, and the wall to the fridge's right
+  // the bedroom side of the new kitchen: a thin partition, then the pantry and the fridge,
+  // their doors facing the kitchen (east)
   begin();
   add(555, 443, 10, 147, 260, plaster, 0, .002);
-  add(629, 443, 9, 147, 260, plaster, 0, .002);
-  add(565, 443, 64, 72, 250, mats.lacquer, 0, .01);                       // pantry
-  add(596, 447, 1.2, 66, 246, mats.dark, 2, .001);
-  add(565, 515, 64, 72, 185, mats.steel, 0, .01);                         // fridge
-  add(625, 525, 3, 3, 120, mats.dark, 40, .002); add(625, 560, 3, 3, 120, mats.dark, 40, .002);
+  add(565, 443, 64, 72, 250, mats.lacquer, 0, .01);                       // pantry: two doors and pulls
+  add(628.6, 478, 1.2, 1.2, 246, mats.dark, 2, .001);
+  add(629, 470, 1.6, 2.4, 90, mats.steel, 90, .002); add(629, 484, 1.6, 2.4, 90, mats.steel, 90, .002);
+  add(565, 515, 64, 72, 185, mats.fridge, 0, .012);                       // fridge: stainless, freezer below
+  add(628.6, 517, 1.2, 68, 1.2, mats.dark, 70, .001);
+  add(629.5, 522, 2, 2.6, 40, mats.dark, 110, .002); add(629.5, 522, 2, 2.6, 30, mats.dark, 28, .002);
   add(565, 515, 64, 72, 63, mats.lacquer, 187, .01);                      // cupboard over the fridge
 
   // the kitchen, as on the revised plan and in the kitchen photo: a U open to the west.
