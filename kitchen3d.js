@@ -510,7 +510,10 @@ if (scrolled) {
   const skMesh = new THREE.Mesh(plan.geometry, skMat);
   skMesh.rotation.x = -Math.PI / 2; skMesh.position.set(X(450), .004, Z(430));
   scene.add(skMesh);
-const tag = box.querySelector('.k3d-tag'), tagText = tag ? tag.textContent : '';
+// The caption names each step for people who have never seen a plan become a kitchen.
+const tag = box.querySelector('.k3d-tag-step');
+const STEP_NAMES = ['The kitchen that comes with the apartment', 'Our new kitchen design', '3D model', 'Photo-realistic rendering'];
+let tagStep = -1;
 
 // The rendering is drawn on a canvas: bare counters first, then the accessories pop on.
 let styled = null, styleLast = -1;
@@ -605,8 +608,12 @@ function drawStyled(t) {
     skMat.opacity = 1 - snap;
     planMat.opacity = snap * (1 - f);
     if (tag) {
-      const label = t < PRE.erase[0] + .3 ? 'Before · the contractor’s kitchen plan' : t < T.rise[0] ? 'After · our kitchen plan' : tagText;
-      if (tag.textContent !== label) tag.textContent = label;
+      const k = t < PRE.erase[0] ? 0 : t < T.rise[0] ? 1 : t < T.photo[0] + .4 ? 2 : 3;
+      if (k !== tagStep) {
+        tagStep = k;
+        const n = document.createElement('b'); n.textContent = `${k + 1}/4`;
+        tag.replaceChildren(n, ' ' + STEP_NAMES[k]);
+      }
     }
     mat.floor.opacity = f;
     edgeMat.opacity = .9 - .7 * span(t, D + 5, D + 8);
