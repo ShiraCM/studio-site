@@ -173,135 +173,92 @@ async function contractorLayer(src, k, clear) {
 }
 
 // ---- Styling: the rendering first shows bare counters, then the accessories pop on ----
-// The three accessories already in the rendering are lifted out of it. Behind each, the stone is
-// filled in with stone from beside it (patches, in image px: rect, shift, soft edge); the
-// accessory itself is whatever the patch changed.
+// Two exports of the same rendering from the same camera: bare, and styled. Each accessory is cut
+// out of the styled one inside a hand-drawn area (image px), wherever the two pictures differ,
+// so it comes with its own real light, shadow and reflection. Order = the order they pop on.
 const ACCESSORIES = [
-  { name: 'olive', box: [790, 276, 862, 396], base: [826, 390], patches: [[[795, 279, 857, 345], -64, 0], [[804, 344, 846, 394], -64, 0]],
-    mask: [['e', 826, 312, 33, 37], ['r', 819, 340, 834, 360], ['r', 809, 354, 846, 393]] },
-  { name: 'board', box: [566, 256, 636, 342], base: [600, 338], patches: [[[572, 262, 630, 338], -64, 0]],
-    mask: [['r', 575, 260, 626, 340]] },
-  // the bowl is as pale as the stone, so it is cut out by its shape alone
-  { name: 'lemons', box: [180, 370, 282, 430], base: [228, 421], patches: [], fill: [[186, 376, 262, 426], [246, 391, 278, 426]], solid: true,
-    mask: [['e', 221, 409, 32, 12], ['e', 222, 392, 22, 12], ['e', 257, 407, 14, 13]] }
+  { name: 'vase and branches', box: [846, 284, 1072, 494] },
+  { name: 'bowl', box: [1004, 450, 1096, 500] },
+  { name: 'boards', box: [664, 294, 752, 410] },
+  { name: 'oil', box: [752, 328, 792, 410] },
+  { name: 'lemons', box: [226, 448, 338, 512] }
 ];
-// Where each accessory is set down (bottom centre, image px) and at what size, in the order they pop on.
-// The owner's styling: lemons on the island, the olive tree on the back counter, two folded towels.
-const PLACE = [
-  { src: 'lemons', at: [805, 392], s: 1.15 },
-  { src: 'olive', at: [688, 341], s: .72 },
-  { src: 'towels', at: [545, 342], s: 1.1 },
-  { src: 'board', at: [600, 338], s: 1 },
-  { src: 'lemons', at: [228, 421], s: 1 }
-];
-// Two folded kitchen towels, drawn: linen on top, oat with an olive stripe underneath.
-function makeTowels() {
-  const k = 3, c = document.createElement('canvas'); c.width = 52 * k; c.height = 20 * k;
-  const g = c.getContext('2d'); g.scale(k, k);
-  const towel = (x0, x1, y0, y1, top, a, b, stripe) => {
-    const rr = (x, y, w, h, r) => { g.beginPath(); if (g.roundRect) g.roundRect(x, y, w, h, r); else g.rect(x, y, w, h); };
-    const gr = g.createLinearGradient(0, y0, 0, y1); gr.addColorStop(0, a); gr.addColorStop(1, b);
-    rr(x0, y0, x1 - x0, y1 - y0, [3.5, 1.5, 1.5, 3.5]); g.fillStyle = gr; g.fill();
-    rr(x0 + .6, y0 - 2.2, x1 - x0 - 1.2, 2.8, [2, 1, 0, 0]); g.fillStyle = top; g.fill();
-    g.strokeStyle = 'rgba(120,105,85,.35)'; g.lineWidth = .5;
-    g.beginPath(); g.moveTo(x0 + 3, (y0 + y1) / 2 + .4); g.lineTo(x1 - 1, (y0 + y1) / 2 + .4); g.stroke();
-    if (stripe) { g.fillStyle = stripe; g.fillRect(x1 - 11, y0, 1.4, y1 - y0); g.fillRect(x1 - 8.4, y0, .8, y1 - y0); }
-    const sh = g.createLinearGradient(x0, 0, x0 + 4, 0); sh.addColorStop(0, 'rgba(90,75,55,.18)'); sh.addColorStop(1, 'rgba(90,75,55,0)');
-    rr(x0, y0, 4, y1 - y0, [3.5, 0, 0, 3.5]); g.fillStyle = sh; g.fill();
-  };
-  towel(2, 50, 11, 18.5, '#F3EDE1', '#E8DFCE', '#CFC3AD', '#7E8762');
-  towel(5, 46, 4.2, 11.2, '#FBF9F4', '#F4F0E8', '#DED7C9', null);
-  return { canvas: c, w: 52, h: 20, base: [26, 18.5] };
-}
-async function styledPhoto(src) {
-  const img = new Image();
-  await new Promise((resolve, reject) => { img.onload = resolve; img.onerror = reject; img.src = src; });
-  const W = img.naturalWidth, H = img.naturalHeight;
-  const c = document.createElement('canvas'); c.width = W; c.height = H;
-  const g = c.getContext('2d', { willReadFrequently: true });
-  g.drawImage(img, 0, 0);
-  const orig = g.getImageData(0, 0, W, H), work = g.getImageData(0, 0, W, H);
-  const o = orig.data, p = work.data, F = 3;
-// Copy stone from beside each accessory, row by row, and match its light to the stone around the
-// hole: the colour difference at the patch's left and right edges is spread across each row.
-const px = (d, x, y, k) => d[(y * W + x) * 4 + k];
-for (const a of ACCESSORIES) for (const [[x0, y0, x1, y1], dx, dy, edges] of a.patches) {
-  const rows = y1 - y0, L = [], R = [];
-  for (let y = y0; y < y1; y++) {
-    const l = [], rr = [];
+
+// A photographic finish, applied the same way to both pictures: a gentle contrast curve, warmer
+// highlights, a soft glow around the lights and windows, a light vignette and fine film grain.
+function photoFinish(c) {
+  const W = c.width, H = c.height, g = c.getContext('2d', { willReadFrequently: true });
+  // glow: the brightest parts, blurred by drawing them small and scaling back up
+  const sw = Math.round(W / 10), sh = Math.round(H / 10);
+  const small = document.createElement('canvas'); small.width = sw; small.height = sh;
+  const sg = small.getContext('2d', { willReadFrequently: true });
+  sg.drawImage(c, 0, 0, sw, sh);
+  const sd = sg.getImageData(0, 0, sw, sh), s = sd.data;
+  for (let i = 0; i < s.length; i += 4) {
+    const l = .2126 * s[i] + .7152 * s[i + 1] + .0722 * s[i + 2], k = clamp01((l - 205) / 50);
+    s[i] *= k; s[i + 1] *= k * .93; s[i + 2] *= k * .8;
+  }
+  sg.putImageData(sd, 0, 0);
+  const glow = document.createElement('canvas'); glow.width = W; glow.height = H;
+  const gg = glow.getContext('2d', { willReadFrequently: true });
+  gg.imageSmoothingQuality = 'high';
+  const tiny = document.createElement('canvas'); tiny.width = Math.round(sw / 2); tiny.height = Math.round(sh / 2);
+  tiny.getContext('2d').drawImage(small, 0, 0, tiny.width, tiny.height);
+  gg.drawImage(tiny, 0, 0, W, H);
+  const gl = gg.getImageData(0, 0, W, H).data;
+  const d = g.getImageData(0, 0, W, H), p = d.data, cx = W / 2, cy = H / 2, R = Math.hypot(cx, cy);
+  const curve = v => { const x = v / 255; return 255 * (x + .1 * x * (1 - x) * (2 * x - 1) * 2.2); };
+  for (let y = 0, i = 0; y < H; y++) for (let x = 0; x < W; x++, i += 4) {
+    const r = Math.hypot(x - cx, (y - cy) * 1.25) / R, vig = 1 - .2 * Math.pow(clamp01(r - .25) / .75, 1.6);
+    const n = (((Math.sin(x * 12.9898 + y * 78.233) * 43758.5453) % 1) - .5) * 7;
     for (let k = 0; k < 3; k++) {
-      l.push(px(p, x0 - 1, y, k) - px(p, x0 - 1 + dx, y + dy, k));
-      rr.push(px(p, x1, y, k) - px(p, x1 + dx, y + dy, k));
-    }
-    L.push(l); R.push(edges === 'l' ? l : rr);
-  }
-  const smooth = (arr, i, k) => { let s = 0, n = 0; for (let j = Math.max(0, i - 4); j <= Math.min(rows - 1, i + 4); j++) { s += arr[j][k]; n++; } return s / n; };
-  const src = p.slice();
-  for (let y = y0; y < y1; y++) for (let x = x0; x < x1; x++) {
-    const w = clamp01(Math.min(x - x0 + 1, x1 - x, y - y0 + 1, y1 - y) / F), u = (x - x0) / Math.max(1, x1 - x0 - 1);
-    const i = (y * W + x) * 4, j = ((y + dy) * W + x + dx) * 4;
-    for (let k = 0; k < 3; k++) {
-      const corr = lerp(smooth(L, y - y0, k), smooth(R, y - y0, k), u);
-      p[i + k] = p[i + k] + (src[j + k] + corr - p[i + k]) * w;
+      let v = curve(p[i + k]);
+      v = v + gl[i + k] * .35 * (1 - v / 255 * .6);                    // glow, gentler on what's already bright
+      if (k === 0) v += (v / 255) * 3; else if (k === 2) v -= (v / 255) * 4;   // a touch warmer
+      p[i + k] = v * vig + n;
     }
   }
+  g.putImageData(d, 0, 0);
 }
-// Where the stone beside it doesn't match (the lemons sit against a veined side panel), fill the
-// hole smoothly from its edges instead: start from a row-by-row blend, then let it settle.
-for (const a of ACCESSORIES) if (a.fill) {
-  let bx0 = 1e9, by0 = 1e9, bx1 = 0, by1 = 0;
-  for (const [x0, y0, x1, y1] of a.fill) { bx0 = Math.min(bx0, x0); by0 = Math.min(by0, y0); bx1 = Math.max(bx1, x1); by1 = Math.max(by1, y1); }
-  const bw = bx1 - bx0, bh = by1 - by0, inside = new Uint8Array(bw * bh);
-  for (const [x0, y0, x1, y1] of a.fill) for (let y = y0; y < y1; y++) for (let x = x0; x < x1; x++) inside[(y - by0) * bw + x - bx0] = 1;
-  const isIn = (x, y) => x >= bx0 && x < bx1 && y >= by0 && y < by1 && inside[(y - by0) * bw + x - bx0];
-  for (let y = by0; y < by1; y++) {
-    let xl = bx0; while (xl < bx1 && !isIn(xl, y)) xl++;
-    let xr = bx1 - 1; while (xr >= bx0 && !isIn(xr, y)) xr--;
-    for (let x = xl; x <= xr; x++) {
-      const u = (x - xl + 1) / (xr - xl + 2), i = (y * W + x) * 4, l = (y * W + xl - 1) * 4, rr = (y * W + xr + 1) * 4;
-      for (let k = 0; k < 3; k++) p[i + k] = lerp(p[l + k], p[rr + k], u);
+
+async function styledPhoto(bareSrc, styledSrc) {
+  const load = src => new Promise((resolve, reject) => { const i = new Image(); i.onload = () => resolve(i); i.onerror = reject; i.src = src; });
+  const [bi, si] = await Promise.all([load(bareSrc), load(styledSrc)]);
+  const W = si.naturalWidth, H = si.naturalHeight;
+  const canvasOf = img => { const c = document.createElement('canvas'); c.width = W; c.height = H; c.getContext('2d', { willReadFrequently: true }).drawImage(img, 0, 0, W, H); return c; };
+  const bare = canvasOf(bi), full = canvasOf(si);
+  const B = bare.getContext('2d').getImageData(0, 0, W, H).data, S = full.getContext('2d').getImageData(0, 0, W, H).data;
+  photoFinish(bare); photoFinish(full);
+  const Fp = full.getContext('2d').getImageData(0, 0, W, H).data;
+  const items = ACCESSORIES.map(a => {
+    const [x0, y0, x1, y1] = a.box, w = x1 - x0, h = y1 - y0;
+    // where the two raw pictures differ, smoothed a little so render noise doesn't speckle
+    const diff = new Float32Array(w * h);
+    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+      const i = ((y + y0) * W + x + x0) * 4;
+      diff[y * w + x] = Math.max(Math.abs(S[i] - B[i]), Math.abs(S[i + 1] - B[i + 1]), Math.abs(S[i + 2] - B[i + 2]));
     }
-  }
-  for (let it = 0; it < 300; it++) for (let y = by0; y < by1; y++) for (let x = bx0; x < bx1; x++) {
-    if (!isIn(x, y)) continue;
-    const i = (y * W + x) * 4;
-    for (let k = 0; k < 3; k++) p[i + k] = (p[i - 4 + k] + p[i + 4 + k] + p[i - W * 4 + k] + p[i + W * 4 + k]) / 4;
-  }
-  // a whisper of grain so the fill doesn't look airbrushed
-  for (let y = by0; y < by1; y++) for (let x = bx0; x < bx1; x++) if (isIn(x, y)) {
-    const i = (y * W + x) * 4, n = ((Math.sin(x * 12.9898 + y * 78.233) * 43758.5453) % 1) * 3;
-    for (let k = 0; k < 3; k++) p[i + k] += n;
-  }
+    const ic = document.createElement('canvas'); ic.width = w; ic.height = h;
+    const ig = ic.getContext('2d'), d = ig.createImageData(w, h);
+    let base = 0;
+    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+      let s = 0, n = 0;
+      for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
+        const xx = x + dx, yy = y + dy; if (xx < 0 || yy < 0 || xx >= w || yy >= h) continue;
+        s += diff[yy * w + xx]; n++;
+      }
+      const edge = clamp01(Math.min(x, w - 1 - x, y, h - 1 - y) / 3);
+      const al = clamp01((s / n - 7) / 16) * edge;
+      if (al > .5) base = Math.max(base, y);
+      const i = ((y + y0) * W + x + x0) * 4, j = (y * w + x) * 4;
+      d.data[j] = Fp[i]; d.data[j + 1] = Fp[i + 1]; d.data[j + 2] = Fp[i + 2]; d.data[j + 3] = Math.round(255 * al);
+    }
+    ig.putImageData(d, 0, 0);
+    return { canvas: ic, x0, y0, w, h, cx: x0 + w / 2, by: y0 + (base || h - 1) };
+  });
+  return { bare, full, items, W, H };
 }
-  g.putImageData(work, 0, 0);
-// each accessory's cut-out: inside its outline, where the patch changed the picture
-const inMask = (m, x, y) => {
-  let v = 0;
-  for (const [t, a, b, c2, d2] of m) {
-    if (t === 'e') v = Math.max(v, clamp01((1 - Math.hypot((x - a) / c2, (y - b) / d2)) * Math.min(c2, d2) / 1.5));
-    else v = Math.max(v, clamp01(Math.min(x - a, c2 - x, y - b, d2 - y) / 1.5 + .5));
-  }
-  return v;
-};
-const cuts = { towels: makeTowels() };
-for (const a of ACCESSORIES) {
-  const [x0, y0, x1, y1] = a.box, w = x1 - x0, h = y1 - y0;
-  const ic = document.createElement('canvas'); ic.width = w; ic.height = h;
-  const ig = ic.getContext('2d'), d = ig.createImageData(w, h);
-  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
-    const i = ((y + y0) * W + x + x0) * 4, j = (y * w + x) * 4;
-    const diff = Math.max(Math.abs(o[i] - p[i]), Math.abs(o[i + 1] - p[i + 1]), Math.abs(o[i + 2] - p[i + 2]));
-    const m = inMask(a.mask, x + x0 + .5, y + y0 + .5);
-    d.data[j] = o[i]; d.data[j + 1] = o[i + 1]; d.data[j + 2] = o[i + 2];
-    d.data[j + 3] = Math.round(255 * m * (a.solid ? 1 : clamp01((diff - 5) / 20)));
-  }
-  ig.putImageData(d, 0, 0);
-  cuts[a.name] = { canvas: ic, w, h, base: [a.base[0] - x0, a.base[1] - y0] };
-}
-  const bare = document.createElement('canvas'); bare.width = W; bare.height = H;
-  bare.getContext('2d').drawImage(c, 0, 0);
-  return { bare, cuts, W, H };
-}
+
 // a quick overshoot, like something set down with a little bounce
 const popOut = t => { const s = 2.2; return 1 + (s + 1) * Math.pow(t - 1, 3) + s * Math.pow(t - 1, 2); };
 
@@ -527,7 +484,7 @@ const tag = box.querySelector('.k3d-tag'), tagText = tag ? tag.textContent : '';
 // The rendering is drawn on a canvas: bare counters first, then the accessories pop on.
 let styled = null, styleLast = -1;
 if (full || story) {
-  styled = await styledPhoto(photo.getAttribute('src')).catch(e => { console.warn('kitchen styling:', e); return null; });
+  styled = await styledPhoto('img/kitchen-render-bare.webp', 'img/kitchen-render-styled.webp').catch(e => { console.warn('kitchen styling:', e); return null; });
   if (styled) {
     const pc = document.createElement('canvas'); pc.width = styled.W; pc.height = styled.H;
     pc.className = photo.className;
@@ -537,28 +494,24 @@ if (full || story) {
   }
 }
 function drawStyled(t) {
-  const q = Math.round(clamp01(span(t, T.style[0], T.style[1] + .2)) * 400);
+  const q = Math.round(clamp01(span(t, T.style[0], T.style[1] + .35)) * 500);
   if (q === styleLast) return;
   styleLast = q;
   const g = styled.g;
-  g.setTransform(1, 0, 0, 1, 0, 0);
+  g.setTransform(1, 0, 0, 1, 0, 0); g.globalAlpha = 1;
   g.drawImage(styled.bare, 0, 0);
-const step = (T.style[1] - T.style[0] - .5) / Math.max(1, PLACE.length - 1);
-PLACE.forEach((pl, i) => {
-  const a = T.style[0] + i * step, k = span(t, a, a + .5), it = styled.cuts[pl.src];
-  if (k <= 0 || !it) return;
-  const sc = pl.s * (.3 + .7 * popOut(k)), [cx, by] = pl.at, f = it.canvas.width / it.w;
-  // a soft contact shadow, so it sits on the stone
-  g.setTransform(1, 0, 0, 1, 0, 0);
-  g.globalAlpha = clamp01(k * 2);
-  const rx = it.w * pl.s * .5, sh = g.createRadialGradient(cx, by, 0, cx, by, rx);
-  sh.addColorStop(0, 'rgba(70,55,40,.32)'); sh.addColorStop(1, 'rgba(70,55,40,0)');
-  g.save(); g.translate(cx, by); g.scale(1, .12); g.translate(-cx, -by);
-  g.fillStyle = sh; g.beginPath(); g.arc(cx, by, rx, 0, Math.PI * 2); g.fill(); g.restore();
-  g.globalAlpha = clamp01(k * 3);
-  g.setTransform(sc / f, 0, 0, sc / f, cx - sc * it.base[0], by - sc * it.base[1]);
-  g.drawImage(it.canvas, 0, 0);
-});
+  const n = styled.items.length, step = (T.style[1] - T.style[0] - .5) / Math.max(1, n - 1);
+  styled.items.forEach((it, i) => {
+    const a = T.style[0] + i * step, k = span(t, a, a + .5);
+    if (k <= 0) return;
+    const sc = .35 + .65 * popOut(k);
+    g.globalAlpha = clamp01(k * 3);
+    g.setTransform(sc, 0, 0, sc, it.cx - sc * it.cx, it.by - sc * it.by);
+    g.drawImage(it.canvas, it.x0, it.y0);
+  });
+  // once everything has landed, settle into the styled rendering itself
+  const e = span(t, T.style[1], T.style[1] + .3);
+  if (e > 0) { g.setTransform(1, 0, 0, 1, 0, 0); g.globalAlpha = e; g.drawImage(styled.full, 0, 0); }
   g.globalAlpha = 1; g.setTransform(1, 0, 0, 1, 0, 0);
 }
   let skLast = -1;
@@ -710,7 +663,7 @@ frame(time);
 
 // Scroll mode: the page's scroll position is the timeline. The scroll range is the pinned
 // hero on wide screens (.hero-pin is sticky) or the figure's own track on phones (figure is sticky).
-const SCROLL_END = T.style[1] + .3;
+const SCROLL_END = T.style[1] + .35;
 function scrollRange() {
   const pin = box.closest('.hero-pin'), section = box.closest('.hero-scroll'), track = box.closest('.k3d-track');
   let el, child;
