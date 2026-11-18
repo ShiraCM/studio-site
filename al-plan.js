@@ -17,7 +17,8 @@
     [674, 70, 464, 24], [674, 94, 22, 266], [1104, 82, 48, 30], [1102, 228, 26, 234], [1138, 230, 14, 136],
     [1126, 344, 10, 118], [1116, 462, 20, 130], [1560, 236, 428, 30], [1560, 266, 36, 100], [1952, 266, 36, 218],
     [1490, 330, 70, 36], [1154, 330, 10, 36], [1234, 330, 102, 36], [456, 332, 218, 20], [456, 352, 20, 18],
-    [454, 496, 24, 114], [38, 584, 416, 24], [38, 608, 26, 528], [684, 360, 24, 102], [710, 436, 290, 24],
+    [454, 496, 24, 114], [38, 584, 416, 24], [38, 608, 26, 528],
+    [674, 360, 22, 100], [674, 436, 326, 24],             // bedroom's west wall runs straight down into its south wall (owner: the offset piece looked sloppy)
     [952, 460, 18, 166], [1136, 578, 12, 14], [1230, 578, 170, 14], [1480, 580, 118, 12], [1586, 366, 12, 226],
     [1586, 592, 12, 24], [904, 720, 302, 20],
     [1300, 720, 64, 20],                                   // owner: only this short piece is thick; the rest was a thin line and a door
@@ -30,12 +31,16 @@
     [1254, 368, 10, 222],                                  // guest toilet / main bathroom
     [1364, 722, 116, 10], [1574, 722, 376, 10],            // the hall's thin wall, either side of the old suite door
     [1586, 696, 12, 26],                                   // old door jamb (owner: remove)
-    [1726, 924, 226, 8], [1716, 918, 10, 26], [1716, 1030, 10, 104]   // the old en-suite
+    [1800, 924, 90, 8]                                     // the en-suite's new door, opened in its north wall
   ];
+  // the en-suite itself stays where it was (owner: show that only its access changed): its walls are kept,
+  // the old door from the lower bedroom is closed, and it is reached from the primary bedroom through a passage
+  KEEP.push([1726, 924, 74, 8], [1890, 924, 62, 8], [1716, 918, 10, 26], [1716, 1030, 10, 104]);
   const NEW = [
     [1314, 366, 10, 226],                                  // laundry room / main bathroom
-    [1504, 728, 8, 98], [1504, 818, 234, 8],               // built-in closets
-    [1740, 740, 22, 12], [1870, 740, 82, 12], [1740, 752, 10, 382]   // the larger en-suite
+    [1504, 728, 8, 98], [1504, 818, 212, 8],               // built-in closets
+    [1716, 944, 10, 86],                                   // the en-suite's old door, closed
+    [1716, 740, 46, 12], [1870, 740, 82, 12], [1716, 752, 10, 166]   // the passage from the primary bedroom to the en-suite
   ];
   // windows and the balcony doors: two thin lines across a gap in the outer walls
   const WINDOWS = [
@@ -47,9 +52,12 @@
   // room names: [name, x, y, appears (s), goes (s), size px]; the small rooms get smaller letters
   const LABELS = [
     ['Bedroom', 900, 250], ['Entry', 580, 545], ['Kitchen', 255, 880], ['Living', 600, 940], ['Bath', 1430, 470],
-    ['Bedroom', 1770, 560], ['Hall', 1400, 655], ['Balcony', 847, 1320], ['Primary\nbedroom', 1525, 1000],
-    ['Guest\nWC', 1192, 470, null, T.wallOut[0], 28], ['Bedroom', 1110, 930, null, T.wallOut[0]], ['En-suite', 1838, 1040, null, T.wallOut[0], 28],
-    ['Laundry', 1225, 470, T.wallIn[1] - .4, null, 28], ['En-suite', 1850, 950, T.wallIn[1] - .2, null, 28]
+    ['Hall', 1400, 655], ['Balcony', 847, 1320],
+    ['Guest\nWC', 1192, 470, null, T.wallOut[0], 28], ['Bedroom', 1110, 930, null, T.wallOut[0]], ['En-suite', 1838, 1040, null, null, 28],
+    ['Bedroom', 1770, 560, null, T.wallOut[0]], ['Primary\nbedroom', 1525, 1000, null, T.wallOut[0]],
+    // revised plan (owner): the primary bedroom is the top right one
+    ['Laundry', 1225, 470, T.wallIn[1] - .4, null, 28],
+    ['Primary\nbedroom', 1770, 560, T.wallIn[1] - .4], ['Bedroom', 1525, 1000, T.wallIn[1] - .4]
   ];
   const STEPS = [
     [0, '1/3', 'Developer’s plan', 'A bedroom sits between the living area and the bedrooms.'],
