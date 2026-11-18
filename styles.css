@@ -1081,3 +1081,12 @@ nav.links .menu-panel a:first-child{border-top:0}
   .case-hero-scrim{background:linear-gradient(180deg,color-mix(in srgb,var(--stone) 0%,transparent) 0,color-mix(in srgb,var(--stone) 0%,transparent) 28svh,color-mix(in srgb,var(--stone) 92%,transparent) 46svh,var(--stone) 60svh)}
   .case-hero-copy{padding-block:0 40px}
 }
+
+/* Kaduri gallery: the living room and the kitchen open the spread (Nov 18) */
+.spread .sp-e{grid-column:1/span 7}
+.spread .sp-e img{aspect-ratio:16/10}
+.spread .sp-f{grid-column:8/span 5;margin-top:clamp(40px,8vw,120px)}
+.spread .sp-f img{aspect-ratio:4/3.4;object-position:40% 50%}
+@media (max-width:720px){.spread .sp-e,.spread .sp-f{grid-column:auto;margin-top:0}.spread .sp-e img,.spread .sp-f img{aspect-ratio:4/3}}
+.closet-plan .table rect{fill:#fff;stroke:#BDB6AA;stroke-width:1.2}
+.closet-plan .table circle{fill:none;stroke:#BDB6AA;stroke-width:1.2}

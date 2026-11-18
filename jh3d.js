@@ -1,4 +1,4 @@
-/* Jerusalem Heights: how two bedrooms became three, as one self-playing sequence (no buttons).
+/* Kaduri Apartments, Jerusalem: how two bedrooms became three, as one self-playing sequence (no buttons).
    1. The developer's plan.
    2. The walls that come out are rubbed away; then the new walls are drawn in
       (pixel by pixel from the demolition-and-construction plan, which is aligned with it).
@@ -23,11 +23,11 @@ const lerp = (a, b, t) => a + (b - a) * t;
 
 // Rooms for the tour, plan px [x0, y0, x1, y1], in the order the camera visits them.
 const ROOMS = [
-  { key: 'kitchen', name: 'Kitchen', note: 'Carved out of the old laundry area and part of the entrance.', img: 'img/jh-kitchen-real.webp', pos: '26% 50%', r: [700, 440, 970, 760], zoom: .9 },
-  { key: 'dining', name: 'Kitchen and dining', note: 'The kitchen faces the dining table.', img: 'img/jh-styled-dining.jpg', r: [560, 700, 920, 1100] },
-  { key: 'kids', name: 'Children’s room', note: 'This room was the kitchen.', img: 'img/jh-styled-kids.jpg', r: [968, 442, 1192, 806] },
-  { key: 'main', name: 'Main bedroom', note: 'Closets along the wall it shares with the kitchen.', img: 'img/jh-styled-bedroom.jpg', r: [216, 442, 529, 789] },
-  { key: 'safe', name: 'Second bedroom', note: 'The safe room, set up as a bedroom.', img: 'img/jh-styled-bedroom2.jpg', r: [60, 60, 380, 402] }
+  { key: 'kitchen', name: 'Kitchen', note: 'Set where the laundry closet and part of the entry had been.', img: 'img/jh-kitchen-real.webp', pos: '26% 50%', r: [700, 440, 970, 760], zoom: .9 },
+  { key: 'dining', name: 'Kitchen and dining', note: 'The kitchen now opens onto the dining table.', img: 'img/jh-styled-dining.jpg', r: [560, 700, 920, 1100] },
+  { key: 'kids', name: 'Children’s room', note: 'Formerly the kitchen.', img: 'img/jh-styled-kids.jpg', r: [968, 442, 1192, 806] },
+  { key: 'main', name: 'Main bedroom', note: 'Built-in closets along the wall it shares with the kitchen.', img: 'img/jh-styled-bedroom.jpg', r: [216, 442, 529, 789] },
+  { key: 'safe', name: 'Second bedroom', note: 'The safe room, furnished as a bedroom.', img: 'img/jh-styled-bedroom2.jpg', r: [60, 60, 380, 402] }
 ];
 
 
@@ -40,11 +40,11 @@ T.back = [TOUR + ROOMS.length * LEG + .2, TOUR + ROOMS.length * LEG + 2.4];
 T.end = T.back[1] + 1.6;
 const leg = i => { const a = TOUR + i * LEG; return { fly: [a, a + 2.2], open: [a + 2.4, a + 3.6], close: [a + 6.2, a + 7.0] }; };
 const STEPS = [
-  [0, '1/3', 'Developer’s plan', 'The kitchen has its own room off the living area.'],
-  [T.erase[0], '2/3', 'Demolition and new walls', 'The kitchen walls come out and new walls go in.'],
-  [T.rise[0], '3/3', '3D model', 'Three bedrooms within the same outer walls, with no extension.'],
+  [0, '1/3', 'Developer’s plan', 'The kitchen is a separate room, closed off from the living area.'],
+  [T.erase[0], '2/3', 'Demolition and new walls', 'The kitchen walls come down and the new walls go up.'],
+  [T.rise[0], '3/3', '3D model', 'Three bedrooms within the original footprint.'],
   ...ROOMS.map((rm, i) => [leg(i).fly[0] + 1.2, '', rm.name, rm.note]),
-  [T.back[0], '3/3', '3D model', 'Three bedrooms within the same outer walls, with no extension.']
+  [T.back[0], '3/3', '3D model', 'Three bedrooms within the original footprint.']
 ];
 
 const box = document.querySelector('.jh-anim');
@@ -644,6 +644,7 @@ async function start() {
   const kids = ROOMS.find(r => r.key === 'kids').r;
   const inKids = ([x, y, w, d]) => x >= kids[0] - 10 && x + w <= kids[2] + 10 && y >= kids[1] - 10 && y + d <= kids[3] + 10;
   const inSafe = ([x, y]) => x < 400 && y < 420;
+  const mainBeds = [];
   for (const r of model.beds) {
     const [x, y, w, d] = r;
     if (inKids(r)) {
@@ -663,9 +664,15 @@ async function start() {
     } else if (!inSafe(r)) {
       // main bedroom: grey upholstered headboards, white duvets, blue-grey and charcoal throws
       bed(x, y, w, d, 'w', { base: mats.greyUph, duvet: mats.ivory, throw: y < 520 ? mats.blueGrey : mats.taupe, headMat: mats.greyUph, accent: mats.blueGrey, pillows: 2 });
+      mainBeds.push(r);
     }
   }
   rug(250, 520, 200, 120, mats.rugBlue);
+  // main bedroom: a night table between the two beds, at their heads (owner, Nov 18)
+  if (mainBeds.length === 2) {
+    const [a, b] = mainBeds.sort((p, q) => p[1] - q[1]), gap = b[1] - (a[1] + a[3]);
+    if (gap >= 30) nightstand(a[0] + 2, a[1] + a[3] + (gap - Math.min(46, gap - 6)) / 2, 42, Math.min(46, gap - 6));
+  }
   // the safe room: two single beds with their heads on the window wall side (west), the window to the
   // left of the left bed, a night table between them, an oak slat wall behind (as in its picture)
   begin(); add(68, 104, 6, 252, 250, mats.slats, 0, .002);
