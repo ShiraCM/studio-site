@@ -1121,3 +1121,8 @@ nav.links .menu-panel a:first-child{border-top:0}
 .pcard-flip{grid-template-columns:minmax(0,1fr) minmax(0,1.5fr)}
 .pcard-flip .pcard-img{order:2}
 @media (max-width:900px){.pcard-flip{grid-template-columns:1fr}.pcard-flip .pcard-img{order:0}}
+
+/* Neve Amim closet close-up: the strip carved off for the primary bedroom; the long closet's dimension (Nov 18) */
+.closet-plan .carve rect{fill:rgba(70,82,46,.14);stroke:#46522E;stroke-width:1.4;stroke-dasharray:5 4}
+.closet-plan .carve .cap{font-size:10px;fill:#46522E}
+@media (prefers-reduced-motion:no-preference){.closet-plan.armed .dim .d.len2{stroke-dasharray:400;stroke-dashoffset:400}.closet-plan.armed.in .dim .d.len2{stroke-dashoffset:0}}
