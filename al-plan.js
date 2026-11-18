@@ -40,6 +40,7 @@
     [1314, 366, 10, 226],                                  // laundry room / main bathroom
     [1506, 592, 14, 40],                                   // owner: a jamb below the bathroom wall
     [1478, 728, 34, 10],                                   // owner: a jamb at the closets' corner
+    [1364, 722, 32, 18],                                   // owner: a short wall so the bedroom closet can run the length of its west wall
     [1504, 728, 8, 98], [1504, 818, 212, 8],               // built-in closets
     [1716, 944, 10, 86],                                   // the en-suite's old door, closed
     [1716, 740, 46, 12], [1870, 740, 82, 12], [1716, 752, 10, 166]   // the passage from the primary bedroom to the en-suite

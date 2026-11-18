@@ -25,7 +25,7 @@ const lerp = (a, b, t) => a + (b - a) * t;
 
 // Rooms for the tour, plan px [x0, y0, x1, y1], in the order the camera visits them
 const ROOMS = [
-  { key: 'kitchen', name: 'Kitchen', note: 'Open to the living and dining area.', img: 'img/al-kitchen.jpg', r: [64, 608, 430, 1134] },
+  { key: 'kitchen', name: 'Kitchen', note: 'Open to the living and dining area.', img: 'img/al-kitchen.jpg', r: [64, 608, 430, 1134], dir: [.5, .85, .14] },   // seen from the living area, looking west, as in its picture,
   { key: 'dining', name: 'Dining', note: 'Where the third bedroom stood.', img: 'img/al-dining.jpg', r: [906, 740, 1314, 1134] },
   { key: 'bedroom', name: 'Bedroom', note: 'Two single beds, with built-in closets.', r: [1322, 740, 1716, 1134] },
   { key: 'ensuite', name: 'En-suite', note: 'In the same place as before; only the way in has changed.', img: 'img/al-bath-ensuite.webp', r: [1726, 752, 1952, 1134], zoom: 1.15 },
@@ -168,7 +168,7 @@ async function start() {
     [1148, 578, 82, 14],      // laundry room
     [1400, 580, 80, 12],      // main bathroom
     [1206, 720, 94, 20],      // hall to the dining area
-    [1364, 722, 114, 18],     // second bedroom
+    [1396, 722, 82, 18],      // second bedroom (beside the new short wall for its closet)
     [1762, 740, 108, 12]      // en-suite, from the primary bedroom
   ];
   const blocks = [...P.KEEP, ...P.NEW].map(r => [r, 0, WALL]).concat([...WINDOWS, ...DOORS].map(([x, y, w, d]) => [[x, y, w, d], HEAD, WALL]));
@@ -374,27 +374,36 @@ async function start() {
     add(...r, 4, frame, 80, .01);
   }
 
-  // --- kitchen: an L of greige cabinets with stone worktops along the west and north walls, a tall
-  // oven and fridge unit, and a stone island with two stools facing the living area (as in its picture)
+  // --- kitchen, as in its picture (taken looking west): a U of greige cabinets with stone worktops.
+  // Back (west) wall: the long run with the main sink, a stone backsplash and two rows of uppers with a
+  // light strip under them. Left (south) wall: the run under the windows with the gas hob, the oven
+  // under it, and a second sink. Right (north) wall: the tall units with the oven at eye level.
+  // In the middle a stone island, long side east-west, with a stool on each side at its east end.
   begin();
   const base = (x, y, w, d) => { add(x + 3, y + 3, w - 6, d - 6, 10, mats.dark, 0, .002); add(x, y, w, d, 76, mats.greige, 10, .006); };
-  base(64, 608, 236, 70); base(64, 678, 70, 440);
-  add(62, 606, 240, 74, 4, mats.stoneWarm, 86, .006);
-  add(62, 678, 74, 442, 4, mats.stoneWarm, 86, .006);
-  add(300, 608, 112, 70, 232, mats.greige, 0, .008);                      // tall units: fridge and ovens
-  add(345, 606, 2, 1.2, 228, mats.dark, 2, .001);
-  add(330, 678.5, 30, 1, 40, mats.black, 95, .002);                        // the wall oven's glass
-  add(64, 608, 236, 38, 75, mats.greige, 145, .006);                       // uppers on the north wall, LED strip under
-  add(66, 646, 232, 1, 1, mats.glow, 144, .001);
-  for (const xx of [123, 182, 241]) add(xx, 646, 1.2, 1.2, 71, mats.dark, 147, .001);
-  add(76, 820, 46, 70, 1, mats.steel, 90, .01);                            // sink
-  cyl(70, 855, 1.6, 30, mats.steel, 90); add(70, 840, 14, 2, 2, mats.steel, 118, .004);
-  add(78, 1010, 50, 64, 1, mats.black, 90, .008);                         // gas hob
-  for (const [bx, by] of [[90, 1024], [116, 1024], [90, 1058], [116, 1058]]) cyl(bx, by, 6, 1.5, mats.dark, 91);
-  for (const yy of [720, 780, 900, 960, 1090]) add(133.5, yy, 1, 20, 1.2, mats.brass, 80, .001);   // brass bar pulls
-  add(248, 768, 104, 230, 90, mats.stoneWarm, 0, .01);                    // the island, stone down to the floor
-  for (const sy of [800, 940]) { begin(); cyl(378, sy, 18, 6, mats.linen, 64, 19); for (const [lx, ly] of [[366, sy - 12], [390, sy - 12], [366, sy + 12], [390, sy + 12]]) cyl(lx, ly, 1.2, 64, mats.steel); }
-  for (const py of [840, 925]) { begin(); ball(300, py, 14, 180, mats.globe); cyl(300, py, .5, 66, mats.black, 194); cyl(300, py - 14, 3, 5, mats.brass, 190); }
+  base(64, 678, 70, 386); base(64, 1064, 316, 70);
+  add(62, 678, 74, 388, 4, mats.stoneWarm, 86, .006);                      // worktops
+  add(62, 1062, 320, 72, 4, mats.stoneWarm, 86, .006);
+  add(64, 680, 2, 382, 52, mats.stoneWarm, 90, .002);                      // stone backsplash on the back wall
+  add(64, 608, 240, 70, 232, mats.greige, 0, .008);                       // tall units on the north wall
+  for (const xx of [124, 184, 244]) add(xx, 677.5, 1.2, 1.2, 228, mats.dark, 2, .001);
+  add(140, 678.5, 40, 1, 40, mats.black, 120, .002);                       // the oven at eye level
+  add(64, 700, 38, 350, 104, mats.greige, 145, .006);                      // two rows of uppers, up to the ceiling
+  add(101.5, 700, 1.2, 350, 1.2, mats.dark, 210, .001);
+  for (const yy of [770, 840, 910, 980]) add(101.5, yy, 1.2, 1.2, 100, mats.dark, 147, .001);
+  add(102, 702, 1, 346, 1, mats.glow, 144, .001);                          // light strip under them
+  add(76, 850, 46, 66, 1, mats.steel, 90, .01);                            // main sink on the back wall
+  cyl(70, 883, 1.8, 32, mats.steel, 90); add(70, 882, 16, 2.5, 2.5, mats.steel, 120, .004);
+  add(110, 1078, 60, 48, 1, mats.black, 90, .008);                        // gas hob under the first window
+  for (const [bx, by] of [[122, 1090], [158, 1090], [122, 1114], [158, 1114]]) cyl(bx, by, 6, 1.5, mats.dark, 91);
+  add(108, 1063, 64, 1, 58, mats.black, 18, .002);                         // the oven under the hob
+  add(300, 1076, 56, 42, 1, mats.steel, 90, .01);                          // second sink under the second window
+  cyl(328, 1126, 1.8, 32, mats.steel, 90); add(327, 1112, 2.5, 16, 2.5, mats.steel, 120, .004);
+  for (const yy of [720, 790, 940, 1010]) add(133.5, yy, 1, 22, 1.2, mats.brass, 80, .001);   // brass bar pulls
+  for (const xx of [200, 240, 280]) add(xx, 1063.5, 22, 1, 1.2, mats.brass, 80, .001);
+  add(230, 836, 190, 96, 90, mats.stoneWarm, 0, .01);                     // the island, stone down to the floor
+  for (const sy of [814, 954]) { begin(); cyl(386, sy, 18, 6, mats.linen, 64, 19); for (const [lx, ly] of [[374, sy - 12], [398, sy - 12], [374, sy + 12], [398, sy + 12]]) cyl(lx, ly, 1.2, 64, mats.steel); }
+  for (const px of [290, 360]) { begin(); ball(px, 884, 14, 180, mats.globe); cyl(px, 884, .5, 66, mats.black, 194); cyl(px, 884, 3, 5, mats.brass, 190); }
 
   // --- living: the sofa backs onto the dining area, an armchair across, a stone coffee table, a rug
   rug(470, 800, 330, 260, mats.rugLiving);
@@ -478,12 +487,13 @@ async function start() {
   // --- primary bedroom (as in its picture): a double bed against a putty headboard wall with bedside
   // ledges and a lamp, putty closets along the north wall, an oatmeal rug, a boucle armchair and a lamp
   closet(1598, 266, 354, 68, 's', mats.putty, 5);
-  begin(); add(1598, 380, 12, 300, 120, mats.putty, 0, .006);
-  add(1610, 395, 40, 44, 4, mats.putty, 52, .004); add(1610, 636, 40, 44, 4, mats.putty, 52, .004);
-  cyl(1630, 650, 9, 24, mats.warmWhite, 56, 7); cyl(1630, 650, 14, 16, mats.linen, 80, 10);   // lamp
-  add(1600, 515, 3, 60, 66, mats.oak, 160, .004); add(1601, 520, 2, 50, 56, mats.terracotta, 165, .002);   // the flower painting
-  bed(1610, 445, 232, 186, 'w', { base: mats.ivory, duvet: mats.linen, throw: mats.oatmeal, headMat: mats.ivory, hb: 110, pillows: 3, pillowMats: [mats.ivory, mats.oatmeal, mats.ivory], accent: mats.oatmeal, baseH: 32 });
-  rug(1660, 400, 250, 300, mats.rugOat);
+  // owner's marks: the bed between the closets and the room's middle, heads on the west wall
+  begin(); add(1598, 350, 12, 290, 120, mats.putty, 0, .006);
+  add(1610, 598, 40, 44, 4, mats.putty, 52, .004);
+  cyl(1630, 620, 9, 24, mats.warmWhite, 56, 7); cyl(1630, 620, 14, 16, mats.linen, 80, 10);   // lamp
+  add(1600, 460, 3, 60, 66, mats.oak, 160, .004); add(1601, 465, 2, 50, 56, mats.terracotta, 165, .002);   // the flower painting
+  bed(1610, 389, 206, 203, 'w', { base: mats.ivory, duvet: mats.linen, throw: mats.oatmeal, headMat: mats.ivory, hb: 110, pillows: 3, pillowMats: [mats.ivory, mats.oatmeal, mats.ivory], accent: mats.oatmeal, baseH: 32 });
+  rug(1660, 370, 240, 260, mats.rugOat);
   begin(); add(1830, 630, 74, 74, 42, mats.boucle, 0, .08); add(1890, 630, 16, 74, 75, mats.boucle, 0, .06);
   begin(); cyl(1920, 712, 12, 2, mats.brass); cyl(1920, 712, 1.4, 165, mats.brass, 2); cyl(1890, 700, 20, 14, mats.brass, 152, 12);
 
@@ -491,34 +501,38 @@ async function start() {
   // the south wall, a rattan bedside table, and the closet along the north wall: 55 cm deep, with a
   // divider just above the bed for the first 2.10 m (five doors above it), then full-height doors
   begin(); add(696, 94, 3, 342, 250, mats.wallpaper, 0, .001);
-  bed(702, 326, 220, 104, 'w', { base: mats.oatmeal, duvet: mats.white, throw: mats.oatmeal, headMat: mats.oatmeal, hb: 95, pillows: 2, pillowMats: [mats.ivory, mats.oatmeal], baseH: 34 });
-  add(712, 428, 200, 1, 1.2, mats.dark, 14, .001);                          // the trundle drawer's joint
+  bed(702, 336, 206, 100, 'w', { base: mats.oatmeal, duvet: mats.white, throw: mats.oatmeal, headMat: mats.oatmeal, hb: 95, pillows: 2, pillowMats: [mats.ivory, mats.oatmeal], baseH: 34 });
+  add(712, 434, 186, 1, 1.2, mats.dark, 14, .001);                          // the trundle drawer's joint
   begin(); add(702, 270, 42, 40, 55, mats.rattan, 0, .01); cyl(723, 290, 7, 14, mats.oatmeal, 55, 5);
   add(698, 300, 6, 6, 8, mats.brass, 140, .004);
   {
     begin();
-    const cx = 700, cy = 94, L = 385, D = 64, F = cy + D, split = 244;       // 3.32 m long; 2.10 m with the divider
+    const cx = 700, cy = 94, L = 305, D = 64, F = cy + D, split = 244;       // owner's marks: closet to x 1005; 2.10 m with the divider
     add(cx, cy, L, D, 250, mats.warmWhite, 0, .006);
     add(cx, F, split, 1.2, 1.2, mats.dark, 60, .001);                       // the divider line, just above the bed
     for (let k = 1; k < 5; k++) add(cx + split * k / 5 - .6, F, 1.2, 1.2, 188, mats.dark, 61, .001);
     add(cx + split - .6, F, 1.2, 1.2, 248, mats.dark, 1, .001);
-    for (let k = 1; k < 3; k++) add(cx + split + (L - split) * k / 3 - .6, F, 1.2, 1.2, 248, mats.dark, 1, .001);
     for (let k = 0; k < 5; k++) add(cx + split * (k + .5) / 5 - .8, F, 1.6, 1.6, 20, mats.oak, 66, .001);
-    for (let k = 0; k < 3; k++) add(cx + split + (L - split) * (k + .5) / 3 - .8, F, 1.6, 1.6, 30, mats.oak, 95, .001);
+    add(cx + split + (L - split) / 2 - .8, F, 1.6, 1.6, 30, mats.oak, 95, .001);
   }
-  rug(790, 180, 190, 128, mats.rugOat);
+  // a desk in the corner by the window, with its chair (owner's marks)
+  begin(); add(1008, 96, 92, 66, 4, mats.paleOak, 72, .008);
+  for (const [lx, ly] of [[1012, 100], [1094, 100], [1012, 156], [1094, 156]]) cyl(lx, ly, 1.6, 72, mats.paleOak);
+  begin(); cyl(1054, 192, 20, 6, mats.oatmeal, 44, 20); add(1034, 210, 40, 6, 36, mats.oatmeal, 46, .02);
+  for (const [lx, ly] of [[1040, 178], [1068, 178], [1040, 206], [1068, 206]]) cyl(lx, ly, 1.2, 44, mats.paleOak);
+  rug(790, 190, 180, 120, mats.rugOat);
 
   // --- second bedroom (after the twin-bed picture; model only): two white beds with drawers, heads on
   // the east wall against an oak slat wall, an oak night table between, navy cushions and throw, a jute
   // rug, a linen roman blind at the window, and built-in closets
   begin(); add(1710, 828, 6, 304, 250, mats.slats, 0, .002);
-  bed(1488, 838, 220, 104, 'e', { base: mats.white, duvet: mats.linen, throw: mats.linen, headMat: mats.white, hb: 90, pillows: 1, accent: mats.navy, baseH: 34 });
-  bed(1488, 1026, 220, 104, 'e', { base: mats.white, duvet: mats.linen, throw: mats.navy, headMat: mats.white, hb: 90, pillows: 1, accent: mats.navy, baseH: 34 });
-  begin(); add(1650, 960, 58, 48, 52, mats.paleOak, 0, .01); add(1651, 984, 56, 1, 1.2, mats.dark, 26, .001);
-  cyl(1668, 972, 9, 22, mats.stoneWarm, 52, 6); ball(1668, 972, 14, 92, mats.leaf).scale.set(1, 1.2, 1);
-  cyl(1695, 966, 4, 2, mats.dark, 52); cyl(1695, 966, .8, 40, mats.dark, 54); cyl(1688, 966, 6, 8, mats.dark, 90, 4);
-  rug(1400, 880, 160, 220, mats.jute);
-  closet(1324, 832, 60, 300, 'e', mats.white, 4);
+  bed(1502, 834, 206, 100, 'e', { base: mats.white, duvet: mats.linen, throw: mats.linen, headMat: mats.white, hb: 90, pillows: 1, accent: mats.navy, baseH: 34 });
+  bed(1502, 1028, 206, 100, 'e', { base: mats.white, duvet: mats.linen, throw: mats.navy, headMat: mats.white, hb: 90, pillows: 1, accent: mats.navy, baseH: 34 });
+  begin(); add(1660, 944, 48, 76, 52, mats.paleOak, 0, .01); add(1659, 944, 1, 76, 1.2, mats.dark, 26, .001);
+  cyl(1680, 966, 9, 22, mats.stoneWarm, 52, 6); ball(1680, 966, 14, 92, mats.leaf).scale.set(1, 1.2, 1);
+  cyl(1695, 1000, 4, 2, mats.dark, 52); cyl(1695, 1000, .8, 40, mats.dark, 54); cyl(1688, 1000, 6, 8, mats.dark, 90, 4);
+  rug(1420, 900, 150, 200, mats.jute);
+  closet(1322, 740, 74, 394, 'e', mats.white, 6);                          // owner: the full length of the west wall
   closet(1512, 738, 196, 78, 's', mats.white, 4);
   begin(); add(1490, 1124, 142, 8, 45, mats.linen, 165, .01);
 
