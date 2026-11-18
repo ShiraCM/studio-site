@@ -92,71 +92,18 @@ function parts(mask, reach = 2, min = 40) {
 // Step 2: which pixels change between the developer's plan and the construction plan, and when.
 // Each pixel is sorted on its own: lighter in the construction plan = erased, darker = drawn,
 // so a new wall next to a removed one is still drawn with the other new walls.
-// The old laundry closet is wiped clean (its leftover boxes too), and the new walls are drawn solid.
-const LAUNDRY = [745, 438, 913, 600];       // plan px: the utility closet that becomes part of the kitchen
 const INK = [70, 82, 46];                   // new walls are drawn in a deep olive, so they stand out from the charcoal existing walls
-// The plans are redrawn as warm ink on paper, so they read as drawings rather than CAD screenshots:
-// light greys and tints drop out, lines and walls become one soft charcoal.
 const PAPER = [247, 244, 237], INKLINE = [46, 43, 39];
-function inkify(img) {
-  const s = img.data, out = new ImageData(W, H), d = out.data;
-  for (let i = 0; i < s.length; i += 4) {
-    let a = clamp01((232 - lum(s, i)) / 190);
-    a = a < .1 ? 0 : Math.pow(a, .85);
-    for (let k = 0; k < 3; k++) d[i + k] = PAPER[k] + (INKLINE[k] - PAPER[k]) * a;
-    d[i + 3] = 255;
-  }
-  return out;
-}
-  // A clean presentation drawing (owner, Nov 18: the inked scan "still looks like an AutoCAD screenshot"):
-  // only the walls are kept, found as solid dark blocks (thin lines, text, dimensions, hatching and the
-  // dotted insulation all drop out), redrawn solid on paper. New walls in olive; the balcony as a light grid.
-  function wallMask(img) {
-const s = img.data, W1 = W + 1;
-const sum = src => { const I = new Int32Array(W1 * (H + 1)); for (let y = 0; y < H; y++) { let row = 0; for (let x = 0; x < W; x++) { row += src(y * W + x); I[(y + 1) * W1 + x + 1] = I[y * W1 + x + 1] + row; } } return I; };
-const box = (I, x0, y0, x1, y1) => { x0 = Math.max(0, x0); y0 = Math.max(0, y0); x1 = Math.min(W - 1, x1); y1 = Math.min(H - 1, y1); return I[(y1 + 1) * W1 + x1 + 1] - I[y0 * W1 + x1 + 1] - I[(y1 + 1) * W1 + x0] + I[y0 * W1 + x0]; };
-const Id = sum(p => lum(s, p * 4) < 100 ? 1 : 0);
-const core = new Uint8Array(W * H);
-for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) if (box(Id, x - 3, y - 3, x + 3, y + 3) >= 30) core[y * W + x] = 1;
-const Ic = sum(p => core[p]), m = new Uint8Array(W * H);
-for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) if (box(Ic, x - 3, y - 3, x + 3, y + 3) > 0) m[y * W + x] = 1;
-return m;
-  }
   const BALCONY = [[185, 1025, 340, 260], [185, 820, 150, 205]];
   const PLAN_WINDOWS = [[80, 410, 90, 25], [910, 885, 20, 135], [935, 795, 135, 15], [335, 915, 25, 60]];
-// straighten: snap a mask to a 4 px grid by majority, shave one-cell bumps and fill one-cell notches,
-// so every wall edge runs straight (owner, Nov 18: "sloppy fill in the lines")
-function snapMask(m, S = 4) {
-  const cw = Math.ceil(W / S), chh = Math.ceil(H / S);
-  let cell = new Uint8Array(cw * chh);
-  for (let cy = 0; cy < chh; cy++) for (let cx = 0; cx < cw; cx++) {
-    let n = 0, tot = 0;
-    for (let y = cy * S; y < Math.min(H, cy * S + S); y++) for (let x = cx * S; x < Math.min(W, cx * S + S); x++) { tot++; n += m[y * W + x]; }
-    cell[cy * cw + cx] = n * 2 >= tot ? 1 : 0;
-  }
-  const at = (c, x, y) => x >= 0 && y >= 0 && x < cw && y < chh ? c[y * cw + x] : 0;
-  for (let pass = 0; pass < 2; pass++) {
-    const nx = new Uint8Array(cell);
-    for (let y = 0; y < chh; y++) for (let x = 0; x < cw; x++) {
-      const nb = at(cell, x - 1, y) + at(cell, x + 1, y) + at(cell, x, y - 1) + at(cell, x, y + 1);
-      if (cell[y * cw + x] && nb <= 1) nx[y * cw + x] = 0;
-      if (!cell[y * cw + x] && nb >= 3) nx[y * cw + x] = 1;
-    }
-    cell = nx;
-  }
-  const out = new Uint8Array(W * H);
-  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) out[y * W + x] = cell[(y / S | 0) * cw + (x / S | 0)];
-  return out;
-}
   function renderPlan(walls, drawn, extra = []) {
 const img = new ImageData(W, H), d = img.data;
 const put = (p, c) => { const i = p * 4; d[i] = c[0]; d[i + 1] = c[1]; d[i + 2] = c[2]; d[i + 3] = 255; };
 const grid = PAPER.map((v, k) => Math.round(v * .82 + INKLINE[k] * .18));
 for (let p = 0; p < W * H; p++) put(p, PAPER);
 for (const [bx, by, bw, bh] of BALCONY) for (let y = by; y < by + bh; y++) for (let x = bx; x < bx + bw; x++) if ((x - 185) % 42 === 0 || (y - 820) % 42 === 0) put(y * W + x, grid);
-const ws = snapMask(walls);
-for (let p = 0; p < W * H; p++) if (ws[p]) put(p, INKLINE);
-if (drawn) { const ds = snapMask(drawn); for (let p = 0; p < W * H; p++) if (ds[p]) put(p, INK); }
+for (let p = 0; p < W * H; p++) if (walls[p]) put(p, INKLINE);
+if (drawn) for (let p = 0; p < W * H; p++) if (drawn[p]) put(p, INK);
 for (const [x0, y0, w, hh] of PLAN_WINDOWS) {
   const horiz = w >= hh;
   for (const f of [.3, .7]) {
@@ -173,7 +120,8 @@ function changes(O, C, Ci) {
   for (let p = 0; p < W * H; p++) {
     const i = p * 4;
     if (Math.abs(o[i] - c[i]) + Math.abs(o[i + 1] - c[i + 1]) + Math.abs(o[i + 2] - c[i + 2]) <= 40) continue;
-    (lum(c, i) > lum(o, i) ? er : dr)[p] = 1;
+    const ink = c[i] === INK[0] && c[i + 1] === INK[1] && c[i + 2] === INK[2];   // becomes a new wall: drawn, even where an old wall stood
+    (lum(c, i) > lum(o, i) && !ink ? er : dr)[p] = 1;
   }
   // around each removed wall, its dashed outline and stray thin lines go too, so no broken wall is left
   for (const pt of parts(er, 4, 20)) {
@@ -187,11 +135,6 @@ function changes(O, C, Ci) {
       }
       if (n < 34) er[p] = 1;
     }
-  }
-  // the laundry closet: everything inside goes, down to white paper
-  for (let y = LAUNDRY[1]; y < LAUNDRY[3]; y++) for (let x = LAUNDRY[0]; x < LAUNDRY[2]; x++) {
-    const p = y * W + x, i = p * 4;
-    if (lum(o, i) < 248 || lum(c, i) < 248) { er[p] = 1; dr[p] = 0; target[i] = target[i + 1] = target[i + 2] = 255; }
   }
   // new walls: close the hatching into a solid band, then ink it
   const drawParts = parts(dr, 3, 30);
@@ -386,28 +329,33 @@ async function start() {
     return el;
   });
 
-  const [io, ic, ir] = await Promise.all(['img/plan-jh-original-no-ac.webp', 'img/plan-jh-changes-construction-wall.webp', 'img/plan-jh-revised-no-ac.webp'].map(load));
-  const O = pixels(io), C = pixels(ic), R = pixels(ir);
-  // The drawing is built from the walls of the owner's clean revised plan (solid and crisp), not traced
-  // from the scan: "after" = those walls with the new ones in olive; "before" = the same walls without
-  // the new ones, plus the old walls that come out (taken from the developer's plan where they are erased).
-  const ch0 = changes(O, C, inkify(C));
-  const NEW_RECTS = [[560, 584, 72, 12], [954, 438, 11, 272], [904, 700, 61, 10]];   // walls the revised plan draws only as thin lines
-  const BASE_RECTS = [[520, 584, 40, 12], [527, 586, 9, 110]];                        // existing walls next to them, kept in charcoal
-  const newWalls = new Uint8Array(ch0.drawn);
-  for (const [x0, y0, w, hh] of NEW_RECTS) for (let y = y0; y < y0 + hh; y++) for (let x = x0; x < x0 + w; x++) newWalls[y * W + x] = 1;
-  const grow = (m, rr) => { const o = new Uint8Array(W * H); for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) if (m[y * W + x]) for (let dy = -rr; dy <= rr; dy++) for (let dx = -rr; dx <= rr; dx++) { const xx = x + dx, yy = y + dy; if (xx >= 0 && yy >= 0 && xx < W && yy < H) o[yy * W + xx] = 1; } return o; };
-  const newNear = grow(newWalls, 3);
-  const Rm = wallMask(R), Om = wallMask(O);
-  const inRect = (p, [x0, y0, w, hh]) => { const x = p % W, y = p / W | 0; return x >= x0 && x < x0 + w && y >= y0 && y < y0 + hh; };
-  const after = new Uint8Array(W * H), before = new Uint8Array(W * H);
-  for (let p = 0; p < W * H; p++) {
-    if (Rm[p] && !newNear[p] && !inRect(p, [548, 436, 22, 158]) && !inRect(p, [556, 576, 82, 22])) { after[p] = 1; before[p] = 1; }   // not the double line the olive new wall replaces
-    if (Om[p] && ch0.erased[p] && !newNear[p]) before[p] = 1;            // the walls that come out (not where a new wall goes)
-  }
-  for (const [x0, y0, w, hh] of BASE_RECTS) for (let y = y0; y < y0 + hh; y++) for (let x = x0; x < x0 + w; x++) { after[y * W + x] = 1; before[y * W + x] = 1; }
-  // drop specks: anything smaller than a short piece of wall
-  for (const m of [before, after]) for (const pt of parts(m, 2, 1)) if (pt.px.length < 220) for (const p of pt.px) m[p] = 0;
+  const R = pixels(await load('img/plan-jh-revised-no-ac.webp'));
+  // The drawing's walls, as clean straight blocks [x, y, w, h] in plan px (owner, Nov 18: "lines look
+  // jagged, clean them up, even if it's not 100% accurate"). Traced by hand from the developer's and
+  // the revised plans, with the owner's corrections. KEEP: in both plans, charcoal. OLD: only in the
+  // developer's plan, erased. NEW: only in the revised plan, drawn in olive.
+  const KEEP = [
+    [40, 36, 612, 28], [40, 64, 32, 384],                       // outer walls: north, west
+    [376, 64, 28, 256], [376, 396, 28, 40], [166, 404, 238, 32], // safe room east (with its door), safe room / bedroom
+    [444, 64, 24, 108], [404, 140, 64, 32],                     // shaft
+    [400, 292, 72, 20], [544, 284, 86, 20], [630, 64, 20, 240], // bath: south (two pieces), east
+    [500, 432, 144, 14], [524, 408, 40, 24], [628, 408, 16, 64], // hall wall, column, entry stub
+    [758, 88, 18, 348], [758, 416, 450, 20], [1188, 416, 20, 398], [1064, 790, 144, 24],   // entry, kitchen north, east, south
+    [904, 790, 26, 94], [904, 1016, 26, 228], [508, 1208, 422, 36],                       // living room east and south
+    [184, 436, 32, 388], [330, 788, 34, 128], [330, 968, 34, 60], [330, 996, 210, 32],   // bedroom west, balcony side
+    [452, 788, 70, 20], [522, 580, 38, 16], [522, 596, 18, 480]                           // bedroom / dining
+  ];
+  const OLD = [
+    [566, 446, 20, 150], [560, 580, 26, 16],                    // bedroom east wall (the fridge niche goes there)
+    [758, 436, 18, 160], [758, 580, 52, 16], [896, 436, 14, 160], [882, 580, 28, 16],     // utility room
+    [904, 688, 26, 102]                                         // between the old kitchen and the dining area
+  ];
+  const NEW = [
+    [468, 432, 32, 14], [522, 446, 18, 134], [560, 580, 72, 16], // closets and fridge niche
+    [952, 436, 20, 276], [904, 696, 68, 16]                     // the third bedroom
+  ];
+  const rectMask = list => { const m = new Uint8Array(W * H); for (const [x0, y0, w, hh] of list) for (let y = y0; y < y0 + hh; y++) for (let x = x0; x < x0 + w; x++) m[y * W + x] = 1; return m; };
+  const before = rectMask([...KEEP, ...OLD]), after = rectMask(KEEP), newWalls = rectMask(NEW);
   const Oi = renderPlan(before, null), Ti = renderPlan(after, newWalls);
   const ch = changes(Oi, Ti, Ti);
   const model = readModel(R);
