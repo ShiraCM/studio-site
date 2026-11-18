@@ -98,13 +98,8 @@
     return c;
   }
 
-  function start() {
-    const view = box.querySelector('.jh-view'), stepEl = box.querySelector('.k3d-tag-step'), noteEl = box.querySelector('.jh-tag-note');
-    const base = paper();
-    const cv = document.createElement('canvas'); cv.width = W; cv.height = H; view.append(cv);
-    const g = cv.getContext('2d');
-    box.classList.add('jh-live');
-    function labels(t) {
+  // the drawing at time t, painted into any 2D context (the 3D model uses it for its floor)
+  function labels(g, t) {
       g.save(); g.textAlign = 'center'; g.textBaseline = 'middle';
       for (const [name, x, y, from, to, size = 37] of LABELS) {
         g.font = '600 ' + size + 'px "Hanken Grotesk", Helvetica, Arial, sans-serif';
@@ -117,8 +112,8 @@
         name.toUpperCase().split('\n').forEach((line, k, all) => g.fillText(line, x, y + (k - (all.length - 1) / 2) * size * 1.25));
       }
       g.restore();
-    }
-    function draw(t) {
+  }
+  function paint(g, base, t) {
       g.drawImage(base, 0, 0);
       OLD.forEach((r, k) => {                              // old walls: wiped away from one end
         const [a0, a1] = slot(T.wallOut, OLD.length, k), left = 1 - clamp01((t - a0) / (a1 - a0));
@@ -128,8 +123,16 @@
         const [a0, a1] = slot(T.wallIn, NEW.length, k), got = clamp01((t - a0) / (a1 - a0));
         if (got > 0) { g.fillStyle = INK; g.fillRect(...along(r, got, false)); }
       });
-      labels(t);
-    }
+      labels(g, t);
+  }
+
+  function start() {
+    const view = box.querySelector('.jh-view'), stepEl = box.querySelector('.k3d-tag-step'), noteEl = box.querySelector('.jh-tag-note');
+    const base = paper();
+    const cv = document.createElement('canvas'); cv.width = W; cv.height = H; view.append(cv);
+    const g = cv.getContext('2d');
+    box.classList.add('jh-live');
+    const draw = t => paint(g, base, t);
     const setStep = s => { const [, num, name, note] = STEPS[s]; stepEl.innerHTML = '<b>' + num + '</b> ' + name; noteEl.textContent = note; };
     if (still) { draw(T.back[0] - .01); setStep(2); return; }
     const snap = t => { draw(t); const c = document.createElement('canvas'); c.width = W; c.height = H; c.getContext('2d').drawImage(cv, 0, 0); return c; };
@@ -162,6 +165,10 @@
     frame(0);
     window.__al = { jump: t => { time = t; shown = -1; frame(t); }, T };
   }
+  window.AL_PLAN = { W, H, KEEP, OLD, NEW, WINDOWS, BALCONY, T, STEPS, paper, paint };
+  // with WebGL (and motion allowed) the 3D model (al3d.js) plays this drawing and then builds on it
+  const gl = (() => { try { const c = document.createElement('canvas'); return !!(c.getContext('webgl2') || c.getContext('webgl')); } catch (e) { return false; } })();
+  if (!still && gl && box.hasAttribute('data-three')) return;
   const go = () => (document.fonts ? document.fonts.ready : Promise.resolve()).then(start).catch(err => console.error(err));
   const io = new IntersectionObserver(es => {
     if (es.some(e => e.isIntersecting)) { io.disconnect(); go(); }
