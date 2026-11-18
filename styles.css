@@ -1090,3 +1090,5 @@ nav.links .menu-panel a:first-child{border-top:0}
 @media (max-width:720px){.spread .sp-e,.spread .sp-f{grid-column:auto;margin-top:0}.spread .sp-e img,.spread .sp-f img{aspect-ratio:4/3}}
 .closet-plan .table rect{fill:#fff;stroke:#BDB6AA;stroke-width:1.2}
 .closet-plan .table circle{fill:none;stroke:#BDB6AA;stroke-width:1.2}
+.closet-fig .closet-title{font:400 clamp(22px,2vw,28px)/1.1 var(--display);letter-spacing:0;color:var(--ink)}
+.spread .sp-e img{aspect-ratio:1322/1046}
