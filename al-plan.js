@@ -1,25 +1,42 @@
 /* Expanded living space: the developer's plan redraws itself into the revised plan, with no buttons.
-   Owner, Nov 18: walls solid and clean, and the process in order:
-   1. the developer's plan; 2. the bathroom fittings (and doors) that change come out;
-   3. the old walls are rubbed away; 4. the new walls are drawn in olive; 5. the new fittings go in.
-   Walls are the solid dark areas of the two plans, cleaned (closed, then opened, so thin lines drop
-   out and small gaps fill) and drawn as one flat charcoal; everything else is the plans' own linework.
-   Furniture (peach beds, sage closets) is left out. Plays in view, loops; still with reduced motion. */
+   Owner, Nov 18: clean, solid walls, and the process in order:
+   1/4 the developer's plan; 2/4 the fittings that change come out (each area as a whole);
+   3/4 the old walls are rubbed away and the new walls drawn in olive, one by one; 4/4 the new fittings go in.
+   Walls are traced by hand as rectangles (plan px of the 2000 × 1500 drawings) and drawn as flat shapes,
+   so every edge is straight. Everything else (windows, kitchen, fittings, doors) is the plans' own
+   linework, with the furniture left out. The revised drawing sits 4 px left of the developer's; it is
+   aligned here. Plays in view and loops; with reduced motion the revised plan stays as a still. */
 (function () {
   const box = document.querySelector('.al-anim');
   if (!box || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  const W = 2000, H = 1500;                     // the plans’ own size: no resampling, so lines stay crisp
-  const WALL = [46, 43, 39], INK = [70, 82, 46];
-  const T = { fitOut: [1.8, 3.0], wallOut: [3.4, 5.6], wallIn: [6.0, 8.2], fitIn: [8.6, 10.0], back: [14.6, 15.6], end: 16.2 };
+  const W = 2000, H = 1500;
+  const WALL = '#2e2b27', INK = '#46522e';
+  // walls [x, y, w, h]: kept, taken out, and new
+  const KEEP = [
+    [674, 70, 464, 24], [674, 94, 22, 266], [1104, 82, 48, 30], [1102, 228, 26, 234], [1138, 230, 14, 136],
+    [1126, 344, 10, 118], [1116, 462, 20, 130], [1560, 236, 428, 30], [1560, 266, 36, 100], [1952, 266, 36, 218],
+    [1490, 330, 70, 36], [1154, 330, 10, 36], [1234, 330, 102, 36], [456, 332, 218, 20], [456, 352, 20, 18],
+    [454, 496, 24, 114], [38, 584, 416, 24], [38, 608, 26, 528], [684, 360, 24, 102], [710, 436, 290, 24],
+    [952, 460, 18, 166], [1136, 578, 12, 14], [1230, 578, 80, 14], [904, 720, 302, 20], [1300, 720, 60, 20],
+    [1314, 740, 8, 396], [1952, 626, 36, 326], [1952, 1022, 36, 150],
+    [50, 1134, 44, 38], [234, 1134, 50, 38], [424, 1134, 120, 38], [850, 1134, 202, 38], [1194, 1134, 118, 38],
+    [1322, 1134, 168, 38], [1632, 1134, 318, 38]
+  ];
+  const OLD = [[1254, 368, 10, 222], [906, 740, 8, 394], [1574, 722, 376, 10], [1726, 924, 226, 8], [1716, 918, 10, 26], [1716, 1030, 10, 104]];
+  const NEW = [[1314, 366, 10, 226], [686, 462, 10, 68], [652, 522, 44, 8], [918, 616, 34, 8], [1324, 578, 72, 14],
+    [1504, 728, 8, 98], [1504, 818, 234, 8], [1740, 740, 22, 12], [1870, 740, 82, 12], [1740, 752, 10, 382]];
+  // areas whose fittings and doors change: each comes out, and later goes back in, as a whole
+  const AREAS = [[1138, 368, 262, 210], [1322, 592, 630, 244], [1700, 752, 252, 382], [1140, 740, 174, 96]];
+  const T = { fitOut: [1.8, 3.0], wallOut: [3.4, 5.6], wallIn: [6.0, 8.2], fitIn: [8.6, 9.8], back: [14.4, 15.4], end: 16.0 };
   const STEPS = [
     [0, '1/4', 'Developer’s plan', 'A third bedroom sits between the living area and the bedrooms.'],
-    [T.fitOut[0], '2/4', 'Fittings out', 'The bathroom fittings that move come out first.'],
+    [T.fitOut[0], '2/4', 'Fittings out', 'The bathroom fittings and doors that change come out first.'],
     [T.wallOut[0], '3/4', 'Demolition and new walls', 'The old walls come down; the new walls go up in olive.'],
     [T.fitIn[0], '4/4', 'Revised plan', 'New fittings go in: a laundry room and a larger en-suite, and the living area opens up.'],
     [T.back[0], '1/4', 'Developer’s plan', 'A third bedroom sits between the living area and the bedrooms.']
   ];
   const clamp01 = v => Math.min(1, Math.max(0, v));
-  const lum = (d, i) => .2126 * d[i] + .7152 * d[i + 1] + .0722 * d[i + 2];
+  const ease = t => t < .5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
 
   const io = new IntersectionObserver(es => {
     if (es.some(e => e.isIntersecting)) { io.disconnect(); start().catch(err => console.error(err)); }
@@ -27,178 +44,71 @@
   io.observe(box);
 
   const load = src => new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = src; });
-  function pixels(img, dx = 0) {
+  // a plan's linework: furniture and walls cleared (walls are drawn as shapes on top)
+  function linework(img, dx) {
     const c = document.createElement('canvas'); c.width = W; c.height = H;
     const g = c.getContext('2d', { willReadFrequently: true });
-    g.fillStyle = '#fff'; g.fillRect(0, 0, W, H); g.drawImage(img, dx, 0, W, H);
-    return g.getImageData(0, 0, W, H).data;
-  }
-  // square max (grow) or min (shrink) filter of radius r, in two passes
-  function morph(m, r, grow) {
-    const a = new Uint8Array(W * H), b = new Uint8Array(W * H);
-    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
-      let v = grow ? 0 : 1;
-      for (let k = -r; k <= r; k++) { const xx = x + k, s = xx < 0 || xx >= W ? 0 : m[y * W + xx]; if (grow ? s : !s) { v = grow ? 1 : 0; break; } }
-      a[y * W + x] = v;
-    }
-    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
-      let v = grow ? 0 : 1;
-      for (let k = -r; k <= r; k++) { const yy = y + k, s = yy < 0 || yy >= H ? 0 : a[yy * W + x]; if (grow ? s : !s) { v = grow ? 1 : 0; break; } }
-      b[y * W + x] = v;
-    }
-    return b;
-  }
-  const close = (m, r) => morph(morph(m, r, true), r, false);
-  const open = (m, r) => morph(morph(m, r, false), r, true);
-  function parts(mask, reach = 2, min = 20) {
-    const seen = new Uint8Array(W * H), out = [];
+    g.fillStyle = '#fff'; g.fillRect(0, 0, W, H); g.drawImage(img, dx, 0);
+    g.fillStyle = '#fff'; for (const [x, y, w, h] of [...KEEP, ...OLD, ...NEW]) g.fillRect(x - 3, y - 3, w + 6, h + 6);
+    const id = g.getImageData(0, 0, W, H), d = id.data, tint = new Uint8Array(W * H);
     for (let p = 0; p < W * H; p++) {
-      if (!mask[p] || seen[p]) continue;
-      const st = [p], px = []; seen[p] = 1;
-      let x0 = W, y0 = H, x1 = 0, y1 = 0;
-      while (st.length) {
-        const q = st.pop(); px.push(q);
-        const x = q % W, y = (q / W) | 0;
-        if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y;
-        for (let dy = -reach; dy <= reach; dy++) for (let dx = -reach; dx <= reach; dx++) {
-          const xx = x + dx, yy = y + dy; if (xx < 0 || yy < 0 || xx >= W || yy >= H) continue;
-          const k = yy * W + xx; if (mask[k] && !seen[k]) { seen[k] = 1; st.push(k); }
-        }
-      }
-      if (px.length >= min) out.push({ px, x0, y0, x1, y1 });
+      const i = p * 4, mx = Math.max(d[i], d[i + 1], d[i + 2]), mn = Math.min(d[i], d[i + 1], d[i + 2]);
+      if (mx > 70 && (mx - mn > 12 || (d[i + 1] > d[i] + 6 && d[i + 1] > d[i + 2] + 4))) tint[p] = 1;   // peach beds, sage closets
     }
-    return out;
+    const near = new Uint8Array(W * H);                                  // the furniture's outline: 3 px around it
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) if (tint[y * W + x]) for (let dy = -3; dy <= 3; dy++) for (let dx2 = -3; dx2 <= 3; dx2++) { const xx = x + dx2, yy = y + dy; if (xx >= 0 && yy >= 0 && xx < W && yy < H) near[yy * W + xx] = 1; }
+    for (let p = 0; p < W * H; p++) if (near[p]) { const i = p * 4; if (tint[p] || .2126 * d[i] + .7152 * d[i + 1] + .0722 * d[i + 2] >= 120) d[i] = d[i + 1] = d[i + 2] = 255; }
+    g.putImageData(id, 0, 0);
+    return c;
   }
 
   async function start() {
     const [imO, imR] = await Promise.all(['img/apartment-original-furnished.webp', 'img/apartment-revised-furnished.webp'].map(load));
-    const o = pixels(imO), r = pixels(imR, 4);   // the revised plan sits 4 px left of the developer’s; aligned here
-    // leave out the furniture: light tinted pixels (peach beds, sage closets) and their outlines
-    for (const d of [o, r]) {
-      const tint = new Uint8Array(W * H);
-      for (let p = 0; p < W * H; p++) { const i = p * 4, mx = Math.max(d[i], d[i + 1], d[i + 2]); if (mx > 70 && (mx - Math.min(d[i], d[i + 1], d[i + 2]) > 12 || (d[i + 1] > d[i] + 6 && d[i + 1] > d[i + 2] + 4))) tint[p] = 1; }
-      const m = morph(tint, 3, true);
-      for (let p = 0; p < W * H; p++) if (tint[p] || (m[p] && lum(d, p * 4) >= 120)) { const i = p * 4; d[i] = d[i + 1] = d[i + 2] = 255; }   // never shave a wall
-    }
-    // walls on a 4 px grid (owner: "walls need to be filled in"): a cell is wall when most of it is dark;
-    // one-cell bumps are shaved and one-cell notches filled, so every edge runs straight and walls are solid
-    const S = 2, CW = W / S, CH = H / S;
-    const cellsOf = d => {
-      let c = new Uint8Array(CW * CH);
-      for (let cy = 0; cy < CH; cy++) for (let cx = 0; cx < CW; cx++) {
-        let n = 0; for (let y = 0; y < S; y++) for (let x = 0; x < S; x++) if (lum(d, ((cy * S + y) * W + cx * S + x) * 4) < 120) n++;
-        c[cy * CW + cx] = n >= 3 ? 1 : 0;
-      }
-      const at = (m, x, y) => x >= 0 && y >= 0 && x < CW && y < CH ? m[y * CW + x] : 0;
-      for (let pass = 0; pass < 2; pass++) {
-        const nx = new Uint8Array(c);
-        for (let y = 0; y < CH; y++) for (let x = 0; x < CW; x++) {
-          const nb = at(c, x - 1, y) + at(c, x + 1, y) + at(c, x, y - 1) + at(c, x, y + 1);
-          if (c[y * CW + x] && nb <= 1) nx[y * CW + x] = 0;
-          if (!c[y * CW + x] && nb >= 3) nx[y * CW + x] = 1;
-        }
-        c = nx;
-      }
-      // drop anything thinner than a wall (under 6 px: door leaves, frames, hatching)
-      const er = new Uint8Array(CW * CH), op = new Uint8Array(CW * CH);
-      for (let y = 0; y < CH; y++) for (let x = 0; x < CW; x++) { let all = 1; for (let dy = -1; dy <= 1 && all; dy++) for (let dx = -1; dx <= 1; dx++) if (!at(c, x + dx, y + dy)) { all = 0; break; } er[y * CW + x] = all; }
-      for (let y = 0; y < CH; y++) for (let x = 0; x < CW; x++) if (er[y * CW + x]) for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) { const xx = x + dx, yy = y + dy; if (xx >= 0 && yy >= 0 && xx < CW && yy < CH) op[yy * CW + xx] = 1; }
-      return op;
-    };
-    const cO = cellsOf(o), cR = cellsOf(r);
-    const cellParts = m => { const seen = new Uint8Array(CW * CH), out = []; for (let s0 = 0; s0 < CW * CH; s0++) { if (!m[s0] || seen[s0]) continue; const st = [s0], px = []; seen[s0] = 1; while (st.length) { const q = st.pop(); px.push(q); const x = q % CW, y = q / CW | 0; for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const xx = x + dx, yy = y + dy; if (xx < 0 || yy < 0 || xx >= CW || yy >= CH) continue; const k = yy * CW + xx; if (m[k] && !seen[k]) { seen[k] = 1; st.push(k); } } } out.push(px); } return out; };
-    // a change counts only if it is a real piece of wall, not a one-cell sliver along a kept wall
-    const changedCells = (a, b) => { const m = a.map((v, k) => v && !b[k] ? 1 : 0); const keep = new Uint8Array(CW * CH); for (const px of cellParts(m)) { const xs = px.map(k => k % CW), ys = px.map(k => k / CW | 0); const w = Math.max(...xs) - Math.min(...xs) + 1, hh = Math.max(...ys) - Math.min(...ys) + 1; if (px.length >= 24 && Math.min(w, hh) >= 4) for (const k of px) keep[k] = 1; } return keep; };
-    const cOld = changedCells(cO, cR), cNew = changedCells(cR, cO);
-    const toPx = c => { const m = new Uint8Array(W * H); for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) m[y * W + x] = c[(y / S | 0) * CW + (x / S | 0)]; return m; };
-    const wO = toPx(cO), wR = toPx(cR), oldW = toPx(cOld), newW = toPx(cNew);
-    const keepW = wO.map((v, p) => v && !oldW[p] ? 1 : 0);
-    const wallFinal = keepW.map((v, p) => v || newW[p] ? 1 : 0);
-    // the linework (everything but walls), from each plan
-    const line = (d, near) => { const L = new Uint8ClampedArray(W * H * 4).fill(255); for (let p = 0; p < W * H; p++) if (!near[p]) { const i = p * 4; L[i] = d[i]; L[i + 1] = d[i + 1]; L[i + 2] = d[i + 2]; } return L; };
-    const LO = line(o, morph(wO, 2, true)), LR = line(r, morph(wallFinal.map((v, p) => v || wR[p] ? 1 : 0), 2, true));
-    const paint = (L, wall, col) => { const s = new Uint8ClampedArray(L); for (let p = 0; p < W * H; p++) if (wall[p]) { const i = p * 4, c = col(p); s[i] = c[0]; s[i + 1] = c[1]; s[i + 2] = c[2]; } return s; };
-    const fitOutM = new Uint8Array(W * H), fitInM = new Uint8Array(W * H);
-    // a line counts as changed only if the other plan has no line within a few pixels (the two drawings are a pixel or two apart)
-    const inkOf = L => { const m = new Uint8Array(W * H); for (let p = 0; p < W * H; p++) m[p] = lum(L, p * 4) < 235 ? 1 : 0; return m; };
-    const iO = inkOf(LO), iR = inkOf(LR), nO = morph(iO, 4, true), nR = morph(iR, 4, true);
-    for (let p = 0; p < W * H; p++) { if (iO[p] && !nR[p]) fitOutM[p] = 1; if (iR[p] && !nO[p]) fitInM[p] = 1; }
-    for (const m of [fitOutM, fitInM]) for (const pt of parts(m, 3, 1)) if (pt.px.length < 40) for (const p of pt.px) m[p] = 0;
-    const fo = morph(fitOutM, 2, true), fi = morph(fitInM, 2, true);       // whole fittings, soft edges included
-    // the five states the drawing passes through
-    const S0 = paint(LO, wO, () => WALL);
-    const L1 = new Uint8ClampedArray(LO); for (let p = 0; p < W * H; p++) if (fo[p]) { const i = p * 4; L1[i] = L1[i + 1] = L1[i + 2] = 255; }
-    const S1 = paint(L1, wO, () => WALL);
-    const S2 = paint(L1, keepW, () => WALL);
-    const S3 = paint(L1, wallFinal, p => newW[p] ? INK : WALL);
-    const L4 = new Uint8ClampedArray(L1); for (let p = 0; p < W * H; p++) if (fi[p] || fo[p]) { const i = p * 4; L4[i] = LR[i]; L4[i + 1] = LR[i + 1]; L4[i + 2] = LR[i + 2]; }
-    const S4 = paint(L4, wallFinal, p => newW[p] ? INK : WALL);
-
-    // timing: each phase's changed pixels, in order
-    const list = [];                                    // [pixel, start, fade, phase]
-    const diffMask = (A, B) => { const m = new Uint8Array(W * H); for (let p = 0; p < W * H; p++) { const i = p * 4; if (A[i] !== B[i] || A[i + 1] !== B[i + 1] || A[i + 2] !== B[i + 2]) m[p] = 1; } return m; };
-    const order = (a, b) => (a.y0 + a.x0 * .3) - (b.y0 + b.x0 * .3);
-    const fade = (m, span, ph, f) => { const ps = parts(m, 5, 1).sort(order), n = Math.max(1, ps.length); ps.forEach((pt, k) => { for (const p of pt.px) list.push([p, span[0] + (span[1] - span[0] - f) * k / n, f, ph]); }); };
-    fade(diffMask(S0, S1), T.fitOut, 1, .35);
-    { // the eraser over the old walls, in quick back-and-forth strokes
-      const m = diffMask(S1, S2), ps = parts(m, 4, 1).sort(order), path = [];
-      const lineTo = (x, y) => { const [px, py] = path.length ? path[path.length - 1] : [x, y]; const n = Math.max(1, Math.ceil(Math.hypot(x - px, y - py) / 3)); for (let k = 1; k <= n; k++) path.push([px + (x - px) * k / n, py + (y - py) * k / n]); };
-      for (const pt of ps) {
-        const horiz = pt.x1 - pt.x0 >= pt.y1 - pt.y0, mg = 6;
-        const a0 = (horiz ? pt.x0 : pt.y0) - mg, a1 = (horiz ? pt.x1 : pt.y1) + mg, b0 = (horiz ? pt.y0 : pt.x0) - mg, b1 = (horiz ? pt.y1 : pt.x1) + mg;
-        const at = (a, b) => horiz ? [a, b] : [b, a];
-        if (!path.length) path.push(at(a0, b0));
-        lineTo(...at(a0, b0)); let side = 0;
-        for (let a = a0; a <= a1 + 8; a += 8) { lineTo(...at(a + 4, side ? b0 : b1)); side ^= 1; }
-      }
-      const tmap = new Float32Array(W * H).fill(Infinity), RR = 12, dur = T.wallOut[1] - T.wallOut[0];
-      path.forEach(([x, y], k) => {
-        const t = T.wallOut[0] + dur * k / Math.max(1, path.length - 1);
-        for (let dy = -RR; dy <= RR; dy++) for (let dx = -RR; dx <= RR; dx++) {
-          if (dx * dx + dy * dy > RR * RR) continue;
-          const xx = Math.round(x + dx), yy = Math.round(y + dy); if (xx < 0 || yy < 0 || xx >= W || yy >= H) continue;
-          const p = yy * W + xx; if (m[p] && t < tmap[p]) tmap[p] = t;
-        }
-      });
-      for (let p = 0; p < W * H; p++) if (m[p]) list.push([p, Math.min(tmap[p], T.wallOut[1] - .2), .15, 2]);
-    }
-    { // the pen over the new walls, wall by wall, end to end
-      const m = diffMask(S2, S3), ps = parts(m, 3, 1).sort(order), slot = (T.wallIn[1] - T.wallIn[0]) / Math.max(1, ps.length);
-      ps.forEach((pt, k) => {
-        const horiz = pt.x1 - pt.x0 >= pt.y1 - pt.y0, len = Math.max(1, horiz ? pt.x1 - pt.x0 : pt.y1 - pt.y0);
-        for (const p of pt.px) { const f = ((horiz ? p % W : p / W | 0) - (horiz ? pt.x0 : pt.y0)) / len; list.push([p, T.wallIn[0] + slot * k + slot * .85 * clamp01(f), .08, 3]); }
-      });
-    }
-    fade(diffMask(S3, S4), T.fitIn, 4, .35);
-    list.sort((a, b) => a[1] - b[1]);
-    const STATES = [S0, S1, S2, S3, S4];
-
-    // the canvas
+    const LO = linework(imO, 0), LR = linework(imR, 4);
+    const base = document.createElement('canvas'); base.width = W; base.height = H;   // what stays: the developer's linework outside the areas
+    { const b = base.getContext('2d'); b.drawImage(LO, 0, 0); b.fillStyle = '#fff'; for (const [x, y, w, h] of AREAS) b.fillRect(x, y, w, h); }
     const view = box.querySelector('.jh-view'), stepEl = box.querySelector('.k3d-tag-step'), noteEl = box.querySelector('.jh-tag-note');
     const cv = document.createElement('canvas'); cv.width = W; cv.height = H; view.append(cv);
-    const g = cv.getContext('2d'); const cur = new ImageData(new Uint8ClampedArray(S0), W, H);
-    const asCanvas = s => { const c = document.createElement('canvas'); c.width = W; c.height = H; c.getContext('2d').putImageData(new ImageData(new Uint8ClampedArray(s), W, H), 0, 0); return c; };
-    const first = asCanvas(S0), last = asCanvas(S4);
+    const g = cv.getContext('2d');
     box.classList.add('jh-live');
-    let done = 0, lastT = -1, step = -1;
+    const slot = (span, n, k, f = .8) => { const s = (span[1] - span[0]) / n; return [span[0] + s * k, span[0] + s * k + s * f]; };
+    const along = (r, a, fromEnd) => {                                    // the part of a wall from one end, a = 0..1
+      const [x, y, w, h] = r;
+      if (w >= h) return fromEnd ? [x + w * (1 - a), y, w * a, h] : [x, y, w * a, h];
+      return fromEnd ? [x, y + h * (1 - a), w, h * a] : [x, y, w, h * a];
+    };
+    function draw(t) {
+      g.fillStyle = '#fff'; g.fillRect(0, 0, W, H);
+      g.drawImage(base, 0, 0);
+      AREAS.forEach(([x, y, w, h], k) => {                                // fittings: out, then in, area by area
+        const o = 1 - ease(clamp01((t - slot(T.fitOut, AREAS.length, k)[0]) / .5));
+        const n = ease(clamp01((t - slot(T.fitIn, AREAS.length, k)[0]) / .5));
+        if (o > 0) { g.globalAlpha = o; g.drawImage(LO, x, y, w, h, x, y, w, h); }
+        if (n > 0) { g.globalAlpha = n; g.drawImage(LR, x, y, w, h, x, y, w, h); }
+        g.globalAlpha = 1;
+      });
+      g.fillStyle = WALL; for (const r of KEEP) g.fillRect(...r);
+      OLD.forEach((r, k) => {                                             // old walls: wiped away from one end
+        const [a0, a1] = slot(T.wallOut, OLD.length, k), left = 1 - clamp01((t - a0) / (a1 - a0));
+        if (left > 0) { g.fillStyle = WALL; g.fillRect(...along(r, left, true)); }
+      });
+      NEW.forEach((r, k) => {                                             // new walls: drawn from one end
+        const [a0, a1] = slot(T.wallIn, NEW.length, k), got = clamp01((t - a0) / (a1 - a0));
+        if (got > 0) { g.fillStyle = INK; g.fillRect(...along(r, got, false)); }
+      });
+    }
+    const snap = t => { draw(t); const c = document.createElement('canvas'); c.width = W; c.height = H; c.getContext('2d').drawImage(cv, 0, 0); return c; };
+    const first = snap(0), last = snap(T.back[0] - .01);
+    let step = -1, held = false;
     function frame(t) {
-      const d = cur.data;
-      let moved = false;
-      if (t < lastT) { d.set(S0); done = 0; moved = true; }
-      lastT = t;
       if (t < T.back[0]) {
-        let k = done, allDone = true;
-        for (; k < list.length && list[k][1] <= t; k++) {
-          const [p, t0, f, ph] = list[k], i = p * 4, a = clamp01((t - t0) / f), A = STATES[ph - 1], B = STATES[ph];
-          for (let c = 0; c < 3; c++) d[i + c] = A[i + c] + (B[i + c] - A[i + c]) * a;
-          if (a < 1) allDone = false; else if (allDone) done = k + 1;
-          moved = true;
-        }
-        if (moved || frame.back) g.putImageData(cur, 0, 0);   // only when something changed (a full-size copy is costly)
-        frame.back = false;
+        const busy = t > T.fitOut[0] - .1 && t < T.fitIn[1] + .6;
+        if (busy || !held) draw(t);
+        held = !busy;
       } else {
-        g.drawImage(last, 0, 0); frame.back = true;
-        g.globalAlpha = clamp01((t - T.back[0]) / (T.back[1] - T.back[0])); g.drawImage(first, 0, 0); g.globalAlpha = 1;
+        g.drawImage(last, 0, 0);
+        g.globalAlpha = ease(clamp01((t - T.back[0]) / (T.back[1] - T.back[0]))); g.drawImage(first, 0, 0); g.globalAlpha = 1;
+        held = false;
       }
       let s = 0; for (let i = 0; i < STEPS.length; i++) if (t >= STEPS[i][0]) s = i;
       if (s !== step) { step = s; const [, num, name, note] = STEPS[s]; stepEl.innerHTML = (num ? '<b>' + num + '</b> ' : '') + name; noteEl.textContent = note; }
@@ -216,6 +126,6 @@
       if (!on) playing = false;
     }, { threshold: .2 }).observe(view);
     frame(0);
-    window.__al = { jump: t => { time = t; frame(t); }, T };
+    window.__al = { jump: t => { time = t; held = false; frame(t); }, T };
   }
 })();
