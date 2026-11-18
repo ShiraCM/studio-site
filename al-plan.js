@@ -8,7 +8,7 @@
 (function () {
   const box = document.querySelector('.al-anim');
   if (!box) return;
-  const W = 1200, H = 900;
+  const W = 1600, H = 1200;                     // drawn larger than shown, so lines stay crisp on sharp screens
   const INK = [70, 82, 46];
   const T = { erase: [1.8, 4.2], swap: [4.0, 5.2], draw: [5.2, 7.4], back: [12.6, 13.6], end: 14.2 };
   const STEPS = [
@@ -63,6 +63,14 @@
   async function start() {
     const [io_, ir] = await Promise.all(['img/apartment-original-furnished.webp', 'img/apartment-revised-furnished.webp'].map(load));
     const O = pixels(io_), R = pixels(ir), o = O.data, r = R.data;
+    // walls only (owner, Nov 18: "take out all of the furniture"): the coloured beds and closets, with
+    // their outlines (peach beds, sage closets), are cleared from both plans so only the building changes
+    for (const d of [o, r]) {
+      const tint = new Uint8Array(W * H);
+      for (let p = 0; p < W * H; p++) { const i = p * 4; const mx = Math.max(d[i], d[i + 1], d[i + 2]); if (mx > 70 && (mx - Math.min(d[i], d[i + 1], d[i + 2]) > 12 || (d[i + 1] > d[i] + 8 && d[i + 1] > d[i + 2] + 8))) tint[p] = 1; }
+      const m = grow(tint, 3);
+      for (let p = 0; p < W * H; p++) if (m[p]) { const i = p * 4; d[i] = d[i + 1] = d[i + 2] = 255; }
+    }
     // walls: dark, colourless pixels. Old walls are dark only in the developer's plan, new walls only in ours.
     const dark = d => { const m = new Uint8Array(W * H); for (let p = 0; p < W * H; p++) { const i = p * 4, mx = Math.max(d[i], d[i + 1], d[i + 2]), mn = Math.min(d[i], d[i + 1], d[i + 2]); m[p] = lum(d, i) < 150 && mx - mn < 40 ? 1 : 0; } return m; };
     const dO = dark(o), dR = dark(r);
