@@ -108,6 +108,40 @@ function inkify(img) {
   }
   return out;
 }
+  // A clean presentation drawing (owner, Nov 18: the inked scan "still looks like an AutoCAD screenshot"):
+  // only the walls are kept, found as solid dark blocks (thin lines, text, dimensions, hatching and the
+  // dotted insulation all drop out), redrawn solid on paper. New walls in olive; the balcony as a light grid.
+  function wallMask(img) {
+const s = img.data, W1 = W + 1;
+const sum = src => { const I = new Int32Array(W1 * (H + 1)); for (let y = 0; y < H; y++) { let row = 0; for (let x = 0; x < W; x++) { row += src(y * W + x); I[(y + 1) * W1 + x + 1] = I[y * W1 + x + 1] + row; } } return I; };
+const box = (I, x0, y0, x1, y1) => { x0 = Math.max(0, x0); y0 = Math.max(0, y0); x1 = Math.min(W - 1, x1); y1 = Math.min(H - 1, y1); return I[(y1 + 1) * W1 + x1 + 1] - I[y0 * W1 + x1 + 1] - I[(y1 + 1) * W1 + x0] + I[y0 * W1 + x0]; };
+const Id = sum(p => lum(s, p * 4) < 100 ? 1 : 0);
+const core = new Uint8Array(W * H);
+for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) if (box(Id, x - 3, y - 3, x + 3, y + 3) >= 30) core[y * W + x] = 1;
+const Ic = sum(p => core[p]), m = new Uint8Array(W * H);
+for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) if (box(Ic, x - 3, y - 3, x + 3, y + 3) > 0) m[y * W + x] = 1;
+return m;
+  }
+  const BALCONY = [[185, 1025, 340, 260], [185, 820, 150, 205]];
+  const PLAN_WINDOWS = [[80, 410, 90, 25], [910, 885, 20, 135], [935, 795, 135, 15], [335, 915, 25, 60]];
+  function renderPlan(walls, drawn, extra = []) {
+const img = new ImageData(W, H), d = img.data;
+const put = (p, c) => { const i = p * 4; d[i] = c[0]; d[i + 1] = c[1]; d[i + 2] = c[2]; d[i + 3] = 255; };
+const grid = PAPER.map((v, k) => Math.round(v * .82 + INKLINE[k] * .18));
+for (let p = 0; p < W * H; p++) put(p, PAPER);
+for (const [bx, by, bw, bh] of BALCONY) for (let y = by; y < by + bh; y++) for (let x = bx; x < bx + bw; x++) if ((x - 185) % 42 === 0 || (y - 820) % 42 === 0) put(y * W + x, grid);
+for (let p = 0; p < W * H; p++) if (walls[p]) put(p, INKLINE);
+if (drawn) for (let p = 0; p < W * H; p++) if (drawn[p]) put(p, INK);
+for (const [x0, y0, w, hh] of PLAN_WINDOWS) {
+  const horiz = w >= hh;
+  for (const f of [.3, .7]) {
+    if (horiz) { const y = Math.round(y0 + hh * f); for (let x = x0; x < x0 + w; x++) { put(y * W + x, INKLINE); } }
+    else { const x = Math.round(x0 + w * f); for (let y = y0; y < y0 + hh; y++) put(y * W + x, INKLINE); }
+  }
+}
+for (const [x0, y0, w, hh] of extra) for (let y = y0; y < y0 + hh; y++) for (let x = x0; x < x0 + w; x++) put(y * W + x, INK);
+return img;
+  }
 function changes(O, C, Ci) {
   const o = O.data, c = C.data, er = new Uint8Array(W * H), dr = new Uint8Array(W * H);
   const target = new Uint8ClampedArray(Ci.data);  // what each pixel becomes
@@ -185,10 +219,13 @@ function changes(O, C, Ci) {
       const p = yy * W + xx; if (er[p] && t < tmap[p]) tmap[p] = t;
     }
   });
+  const listed = new Uint8Array(W * H);
   for (const pt of erase) for (const p of pt.px) {
     const i = p * 4; if (!dr[p]) { target[i] = PAPER[0]; target[i + 1] = PAPER[1]; target[i + 2] = PAPER[2]; }
-    list.push([p, Math.min(tmap[p], T.erase[1]), .16]);
+    list.push([p, Math.min(tmap[p], T.erase[1]), .16]); listed[p] = 1;
   }
+  // any stray erased pixel too small to be a wall part goes at the end of the erasing
+  for (let p = 0; p < W * H; p++) if (er[p] && !listed[p] && !dr[p]) { const i = p * 4; target[i] = PAPER[0]; target[i + 1] = PAPER[1]; target[i + 2] = PAPER[2]; list.push([p, T.erase[1] - .3, .3]); }
   // the pen: each new wall drawn from one end to the other, one after another
   drawParts.sort(order);
   const slot = (T.draw[1] - T.draw[0]) / Math.max(1, drawParts.length);
@@ -200,7 +237,7 @@ function changes(O, C, Ci) {
     }
   });
   list.sort((a, b) => a[1] - b[1]);
-  return { list, target };
+  return { list, target, drawn: dr, erased: er };
 }
 
 // Step 3: the model, read from the revised plan.
@@ -326,8 +363,28 @@ async function start() {
 
   const [io, ic, ir] = await Promise.all(['img/plan-jh-original-no-ac.webp', 'img/plan-jh-changes-construction-wall.webp', 'img/plan-jh-revised-no-ac.webp'].map(load));
   const O = pixels(io), C = pixels(ic), R = pixels(ir);
-  const Oi = inkify(O), Ci = inkify(C);
-  const ch = changes(O, C, Ci);
+  // The drawing is built from the walls of the owner's clean revised plan (solid and crisp), not traced
+  // from the scan: "after" = those walls with the new ones in olive; "before" = the same walls without
+  // the new ones, plus the old walls that come out (taken from the developer's plan where they are erased).
+  const ch0 = changes(O, C, inkify(C));
+  const NEW_RECTS = [[560, 584, 72, 12], [954, 438, 11, 272], [904, 700, 61, 10]];   // walls the revised plan draws only as thin lines
+  const BASE_RECTS = [[520, 584, 40, 12], [527, 586, 9, 110]];                        // existing walls next to them, kept in charcoal
+  const newWalls = new Uint8Array(ch0.drawn);
+  for (const [x0, y0, w, hh] of NEW_RECTS) for (let y = y0; y < y0 + hh; y++) for (let x = x0; x < x0 + w; x++) newWalls[y * W + x] = 1;
+  const grow = (m, rr) => { const o = new Uint8Array(W * H); for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) if (m[y * W + x]) for (let dy = -rr; dy <= rr; dy++) for (let dx = -rr; dx <= rr; dx++) { const xx = x + dx, yy = y + dy; if (xx >= 0 && yy >= 0 && xx < W && yy < H) o[yy * W + xx] = 1; } return o; };
+  const newNear = grow(newWalls, 3);
+  const Rm = wallMask(R), Om = wallMask(O);
+  const inRect = (p, [x0, y0, w, hh]) => { const x = p % W, y = p / W | 0; return x >= x0 && x < x0 + w && y >= y0 && y < y0 + hh; };
+  const after = new Uint8Array(W * H), before = new Uint8Array(W * H);
+  for (let p = 0; p < W * H; p++) {
+    if (Rm[p] && !newNear[p] && !inRect(p, [548, 436, 22, 158])) { after[p] = 1; before[p] = 1; }   // not the double line the olive new wall replaces
+    if (Om[p] && ch0.erased[p]) before[p] = 1;            // the walls that come out
+  }
+  for (const [x0, y0, w, hh] of BASE_RECTS) for (let y = y0; y < y0 + hh; y++) for (let x = x0; x < x0 + w; x++) { after[y * W + x] = 1; before[y * W + x] = 1; }
+  // drop specks: anything smaller than a short piece of wall
+  for (const m of [before, after]) for (const pt of parts(m, 2, 1)) if (pt.px.length < 220) for (const p of pt.px) m[p] = 0;
+  const Oi = renderPlan(before, null), Ti = renderPlan(after, newWalls);
+  const ch = changes(Oi, Ti, Ti);
   const model = readModel(R);
 
   // the drawing sheet: one canvas, used as the floor texture throughout
@@ -342,6 +399,28 @@ async function start() {
     for (let x = 0; x < W; x += 63) { g.beginPath(); g.moveTo(x, 0); g.lineTo(x, H); g.stroke(); }
     for (let y = 0; y < H; y += 63) { g.beginPath(); g.moveTo(0, y); g.lineTo(W, y); g.stroke(); }
     g.globalAlpha = .3; g.globalCompositeOperation = 'multiply'; g.drawImage(revisedImg, 0, 0); }
+  // room names in the site's small spaced capitals: [name, x, y, appears (s), goes (s)]
+  const LABELS = [
+    ['Safe room', 190, 245], ['Bedroom', 345, 630], ['Bath', 515, 205], ['Entry', 700, 255],
+    ['Dining', 700, 760], ['Living', 690, 1080], ['Balcony', 262, 1165],
+    ['Kitchen', 1078, 640, null, T.erase[0]],
+    ['Bedroom 3', 1078, 640, T.draw[1] - .6], ['Kitchen', 840, 548, T.draw[1] - .3]
+  ];
+  function drawLabels(t) {
+    sg.save();
+    sg.font = '600 23px "Hanken Grotesk", Helvetica, Arial, sans-serif';
+    sg.textAlign = 'center'; sg.textBaseline = 'middle';
+    try { sg.letterSpacing = '4px'; } catch (e) {}
+    for (const [name, x, y, from, to] of LABELS) {
+      let a = 1;
+      if (from != null) a *= clamp01((t - from) / .6);
+      if (to != null) a *= 1 - clamp01((t - to) / .8);
+      if (a <= 0) continue;
+      sg.globalAlpha = a * .72; sg.fillStyle = 'rgb(70,64,56)';
+      sg.fillText(name.toUpperCase(), x, y);
+    }
+    sg.restore();
+  }
   let done = 0;                             // changed pixels before this index are finished
   function sheetAt(t) {
     const L = ch.list, tg = ch.target, d = cur.data, o = Oi.data;
@@ -355,8 +434,10 @@ async function start() {
       if (a < 1) allDone = false; else if (allDone) done = k + 1;
     }
     const f = ease(span(t, ...T.floor));
-    if (moved || t < 1 || f > 0 && f < 1 || sheetAt.k !== f) {
+    const fading = t > T.erase[0] - .1 && t < T.erase[0] + 1.2 || t > T.draw[1] - .9 && t < T.draw[1] + .5;
+    if (moved || fading || t < 1 || f > 0 && f < 1 || sheetAt.k !== f) {
       sg.putImageData(cur, 0, 0);
+      drawLabels(t);
       if (f > 0) { sg.globalAlpha = f; sg.drawImage(tiled, 0, 0); sg.globalAlpha = 1; }
       sheetAt.k = f;
       return true;
