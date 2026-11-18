@@ -675,11 +675,21 @@ const bush = new THREE.Mesh(new THREE.IcosahedronGeometry(h(40), 1), mats.leaf);
   for (const y of [470, 492]) add(787, y, 105, 1.4, 1.2, mats.dark, 50, .001);
   add(890, 520, 2, 58, 58, mats.black, 18, .004);                          // oven door, facing the U
   add(890, 523, 2.5, 52, 2, mats.steel, 70, .002);
-  add(797, 452, 58, 38, 1, mats.steel, 90, .01);                           // sinks
-  add(752, 596, 60, 42, 1, mats.steel, 90, .01);
+  // two 40 cm sinks (owner, Nov 18): one in the east run under the uppers, beside the oven, as in the
+  // kitchen photo; one in the bar. Each with a gooseneck tap on the far side from where you stand.
+  add(906, 458, 36, 42, 1, mats.steel, 90, .01);                           // east-run sink
+  add(752, 598, 42, 36, 1, mats.steel, 90, .01);                           // bar sink
   add(849, 594, 62, 46, 1, mats.black, 90, .008);                          // hob
   for (const [bx, by] of [[862, 606], [895, 606], [862, 629], [895, 629]]) cyl(bx, by, 5, 1.5, mats.dark, 91);
-  cyl(826, 446, 1.6, 30, mats.steel, 90); cyl(782, 590, 1.6, 34, mats.steel, 90);   // taps
+  // a gooseneck tap: a post, then a spout reaching over the sink (dx, dy point toward the sink, px)
+  const tap = (x, y, dx, dy) => {
+    cyl(x, y, 2.2, 3, mats.steel, 90);
+    cyl(x, y, 1.3, 30, mats.steel, 93);
+    add(Math.min(x, x + dx) - 1, Math.min(y, y + dy) - 1, Math.abs(dx) + 2, Math.abs(dy) + 2, 2.4, mats.steel, 121, .004);
+    cyl(x + dx, y + dy, 1.1, 6, mats.steel, 116);
+  };
+  tap(949, 479, -16, 0);                                                    // east-run sink: tap at the wall
+  tap(773, 640, 0, -15);                                                    // bar sink: tap on the bar side
   add(922, 440, 34, 160, 70, mats.lacquer, 145, .006);                     // uppers over the oven, east wall
   for (const y of [480, 520, 560]) add(921, y, 1.2, 1.2, 66, mats.dark, 147, .001);
   for (const sx of [760, 823]) {                                          // two stools at the bar
