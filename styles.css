@@ -1049,3 +1049,35 @@ nav.links .menu-panel a:first-child{border-top:0}
 .closet-plan .glass path{stroke:#2E2B27;stroke-width:1.2;fill:none}
 .closet-plan .tiny{font:600 9px var(--body);letter-spacing:.16em;fill:#9a948a}
 .closet-plan .note{font-size:10.5px}
+
+/* ---- Project opening, like the home page: the photo full width, the words on a faded side (Nov 18) ---- */
+.case-hero{position:relative;min-height:calc(100svh - 70px);display:flex;align-items:center;overflow:hidden}
+.case-hero-pic{position:absolute;inset:0}
+.case-hero-pic img{width:100%;height:100%;object-fit:cover;object-position:62% 50%;max-width:none}
+.case-hero-scrim{position:absolute;inset:0;background:linear-gradient(90deg,color-mix(in srgb,var(--stone) 95%,transparent) 0%,color-mix(in srgb,var(--stone) 86%,transparent) 40%,color-mix(in srgb,var(--stone) 0%,transparent) 68%)}
+.case-hero-copy{position:relative;z-index:1;display:grid;gap:18px;padding-block:56px;width:100%}
+.case-hero-copy>*{max-width:560px}
+.case-hero-copy .back{justify-self:start}
+.case-hero h1{font-size:clamp(48px,6.4vw,96px);line-height:.98}
+.case-hero h1 em{color:var(--olive)}
+.case-hero .niche-strong{margin:4px 0 6px}
+.case-hero .brief{background:color-mix(in srgb,var(--olive-soft) 88%,transparent)}
+@media (max-width:900px){
+  .case-hero{align-items:flex-end;min-height:calc(100svh - 64px)}
+  .case-hero-pic img{object-position:70% 30%}
+  .case-hero-scrim{background:linear-gradient(0deg,color-mix(in srgb,var(--stone) 97%,transparent) 0%,color-mix(in srgb,var(--stone) 92%,transparent) 58%,color-mix(in srgb,var(--stone) 0%,transparent) 86%)}
+  .case-hero h1{font-size:clamp(40px,11vw,60px)}
+  .case-hero-copy{padding-block:32px 36px;gap:14px}
+}
+@media (min-width:901px){
+  .case-hero-scrim{background:linear-gradient(90deg,color-mix(in srgb,var(--stone) 96%,transparent) 0%,color-mix(in srgb,var(--stone) 90%,transparent) 44%,color-mix(in srgb,var(--stone) 0%,transparent) 76%)}
+  .case-hero-pic img{object-position:85% 50%}
+  .case-hero-copy>*{max-width:520px}
+}
+@media (max-width:900px){
+  .case-hero{display:block;min-height:0;padding-top:40svh}
+  .case-hero-pic{inset:0 0 auto 0;height:60svh}
+  .case-hero-pic img{object-position:74% 62%}
+  .case-hero-scrim{background:linear-gradient(180deg,color-mix(in srgb,var(--stone) 0%,transparent) 0,color-mix(in srgb,var(--stone) 0%,transparent) 28svh,color-mix(in srgb,var(--stone) 92%,transparent) 46svh,var(--stone) 60svh)}
+  .case-hero-copy{padding-block:0 40px}
+}

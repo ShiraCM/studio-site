@@ -95,7 +95,7 @@ function parts(mask, reach = 2, min = 40) {
 const INK = [70, 82, 46];                   // new walls are drawn in a deep olive, so they stand out from the charcoal existing walls
 const PAPER = [247, 244, 237], INKLINE = [46, 43, 39];
   const BALCONY = [[185, 1025, 340, 260], [185, 820, 150, 205]];
-  const PLAN_WINDOWS = [[72, 404, 94, 32], [904, 884, 26, 132], [930, 790, 134, 24], [330, 916, 34, 52]];   // in the gaps of the walls below
+  const PLAN_WINDOWS = [[72, 404, 94, 32], [904, 884, 26, 132], [930, 790, 134, 24], [330, 916, 34, 52], [216, 792, 114, 28]];   // the last: the bedroom window onto the balcony (owner, Nov 18: a window, not a door)   // in the gaps of the walls below
   function renderPlan(walls, drawn, extra = []) {
 const img = new ImageData(W, H), d = img.data;
 const put = (p, c) => { const i = p * 4; d[i] = c[0]; d[i + 1] = c[1]; d[i + 2] = c[2]; d[i + 3] = 255; };
@@ -458,13 +458,12 @@ async function start() {
   // The model is built from the same clean walls as the drawing (KEEP + NEW), so its walls are as
   // straight as the plan's (owner, Nov 18: "lots of jagged edges"). Windows and doorways fill the
   // gaps between them: a beam above each, glass in the windows, an oak frame in each doorway.
-  const WINDOWS = PLAN_WINDOWS.map((r, i) => [...r, [100, 60, 90, 110][i]]);   // sill height in cm
+  const WINDOWS = PLAN_WINDOWS.map((r, i) => [...r, [100, 60, 90, 110, 90][i]]);   // sill height in cm
   const DOORS = [
     [376, 320, 28, 76],      // safe room
     [472, 288, 72, 20],      // bathroom
     [650, 88, 108, 22],      // front door
     [404, 430, 64, 16],      // bedroom
-    [216, 792, 114, 28],     // bedroom to the balcony
     [364, 790, 88, 18],      // bedroom's en-suite
     [904, 712, 26, 78],      // the new third bedroom
     [522, 1076, 18, 132]     // living room to the balcony
