@@ -346,12 +346,14 @@ async function start() {
   const poche = new THREE.MeshStandardMaterial({ color: 0x2a2825, roughness: .8 });
   // the windows (plan px [x, y, w, d], sill in cm), read off the plan: wall gaps the plan crosses with
   // window lines. The detector also flags the front door and the pantry niche, so they are listed by hand.
-  const WINDOWS = [[80, 408, 90, 32, 100], [230, 795, 100, 20, 0], [335, 805, 30, 195, 90], [910, 880, 20, 140, 60], [935, 795, 135, 15, 90]];
+  const WINDOWS = [[80, 410, 90, 25, 100], [910, 885, 20, 135, 60], [935, 795, 135, 15, 90], [335, 915, 25, 60, 110]];
+  // doorways get only the wall above the opening, never glass (the main bedroom’s door to the balcony)
+  const DOORS = [[230, 795, 100, 20]];
   // new walls that the revised plan draws only as thin lines: the wall that wraps the bar
   // (the children's room wall, then a short return under the bar)
   // and the short wall that closes the fridge niche on the living-room side (white, as seen from the salon)
-  model.runs.push([954, 438, 11, 272], [904, 700, 61, 10], [904, 686, 10, 24], [527, 586, 105, 10], [527, 586, 9, 100]);
-  const blocks = [...model.runs.map(r => [r, 0, WALL]), ...WINDOWS.map(([x, y, w, d]) => [[x, y, w, d], HEAD, WALL])];
+  model.runs.push([954, 438, 11, 272], [904, 700, 61, 10], [527, 586, 105, 10], [527, 586, 9, 100]);
+  const blocks = [...model.runs.map(r => [r, 0, WALL]), ...[...WINDOWS, ...DOORS].map(([x, y, w, d]) => [[x, y, w, d], HEAD, WALL])];
   const built = new THREE.Group(); scene.add(built);
   const walls = new THREE.InstancedMesh(unit, plaster, blocks.length);
   const caps = new THREE.InstancedMesh(unit, poche, blocks.length);
@@ -373,7 +375,8 @@ async function start() {
   for (const [x, y, w, d, sillcm] of WINDOWS) {
     const horiz = w >= d, long = Math.max(w, d), sill = h(Math.max(2, sillcm));
     if (sill > h(5)) slab(x, y, w, d, 0, sill, plaster);
-    const px = horiz ? x : x + d / 2 - 2, py = horiz ? y + d / 2 - 2 : y, pw = horiz ? w : 4, pd = horiz ? 4 : d;
+    // the glass is centred in the wall's thickness (w for a north-south wall, d for an east-west one)
+    const px = horiz ? x : x + w / 2 - 2, py = horiz ? y + d / 2 - 2 : y, pw = horiz ? w : 4, pd = horiz ? 4 : d;
     slab(px, py, pw, pd, sill, HEAD, glassMat);
     slab(px, py, pw, pd, sill, sill + h(5), frameMat);
     slab(px, py, pw, pd, HEAD - h(5), HEAD, frameMat);
@@ -534,7 +537,7 @@ async function start() {
       add(x, y, w, 4, 22, mats.white, 150, .004);                             // guard rail
       add(x + w - 12, y + d - 4, 10, 4, 140, mats.white, 0, .003);            // ladder
       rug(1005, 600, 165, 120, mats.rugKids);
-      begin(); add(963, 450, 4, 350, 250, mats.sageWall, 0, .002);            // the sage wallpaper wall
+      begin(); add(963, 450, 4, 250, 250, mats.sageWall, 0, .002);   // stops short of the doorway at the room’s south-west corner            // the sage wallpaper wall
     } else if (!inSafe(r)) {
       // main bedroom: grey upholstered headboards, white duvets, blue-grey and charcoal throws
       bed(x, y, w, d, 'w', { base: mats.greyUph, duvet: mats.ivory, throw: y < 520 ? mats.blueGrey : mats.taupe, headMat: mats.greyUph, accent: mats.blueGrey, pillows: 2 });
