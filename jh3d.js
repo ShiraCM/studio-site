@@ -739,8 +739,9 @@ const bush = new THREE.Mesh(new THREE.IcosahedronGeometry(h(36), 1), mats.leaf);
   // kitchen photo; one in the bar. Each with a gooseneck tap on the far side from where you stand.
   add(906, 510, 36, 42, 1, mats.steel, 90, .01);   // its left side against the seam of the two worktops                           // east-run sink
   add(752, 598, 42, 36, 1, mats.steel, 90, .01);                           // bar sink
-  add(899, 576, 46, 62, 1, mats.black, 90, .008);                          // hob, in the corner
-  for (const [bx, by] of [[911, 591], [933, 591], [911, 623], [933, 623]]) cyl(bx, by, 5, 1.5, mats.dark, 91);
+  // hob: set across the inside corner on a 45-degree angle, its front edge facing into the U (owner, Nov 18)
+  add(890, 582, 52, 52, 1, mats.black, 90, .008).rotation.y = Math.PI / 4;
+  for (const [bx, by] of [[916, 590], [916, 626], [898, 608], [934, 608]]) cyl(bx, by, 5, 1.5, mats.dark, 91);
   // a gooseneck tap: a post, then a spout reaching over the sink (dx, dy point toward the sink, px)
   const tap = (x, y, dx, dy) => {
     cyl(x, y, 2.2, 3, mats.steel, 90);
