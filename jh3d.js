@@ -95,7 +95,7 @@ function parts(mask, reach = 2, min = 40) {
 const INK = [70, 82, 46];                   // new walls are drawn in a deep olive, so they stand out from the charcoal existing walls
 const PAPER = [247, 244, 237], INKLINE = [46, 43, 39];
   const BALCONY = [[185, 1025, 340, 260], [185, 820, 150, 205]];
-  const PLAN_WINDOWS = [[80, 410, 90, 25], [910, 885, 20, 135], [935, 795, 135, 15], [335, 915, 25, 60]];
+  const PLAN_WINDOWS = [[72, 404, 94, 32], [904, 884, 26, 132], [930, 790, 134, 24], [330, 916, 34, 52]];   // in the gaps of the walls below
   function renderPlan(walls, drawn, extra = []) {
 const img = new ImageData(W, H), d = img.data;
 const put = (p, c) => { const i = p * 4; d[i] = c[0]; d[i + 1] = c[1]; d[i + 2] = c[2]; d[i + 3] = 255; };
@@ -351,7 +351,7 @@ async function start() {
     [904, 688, 26, 102]                                         // between the old kitchen and the dining area
   ];
   const NEW = [
-    [468, 432, 32, 14], [522, 446, 18, 134], [560, 580, 72, 16], // closets and fridge niche
+    [468, 432, 32, 14], [552, 446, 14, 134], [560, 580, 72, 16], // closets and fridge niche
     [952, 436, 20, 276], [904, 696, 68, 16]                     // the third bedroom
   ];
   const rectMask = list => { const m = new Uint8Array(W * H); for (const [x0, y0, w, hh] of list) for (let y = y0; y < y0 + hh; y++) for (let x = x0; x < x0 + w; x++) m[y * W + x] = 1; return m; };
@@ -453,17 +453,21 @@ async function start() {
   const WALL = h(260), HEAD = h(212);
   const plaster = new THREE.MeshStandardMaterial({ color: 0xf3efe8, roughness: .9 });
   const poche = new THREE.MeshStandardMaterial({ color: 0x2a2825, roughness: .8 });
-  // the windows (plan px [x, y, w, d], sill in cm), read off the plan: wall gaps the plan crosses with
-  // window lines. The detector also flags the front door and the pantry niche, so they are listed by hand.
-  const WINDOWS = [[80, 410, 90, 25, 100], [910, 885, 20, 135, 60], [935, 795, 135, 15, 90], [335, 915, 25, 60, 110]];
-  // doorways get only the wall above the opening, never glass (the main bedroom’s door to the balcony)
-  const overlaps = ([ax, ay, aw, ad], [bx, by, bw, bd]) => ax < bx + bw && bx < ax + aw && ay < by + bd && by < ay + ad;
-  const DOORS = [[230, 795, 100, 20], ...model.doors.filter(dr => Math.min(dr[2], dr[3]) >= 16 && !overlaps(dr, [515, 400, 130, 200]) && !WINDOWS.some(w => overlaps(dr, w)) && !overlaps(dr, [230, 795, 100, 20]))];   // real walls only, not the pantry niche
-  // new walls that the revised plan draws only as thin lines: the wall that wraps the bar
-  // (the children's room wall, then a short return under the bar)
-  // and the short wall that closes the fridge niche on the living-room side (white, as seen from the salon)
-  model.runs.push([954, 438, 11, 272], [904, 700, 61, 10], [527, 586, 105, 10], [527, 586, 9, 100]);
-  const blocks = [...model.runs.map(r => [r, 0, WALL]), ...[...WINDOWS, ...DOORS].map(([x, y, w, d]) => [[x, y, w, d], HEAD, WALL])];
+  // The model is built from the same clean walls as the drawing (KEEP + NEW), so its walls are as
+  // straight as the plan's (owner, Nov 18: "lots of jagged edges"). Windows and doorways fill the
+  // gaps between them: a beam above each, glass in the windows, an oak frame in each doorway.
+  const WINDOWS = PLAN_WINDOWS.map((r, i) => [...r, [100, 60, 90, 110][i]]);   // sill height in cm
+  const DOORS = [
+    [376, 320, 28, 76],      // safe room
+    [472, 288, 72, 20],      // bathroom
+    [650, 88, 108, 22],      // front door
+    [404, 430, 64, 16],      // bedroom
+    [216, 792, 114, 28],     // bedroom to the balcony
+    [364, 790, 88, 18],      // bedroom's en-suite
+    [904, 712, 26, 78],      // the new third bedroom
+    [522, 1076, 18, 132]     // living room to the balcony
+  ];
+  const blocks = [...KEEP, ...NEW].map(r => [r, 0, WALL]).concat([...WINDOWS, ...DOORS].map(([x, y, w, d]) => [[x, y, w, d], HEAD, WALL]));
   const built = new THREE.Group(); scene.add(built);
   const walls = new THREE.InstancedMesh(unit, plaster, blocks.length);
   const caps = new THREE.InstancedMesh(unit, poche, blocks.length);
@@ -694,13 +698,12 @@ const rail = (x, y, w, d) => { add(x, y, w, d, 100, mats.glass, 4, .002); add(x 
 rail(185, 820, 4, 465); rail(185, 1281, 340, 4);
 begin(); add(330, 1110, 52, 52, 3, mats.black, 70, .01); cyl(356, 1136, 2, 70, mats.black);
 for (const [cx, cy] of [[270, 1112], [400, 1160]]) { begin(); add(cx, cy, 46, 46, 6, mats.linen, 40, .02); add(cx, cy, 46, 6, 80, mats.black, 0, .01); for (const [lx, ly] of [[cx + 3, cy + 3], [cx + 41, cy + 3], [cx + 3, cy + 41], [cx + 41, cy + 41]]) cyl(lx, ly, 1.2, 40, mats.black); }
-begin(); add(200, 1230, 46, 46, 50, mats.terracotta, 0, .02);
-const bush = new THREE.Mesh(new THREE.IcosahedronGeometry(h(40), 1), mats.leaf); bush.position.set(wx(223), h(85), wz(1253)); bush.castShadow = true; item.add(bush);
+begin(); add(444, 1051, 42, 42, 50, mats.terracotta, 0, .02);   // the planter stands against the house wall, well inside the railing
+const bush = new THREE.Mesh(new THREE.IcosahedronGeometry(h(36), 1), mats.leaf); bush.position.set(wx(465), h(84), wz(1072)); bush.castShadow = true; item.add(bush);
 
-  // the bedroom side of the new kitchen: a thin partition, then the pantry and the fridge,
+  // the bedroom side of the new kitchen: the partition (a wall, NEW), then the pantry and the fridge,
   // their doors facing the kitchen (east)
   begin();
-  add(555, 443, 10, 147, 260, plaster, 0, .002);
   add(565, 443, 64, 72, 250, mats.lacquer, 0, .01);                       // pantry: two doors and pulls
   add(628.6, 478, 1.2, 1.2, 246, mats.dark, 2, .001);
   add(629, 470, 1.6, 2.4, 90, mats.steel, 90, .002); add(629, 484, 1.6, 2.4, 90, mats.steel, 90, .002);
