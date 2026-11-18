@@ -1112,3 +1112,12 @@ nav.links .menu-panel a:first-child{border-top:0}
 .al-zoom span{position:absolute;transform:translate(-50%,-50%);background:rgba(250,248,243,.94);color:#2E2B27;font:600 10.5px/1.25 var(--body);letter-spacing:.12em;text-transform:uppercase;padding:5px 8px;border-radius:1px;white-space:nowrap;box-shadow:0 2px 8px -4px rgba(0,0,0,.25)}
 @media (max-width:760px){.al-pair{grid-template-columns:1fr}}
 .al-zoom{aspect-ratio:485/340;background-size:412.4% auto;background-position:72.3% 25.9%}
+
+/* Expanded living space: the primary bedroom's closet close-up (Nov 18) */
+.closet-plan .old{fill:none;stroke:#2E2B27;stroke-width:1.4;stroke-dasharray:6 5;opacity:.55}
+@media (prefers-reduced-motion:no-preference){.closet-plan.armed .dim .d.len{stroke-dasharray:210;stroke-dashoffset:210}.closet-plan.armed.in .dim .d.len{stroke-dashoffset:0}}
+
+/* Projects: two projects, both shown large, the second with its picture on the right (Nov 18) */
+.pcard-flip{grid-template-columns:minmax(0,1fr) minmax(0,1.5fr)}
+.pcard-flip .pcard-img{order:2}
+@media (max-width:900px){.pcard-flip{grid-template-columns:1fr}.pcard-flip .pcard-img{order:0}}

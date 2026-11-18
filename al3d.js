@@ -557,7 +557,7 @@ async function start() {
   cyl(1695, 1000, 4, 2, mats.dark, 52); cyl(1695, 1000, .8, 40, mats.dark, 54); cyl(1688, 1000, 6, 8, mats.dark, 90, 4);
   rug(1420, 900, 150, 200, mats.jute);
   closet(1322, 740, 74, 394, 'e', mats.white, 6);                          // owner: the full length of the west wall
-  closet(1512, 738, 196, 78, 's', mats.white, 4);
+  closet(1512, 738, 204, 80, 'n', mats.putty, 4);                        // the primary bedroom's closet, opening north into it (owner)
   begin(); add(1490, 1124, 142, 8, 45, mats.linen, 165, .01);
 
   // --- balcony: stone deck, glass railing, two chairs and a table, an olive in a planter
