@@ -124,14 +124,39 @@ return m;
   }
   const BALCONY = [[185, 1025, 340, 260], [185, 820, 150, 205]];
   const PLAN_WINDOWS = [[80, 410, 90, 25], [910, 885, 20, 135], [935, 795, 135, 15], [335, 915, 25, 60]];
+// straighten: snap a mask to a 4 px grid by majority, shave one-cell bumps and fill one-cell notches,
+// so every wall edge runs straight (owner, Nov 18: "sloppy fill in the lines")
+function snapMask(m, S = 4) {
+  const cw = Math.ceil(W / S), chh = Math.ceil(H / S);
+  let cell = new Uint8Array(cw * chh);
+  for (let cy = 0; cy < chh; cy++) for (let cx = 0; cx < cw; cx++) {
+    let n = 0, tot = 0;
+    for (let y = cy * S; y < Math.min(H, cy * S + S); y++) for (let x = cx * S; x < Math.min(W, cx * S + S); x++) { tot++; n += m[y * W + x]; }
+    cell[cy * cw + cx] = n * 2 >= tot ? 1 : 0;
+  }
+  const at = (c, x, y) => x >= 0 && y >= 0 && x < cw && y < chh ? c[y * cw + x] : 0;
+  for (let pass = 0; pass < 2; pass++) {
+    const nx = new Uint8Array(cell);
+    for (let y = 0; y < chh; y++) for (let x = 0; x < cw; x++) {
+      const nb = at(cell, x - 1, y) + at(cell, x + 1, y) + at(cell, x, y - 1) + at(cell, x, y + 1);
+      if (cell[y * cw + x] && nb <= 1) nx[y * cw + x] = 0;
+      if (!cell[y * cw + x] && nb >= 3) nx[y * cw + x] = 1;
+    }
+    cell = nx;
+  }
+  const out = new Uint8Array(W * H);
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) out[y * W + x] = cell[(y / S | 0) * cw + (x / S | 0)];
+  return out;
+}
   function renderPlan(walls, drawn, extra = []) {
 const img = new ImageData(W, H), d = img.data;
 const put = (p, c) => { const i = p * 4; d[i] = c[0]; d[i + 1] = c[1]; d[i + 2] = c[2]; d[i + 3] = 255; };
 const grid = PAPER.map((v, k) => Math.round(v * .82 + INKLINE[k] * .18));
 for (let p = 0; p < W * H; p++) put(p, PAPER);
 for (const [bx, by, bw, bh] of BALCONY) for (let y = by; y < by + bh; y++) for (let x = bx; x < bx + bw; x++) if ((x - 185) % 42 === 0 || (y - 820) % 42 === 0) put(y * W + x, grid);
-for (let p = 0; p < W * H; p++) if (walls[p]) put(p, INKLINE);
-if (drawn) for (let p = 0; p < W * H; p++) if (drawn[p]) put(p, INK);
+const ws = snapMask(walls);
+for (let p = 0; p < W * H; p++) if (ws[p]) put(p, INKLINE);
+if (drawn) { const ds = snapMask(drawn); for (let p = 0; p < W * H; p++) if (ds[p]) put(p, INK); }
 for (const [x0, y0, w, hh] of PLAN_WINDOWS) {
   const horiz = w >= hh;
   for (const f of [.3, .7]) {
@@ -348,7 +373,7 @@ async function start() {
   THREE = await import('./vendor/three.module.min.js');
   const view = box.querySelector('.jh-view');
   const fallback = box.querySelector('.jh-fallback');
-  if (fallback) fallback.src = 'img/plan-jh-original-no-ac.webp';   // while it gets ready, show where it starts
+  if (fallback) fallback.style.visibility = 'hidden';   // no scan flashes while the drawing gets ready
   const stepEl = box.querySelector('.jh-tag .k3d-tag-step');
   const noteEl = box.querySelector('.jh-tag-note');
   const legend = box.querySelector('.jh-legend');
@@ -377,8 +402,8 @@ async function start() {
   const inRect = (p, [x0, y0, w, hh]) => { const x = p % W, y = p / W | 0; return x >= x0 && x < x0 + w && y >= y0 && y < y0 + hh; };
   const after = new Uint8Array(W * H), before = new Uint8Array(W * H);
   for (let p = 0; p < W * H; p++) {
-    if (Rm[p] && !newNear[p] && !inRect(p, [548, 436, 22, 158])) { after[p] = 1; before[p] = 1; }   // not the double line the olive new wall replaces
-    if (Om[p] && ch0.erased[p]) before[p] = 1;            // the walls that come out
+    if (Rm[p] && !newNear[p] && !inRect(p, [548, 436, 22, 158]) && !inRect(p, [556, 576, 82, 22])) { after[p] = 1; before[p] = 1; }   // not the double line the olive new wall replaces
+    if (Om[p] && ch0.erased[p] && !newNear[p]) before[p] = 1;            // the walls that come out (not where a new wall goes)
   }
   for (const [x0, y0, w, hh] of BASE_RECTS) for (let y = y0; y < y0 + hh; y++) for (let x = x0; x < x0 + w; x++) { after[y * W + x] = 1; before[y * W + x] = 1; }
   // drop specks: anything smaller than a short piece of wall
@@ -403,7 +428,7 @@ async function start() {
   const LABELS = [
     ['Safe room', 190, 245], ['Bedroom', 345, 630], ['Bath', 515, 205], ['Entry', 700, 255],
     ['Dining', 700, 760], ['Living', 690, 1080], ['Balcony', 262, 1165],
-    ['Kitchen', 1078, 640, null, T.erase[0]],
+    ['Kitchen', 1078, 640, null, T.erase[0]], ['Utility\nroom', 830, 512, null, T.erase[0]],
     ['Bedroom 3', 1078, 640, T.draw[1] - .6], ['Kitchen', 840, 548, T.draw[1] - .3]
   ];
   function drawLabels(t) {
@@ -417,7 +442,7 @@ async function start() {
       if (to != null) a *= 1 - clamp01((t - to) / .8);
       if (a <= 0) continue;
       sg.globalAlpha = a * .72; sg.fillStyle = 'rgb(70,64,56)';
-      sg.fillText(name.toUpperCase(), x, y);
+      name.toUpperCase().split('\n').forEach((line, k, all) => sg.fillText(line, x, y + (k - (all.length - 1) / 2) * 30));
     }
     sg.restore();
   }
@@ -754,11 +779,11 @@ const bush = new THREE.Mesh(new THREE.IcosahedronGeometry(h(40), 1), mats.leaf);
   // drawer joints along the north run, door joints along the bar
   for (const x of [822, 857]) add(x, 506, 1.2, 2, 70, mats.dark, 14, .001);
   for (const y of [470, 492]) add(787, y, 105, 1.4, 1.2, mats.dark, 50, .001);
-  add(890, 520, 2, 58, 58, mats.black, 18, .004);                          // oven door, facing the U
-  add(890, 523, 2.5, 52, 2, mats.steel, 70, .002);
+  add(852, 582, 58, 2, 58, mats.black, 18, .004);   // oven under the hob, facing into the U                          // oven door, facing the U
+  add(855, 581.5, 52, 2.5, 2, mats.steel, 70, .002);
   // two 40 cm sinks (owner, Nov 18): one in the east run under the uppers, beside the oven, as in the
   // kitchen photo; one in the bar. Each with a gooseneck tap on the far side from where you stand.
-  add(906, 458, 36, 42, 1, mats.steel, 90, .01);                           // east-run sink
+  add(906, 510, 36, 42, 1, mats.steel, 90, .01);   // its left side against the seam of the two worktops                           // east-run sink
   add(752, 598, 42, 36, 1, mats.steel, 90, .01);                           // bar sink
   add(849, 594, 62, 46, 1, mats.black, 90, .008);                          // hob
   for (const [bx, by] of [[862, 606], [895, 606], [862, 629], [895, 629]]) cyl(bx, by, 5, 1.5, mats.dark, 91);
@@ -769,9 +794,11 @@ const bush = new THREE.Mesh(new THREE.IcosahedronGeometry(h(40), 1), mats.leaf);
     add(Math.min(x, x + dx) - 1, Math.min(y, y + dy) - 1, Math.abs(dx) + 2, Math.abs(dy) + 2, 2.4, mats.steel, 121, .004);
     cyl(x + dx, y + dy, 1.1, 6, mats.steel, 116);
   };
-  tap(949, 479, -16, 0);                                                    // east-run sink: tap at the wall
+  tap(949, 531, -16, 0);                                                    // east-run sink: tap at the wall
   tap(773, 640, 0, -15);                                                    // bar sink: tap on the bar side
   add(922, 440, 34, 160, 70, mats.lacquer, 145, .006);                     // uppers over the oven, east wall
+  add(787, 440, 135, 34, 70, mats.lacquer, 145, .006);                     // uppers on the back wall too
+  for (const x of [832, 877]) add(x, 474, 1.2, 1.2, 66, mats.dark, 147, .001);
   for (const y of [480, 520, 560]) add(921, y, 1.2, 1.2, 66, mats.dark, 147, .001);
   for (const sx of [760, 823]) {                                          // two stools at the bar
     begin(); cyl(sx + 19, 728, 19, 5, mats.linen, 62, 18);
