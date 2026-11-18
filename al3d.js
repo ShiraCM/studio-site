@@ -246,17 +246,12 @@ async function start() {
     g.fillStyle = '#c29468'; g.fillRect(0, 0, w, hh);
     for (let x = 0; x < w; x += 8) { g.fillStyle = '#7d5a3a'; g.globalAlpha = .55; g.fillRect(x, 0, 2, hh); g.globalAlpha = .12; g.fillStyle = '#fff'; g.fillRect(x + 3, 0, 2, hh); }
   }, [3, 1]);
-  const books = canvasTex(256, 256, (g, w, hh) => {   // the bookcase front: white shelves, rows of dark leather-bound books
-    g.fillStyle = '#f1eee8'; g.fillRect(0, 0, w, hh);
-    const cols = ['#27344d', '#5b2427', '#2f3a2e', '#3b2a22', '#6b5332', '#1f2633'];
-    for (let row = 0; row < 6; row++) {
-      const y0 = row * 42 + 4;
-      let x = 4 + seeded() * 20;
-      while (x < w - 10) { const bw = 5 + seeded() * 5, bh = 26 + seeded() * 10; g.fillStyle = cols[seeded() * cols.length | 0]; g.fillRect(x, y0 + 38 - bh, bw, bh); x += bw + (seeded() < .08 ? 18 : .6); }
-      g.fillStyle = '#e6e1d8'; g.fillRect(0, y0 + 38, w, 4);
-    }
-    for (let x = 0; x < w; x += 85) { g.fillStyle = '#e6e1d8'; g.fillRect(x, 0, 4, hh); }
-  });
+  const spines = base => canvasTex(64, 64, (g, w, hh) => {
+    g.fillStyle = base; g.fillRect(0, 0, w, hh);
+    for (let x = 0; x < w; x += 8) { g.fillStyle = 'rgba(0,0,0,.45)'; g.fillRect(x, 0, 1, hh); g.fillStyle = 'rgba(255,255,255,.07)'; g.fillRect(x + 2, 0, 2, hh); }
+    g.fillStyle = '#b8954f'; g.fillRect(0, 10, w, 3); g.fillRect(0, 48, w, 3);
+    g.fillStyle = 'rgba(200,165,90,.5)'; for (let x = 3; x < w; x += 8) g.fillRect(x, 26, 2, 6);
+  }, [3, 1]);
   const wallpaper = canvasTex(128, 128, (g, w, hh) => {   // safe room: a small tone-on-tone botanical print
     g.fillStyle = '#f2ebdf'; g.fillRect(0, 0, w, hh);
     g.strokeStyle = 'rgba(150,128,100,.55)'; g.lineWidth = 1;
@@ -295,7 +290,11 @@ async function start() {
     navy: M({ map: weave('#2f3a52') }),
     sheer: M({ color: 0xf4eee4, roughness: .9, transparent: true, opacity: .55 }),
     slats: M({ map: slats, roughness: .7 }),
-    books: M({ map: books, roughness: .8 }),
+    // leather-bound sets: a spine every few px, two gold bands
+    setBlue: M({ map: spines('#22314d'), roughness: .55 }),
+    setRed: M({ map: spines('#5a2226'), roughness: .55 }),
+    setGreen: M({ map: spines('#26352b'), roughness: .55 }),
+    setBlack: M({ map: spines('#1d1c1b'), roughness: .55 }),
     wallpaper: M({ map: wallpaper, roughness: .9 }),
     rattan: M({ map: weave('#c9a26b', 2), roughness: .8 }),
     jute: M({ map: weave('#c8b08a', 5), roughness: 1 }),
@@ -385,8 +384,8 @@ async function start() {
   add(62, 678, 74, 388, 4, mats.stoneWarm, 86, .006);                      // worktops
   add(62, 1062, 320, 72, 4, mats.stoneWarm, 86, .006);
   add(64, 680, 2, 382, 52, mats.stoneWarm, 90, .002);                      // stone backsplash on the back wall
-  add(64, 608, 240, 70, 232, mats.greige, 0, .008);                       // tall units on the north wall
-  for (const xx of [124, 184, 244]) add(xx, 677.5, 1.2, 1.2, 228, mats.dark, 2, .001);
+  add(64, 608, 390, 70, 232, mats.greige, 0, .008);                       // tall units along the whole north wall, to the entry corner (owner)
+  for (let xx = 124; xx < 454; xx += 60) add(xx, 677.5, 1.2, 1.2, 228, mats.dark, 2, .001);
   add(140, 678.5, 40, 1, 40, mats.black, 120, .002);                       // the oven at eye level
   add(64, 700, 38, 350, 104, mats.greige, 145, .006);                      // two rows of uppers, up to the ceiling
   add(101.5, 700, 1.2, 350, 1.2, mats.dark, 210, .001);
@@ -405,32 +404,56 @@ async function start() {
   for (const sy of [814, 954]) { begin(); cyl(386, sy, 18, 6, mats.linen, 64, 19); for (const [lx, ly] of [[374, sy - 12], [398, sy - 12], [374, sy + 12], [398, sy + 12]]) cyl(lx, ly, 1.2, 64, mats.steel); }
   for (const px of [290, 360]) { begin(); ball(px, 884, 14, 180, mats.globe); cyl(px, 884, .5, 66, mats.black, 194); cyl(px, 884, 3, 5, mats.brass, 190); }
 
-  // --- living: the sofa backs onto the dining area, an armchair across, a stone coffee table, a rug
-  rug(470, 800, 330, 260, mats.rugLiving);
+  // --- living, as in the dining picture (taken looking east): the armchair on the north side facing
+  // south, the sofa on the south side facing north with its back to the balcony doors, a round stone
+  // coffee table between them on a light rug, a floor lamp by the armchair
+  rug(590, 830, 310, 260, mats.rugLiving);
   begin();
-  add(790, 830, 92, 250, 42, mats.oatmeal, 0, .05);                       // seat
-  add(856, 830, 28, 250, 80, mats.oatmeal, 0, .05);                       // back
-  add(790, 830, 92, 24, 60, mats.oatmeal, 0, .05); add(790, 1056, 92, 24, 60, mats.oatmeal, 0, .05);
-  add(820, 870, 22, 38, 34, mats.ivory, 42, .06); add(820, 1010, 22, 38, 34, mats.ivory, 42, .06);
-  begin(); cyl(640, 930, 44, 36, mats.stoneWarm, 0, 44);                   // round travertine coffee table
-  begin(); cyl(520, 1040, 10, 30, mats.brass, 0, 4); cyl(520, 1040, 36, 40, mats.boucle, 30, 36);   // swivel armchair
-  add(486, 1006, 16, 68, 34, mats.boucle, 62, .06);
-  begin(); cyl(470, 1100, 12, 2, mats.brass); cyl(470, 1100, 1.4, 160, mats.brass, 2); cyl(500, 1080, 20, 14, mats.brass, 150, 12);   // floor lamp
+  add(620, 1020, 250, 92, 42, mats.oatmeal, 0, .05);                      // sofa seat
+  add(620, 1084, 250, 28, 80, mats.oatmeal, 0, .05);                      // back, toward the balcony doors
+  add(620, 1020, 24, 92, 60, mats.oatmeal, 0, .05); add(846, 1020, 24, 92, 60, mats.oatmeal, 0, .05);
+  add(670, 1062, 40, 22, 34, mats.ivory, 42, .06); add(780, 1062, 40, 22, 34, mats.ivory, 42, .06);
+  begin(); cyl(745, 955, 42, 36, mats.stoneWarm, 0, 42);                   // round travertine coffee table
+  begin(); cyl(720, 845, 10, 30, mats.brass, 0, 4); cyl(720, 845, 36, 40, mats.boucle, 30, 36);   // swivel armchair, facing south
+  add(686, 811, 68, 16, 34, mats.boucle, 62, .06);
+  begin(); cyl(650, 800, 12, 2, mats.brass); cyl(650, 800, 1.4, 160, mats.brass, 2); cyl(672, 812, 20, 14, mats.brass, 150, 12);   // floor lamp
 
-  // --- dining: an oak table, six oak chairs with cream seats, three glass globes on brass rods,
-  // a white sideboard with an oak top, the bookcase on the hall wall, sheers at the window
+  // --- dining: an oak table (clear of the sideboard), six oak chairs with cream seats, three glass
+  // globes on brass rods, a white sideboard with an oak top, the bookcase on the hall wall, sheers
   begin();
-  add(1000, 886, 210, 104, 5, mats.oak, 72, .01);
-  add(1084, 918, 42, 40, 72, mats.oak, 0, .01); add(1070, 904, 70, 68, 3, mats.oak, 0, .01);
-  for (const cx of [1040, 1130]) { chair(cx, 838, 'n', mats.boucle, mats.paleOak); chair(cx, 994, 's', mats.boucle, mats.paleOak); }
-  chair(952, 916, 'w', mats.boucle, mats.paleOak); chair(1214, 916, 'e', mats.boucle, mats.paleOak);
-  begin(); cyl(1105, 938, 18, 24, mats.stoneWarm, 77, 12);                 // vase with olive branches
-  ball(1105, 938, 22, 115, mats.leaf).scale.set(1.2, .7, 1.2);
-  for (const px of [1045, 1105, 1165]) { begin(); ball(px, 938, 14, 170, mats.globe); cyl(px, 938, .6, 74, mats.brass, 184); }
+  add(985, 886, 180, 104, 5, mats.oak, 72, .01);
+  add(1055, 918, 40, 40, 72, mats.oak, 0, .01); add(1040, 904, 70, 68, 3, mats.oak, 0, .01);
+  for (const cx of [1005, 1095]) { chair(cx, 838, 'n', mats.boucle, mats.paleOak); chair(cx, 994, 's', mats.boucle, mats.paleOak); }
+  chair(937, 916, 'w', mats.boucle, mats.paleOak); chair(1169, 916, 'e', mats.boucle, mats.paleOak);
+  begin(); cyl(1075, 938, 18, 24, mats.stoneWarm, 77, 12);                 // vase with olive branches
+  ball(1075, 938, 22, 115, mats.leaf).scale.set(1.2, .7, 1.2);
+  for (const px of [1020, 1075, 1130]) { begin(); ball(px, 938, 14, 170, mats.globe); cyl(px, 938, .6, 74, mats.brass, 184); }
   begin(); add(1256, 820, 58, 260, 76, mats.white, 4, .008); add(1254, 818, 60, 264, 4, mats.oak, 80, .006);   // sideboard
   for (const yy of [872, 924, 976, 1028]) add(1255, yy, 1, 1.2, 70, mats.dark, 6, .001);
   begin(); add(1308, 880, 5, 140, 120, mats.oak, 140, .004); add(1306, 886, 3, 128, 108, mats.linen, 146, .002);   // the art
-  begin(); add(920, 740, 280, 38, 236, mats.white, 0, .006); add(921, 777, 278, 2, 230, mats.books, 4, .002);     // bookcase
+  // the sefarim bookcase on the hall wall (owner: the printed panel "looked really weird"): a white case
+  // with uprights and shelves, and on each shelf one or two matching sets of leather-bound volumes with
+  // gold bands on their spines, deep blue, burgundy, dark green and black, with a little space left over
+  {
+    begin();
+    const X = 920, Y = 740, Wd = 280, D = 36, Hc = 236, cols = 4, rows = 6, t = 3;
+    add(X, Y, Wd, 3, Hc, mats.white, 0, .002);                                   // back
+    for (let c = 0; c <= cols; c++) add(X + (Wd - t) * c / cols, Y, t, D, Hc, mats.white, 0, .002);   // uprights
+    for (let k = 0; k <= rows; k++) add(X, Y, Wd, D, 2.5, mats.white, k * (Hc - 2.5) / rows, .002);  // shelves
+    const pick = (() => { let q = 5; return () => (q = (q * 16807) % 2147483647) / 2147483647; })();
+    const sets = [mats.setBlue, mats.setRed, mats.setGreen, mats.setBlack, mats.setBlue, mats.setRed];
+    const cw = (Wd - t) / cols, sh = (Hc - 2.5) / rows;
+    for (let c = 0; c < cols; c++) for (let k = 0; k < rows; k++) {
+      let x = X + (Wd - t) * c / cols + t + 1;
+      const end = x + cw - t - 2, n = pick() < .55 ? 2 : 1;
+      for (let m = 0; m < n && x < end - 8; m++) {
+        const w = Math.min(end - x, (cw - 8) * (n === 1 ? .7 + pick() * .25 : .35 + pick() * .2));
+        const hh = 24 + pick() * 6;
+        add(x, Y + 6, w, D - 9, Math.min(hh, sh - 4), sets[(c * 3 + k * 2 + m) % sets.length], k * sh + 2.5, .003);
+        x += w + 1.5;
+      }
+    }
+  }
   begin(); add(1036, 1112, 26, 14, 250, mats.sheer, 0, .01); add(1186, 1112, 26, 14, 250, mats.sheer, 0, .01);  // sheers
 
   // --- laundry room (from the SketchUp sketches): along the east wall a tall built-in unit 65 cm deep,
@@ -488,9 +511,10 @@ async function start() {
   // ledges and a lamp, putty closets along the north wall, an oatmeal rug, a boucle armchair and a lamp
   closet(1598, 266, 354, 68, 's', mats.putty, 5);
   // owner's marks: the bed between the closets and the room's middle, heads on the west wall
-  begin(); add(1598, 350, 12, 290, 120, mats.putty, 0, .006);
-  add(1610, 598, 40, 44, 4, mats.putty, 52, .004);
-  cyl(1630, 620, 9, 24, mats.warmWhite, 56, 7); cyl(1630, 620, 14, 16, mats.linen, 80, 10);   // lamp
+  // the headboard panel and the bedside ledge stay within the west wall, which ends at y 616 (owner)
+  begin(); add(1598, 340, 12, 272, 120, mats.putty, 0, .006);
+  add(1610, 342, 40, 42, 4, mats.putty, 52, .004);
+  cyl(1630, 363, 9, 24, mats.warmWhite, 56, 7); cyl(1630, 363, 14, 16, mats.linen, 80, 10);   // lamp
   add(1600, 460, 3, 60, 66, mats.oak, 160, .004); add(1601, 465, 2, 50, 56, mats.terracotta, 165, .002);   // the flower painting
   bed(1610, 389, 206, 203, 'w', { base: mats.ivory, duvet: mats.linen, throw: mats.oatmeal, headMat: mats.ivory, hb: 110, pillows: 3, pillowMats: [mats.ivory, mats.oatmeal, mats.ivory], accent: mats.oatmeal, baseH: 32 });
   rug(1660, 370, 240, 260, mats.rugOat);
