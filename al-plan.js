@@ -17,14 +17,16 @@
     [1126, 344, 10, 118], [1116, 462, 20, 130], [1560, 236, 428, 30], [1560, 266, 36, 100], [1952, 266, 36, 218],
     [1490, 330, 70, 36], [1154, 330, 10, 36], [1234, 330, 102, 36], [456, 332, 218, 20], [456, 352, 20, 18],
     [454, 496, 24, 114], [38, 584, 416, 24], [38, 608, 26, 528], [684, 360, 24, 102], [710, 436, 290, 24],
-    [952, 460, 18, 166], [1136, 578, 12, 14], [1230, 578, 80, 14], [904, 720, 302, 20], [1300, 720, 60, 20],
+    [952, 460, 18, 166], [1136, 578, 12, 14], [1230, 578, 170, 14], [1480, 580, 118, 12], [1586, 366, 12, 226], [904, 720, 302, 20], [1300, 720, 60, 20],
     [1314, 740, 8, 396], [1952, 626, 36, 326], [1952, 1022, 36, 150],
     [50, 1134, 44, 38], [234, 1134, 50, 38], [424, 1134, 120, 38], [850, 1134, 202, 38], [1194, 1134, 118, 38],
     [1322, 1134, 168, 38], [1632, 1134, 318, 38]
   ];
   const OLD = [[1254, 368, 10, 222], [906, 740, 8, 394], [1574, 722, 376, 10], [1726, 924, 226, 8], [1716, 918, 10, 26], [1716, 1030, 10, 104]];
-  const NEW = [[1314, 366, 10, 226], [686, 462, 10, 68], [652, 522, 44, 8], [918, 616, 34, 8], [1324, 578, 72, 14],
+  const NEW = [[1314, 366, 10, 226],
     [1504, 728, 8, 98], [1504, 818, 234, 8], [1740, 740, 22, 12], [1870, 740, 82, 12], [1740, 752, 10, 382]];
+  // lines the owner asked to clear: the threshold across the main bathroom door, a door jamb by the third bedroom
+  const CLEAR = [[1406, 582, 70, 6], [1180, 744, 14, 28]];
   // areas whose fittings and doors change: each comes out, and later goes back in, as a whole
   const AREAS = [[1138, 368, 262, 210], [1322, 592, 630, 244], [1700, 752, 252, 382], [1140, 740, 174, 96]];
   const T = { fitOut: [1.8, 3.0], wallOut: [3.4, 5.6], wallIn: [6.0, 8.2], fitIn: [8.6, 9.8], back: [14.4, 15.4], end: 16.0 };
@@ -49,7 +51,8 @@
     const c = document.createElement('canvas'); c.width = W; c.height = H;
     const g = c.getContext('2d', { willReadFrequently: true });
     g.fillStyle = '#fff'; g.fillRect(0, 0, W, H); g.drawImage(img, dx, 0);
-    g.fillStyle = '#fff'; for (const [x, y, w, h] of [...KEEP, ...OLD, ...NEW]) g.fillRect(x - 3, y - 3, w + 6, h + 6);
+    g.fillStyle = '#fff'; for (const [x, y, w, h] of [...KEEP, ...NEW]) g.fillRect(x - 3, y - 3, w + 6, h + 6);
+    for (const [x, y, w, h] of [...OLD, ...CLEAR]) g.fillRect(x - 8, y - 8, w + 16, h + 16);   // removed walls leave no ghost lines
     const id = g.getImageData(0, 0, W, H), d = id.data, tint = new Uint8Array(W * H);
     for (let p = 0; p < W * H; p++) {
       const i = p * 4, mx = Math.max(d[i], d[i + 1], d[i + 2]), mn = Math.min(d[i], d[i + 1], d[i + 2]);
