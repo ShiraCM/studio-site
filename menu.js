@@ -25,3 +25,12 @@
     a.addEventListener('click', function (e) { e.preventDefault(); history.back(); });
   });
 })();
+
+// drawings that draw themselves in when they scroll into view
+(function () {
+  if (!window.IntersectionObserver) return;
+  document.querySelectorAll('.closet-plan').forEach(function (el) {
+    el.classList.add('armed');
+    new IntersectionObserver(function (es, io) { if (es[0].isIntersecting) { el.classList.add('in'); io.disconnect(); } }, { threshold: .35 }).observe(el);
+  });
+})();
