@@ -1046,3 +1046,6 @@ nav.links .menu-panel a:first-child{border-top:0}
 .closet-plan .bed path{stroke:#BDB6AA;stroke-width:1.2;fill:none}
 .closet-grid{grid-template-columns:minmax(0,4.5fr) minmax(0,7.5fr)}
 @media (max-width:900px){.closet-grid{grid-template-columns:1fr}}
+.closet-plan .glass path{stroke:#2E2B27;stroke-width:1.2;fill:none}
+.closet-plan .tiny{font:600 9px var(--body);letter-spacing:.16em;fill:#9a948a}
+.closet-plan .note{font-size:10.5px}
