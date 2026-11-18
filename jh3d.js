@@ -156,7 +156,9 @@ function changes(O, C, Ci) {
     }
     pt.px = px;
   }
-  const list = [];                          // [pixel, start time, fade seconds]
+  // where a new wall goes over an old one, the old wall is still rubbed out first, then the new one drawn
+  for (let p = 0; p < W * H; p++) if (dr[p] && lum(o, p * 4) < 120) er[p] = 1;
+  const list = [];                          // [pixel, start time, fade seconds, from colour?, to colour?]
   // the eraser: one hand moving from wall to wall, rubbing back and forth across each in quick strokes
   const order = (a, b) => (a.y0 + a.x0 * .3) - (b.y0 + b.x0 * .3);
   const erase = parts(er, 4, 20).sort(order);
@@ -190,7 +192,7 @@ function changes(O, C, Ci) {
   const listed = new Uint8Array(W * H);
   for (const pt of erase) for (const p of pt.px) {
     const i = p * 4; if (!dr[p]) { target[i] = PAPER[0]; target[i + 1] = PAPER[1]; target[i + 2] = PAPER[2]; }
-    list.push([p, Math.min(tmap[p], T.erase[1]), .16]); listed[p] = 1;
+    list.push(dr[p] ? [p, Math.min(tmap[p], T.erase[1]), .16, null, PAPER] : [p, Math.min(tmap[p], T.erase[1]), .16]); listed[p] = 1;
   }
   // any stray erased pixel too small to be a wall part goes at the end of the erasing
   for (let p = 0; p < W * H; p++) if (er[p] && !listed[p] && !dr[p]) { const i = p * 4; target[i] = PAPER[0]; target[i + 1] = PAPER[1]; target[i + 2] = PAPER[2]; list.push([p, T.erase[1] - .3, .3]); }
@@ -201,7 +203,7 @@ function changes(O, C, Ci) {
     const horiz = pt.x1 - pt.x0 >= pt.y1 - pt.y0, len = Math.max(1, horiz ? pt.x1 - pt.x0 : pt.y1 - pt.y0);
     for (const p of pt.px) {
       const f = ((horiz ? p % W : p / W | 0) - (horiz ? pt.x0 : pt.y0)) / len;
-      list.push([p, T.draw[0] + slot * k + slot * .85 * clamp01(f), .1]);
+      list.push([p, T.draw[0] + slot * k + slot * .85 * clamp01(f), .1, er[p] ? PAPER : null]);
     }
   });
   list.sort((a, b) => a[1] - b[1]);
@@ -401,8 +403,8 @@ async function start() {
     sheetAt.t = t;
     let moved = false, k = done, allDone = true;
     for (; k < L.length && L[k][1] <= t; k++) {
-      const [p, t0, fade] = L[k], i = p * 4, a = clamp01((t - t0) / fade);
-      d[i] = o[i] + (tg[i] - o[i]) * a; d[i + 1] = o[i + 1] + (tg[i + 1] - o[i + 1]) * a; d[i + 2] = o[i + 2] + (tg[i + 2] - o[i + 2]) * a;
+      const [p, t0, fade, fr, to] = L[k], i = p * 4, a = clamp01((t - t0) / fade);
+      for (let c = 0; c < 3; c++) { const c0 = fr ? fr[c] : o[i + c], c1 = to ? to[c] : tg[i + c]; d[i + c] = c0 + (c1 - c0) * a; }
       moved = true;
       if (a < 1) allDone = false; else if (allDone) done = k + 1;
     }
@@ -714,8 +716,9 @@ const bush = new THREE.Mesh(new THREE.IcosahedronGeometry(h(36), 1), mats.leaf);
 
   // the kitchen, as on the revised plan and in the kitchen photo: a U open to the west.
   // North run: a tall unit at its open end, then drawers and the first sink. East run (the wall shared
-  // with the children's room): the oven, with the upper cabinets above it. South run: the bar, with
-  // the second sink, the gas hob at its east end, and an overhang on the living-room side for two stools.
+  // with the children's room): the first sink, then the oven, with the gas hob above it in the corner
+  // where the east run meets the bar (owner, Nov 18: "the hob is on the corner", as in the kitchen photo).
+  // South run: the bar, with the second sink and an overhang on the living-room side for two stools.
   begin();
   const base = (x, y, w, d) => {
     add(x + 3, y + 3, w - 6, d - 6, 10, mats.dark, 0, .002);              // toe kick
@@ -730,14 +733,14 @@ const bush = new THREE.Mesh(new THREE.IcosahedronGeometry(h(36), 1), mats.leaf);
   // drawer joints along the north run, door joints along the bar
   for (const x of [822, 857]) add(x, 506, 1.2, 2, 70, mats.dark, 14, .001);
   for (const y of [470, 492]) add(787, y, 105, 1.4, 1.2, mats.dark, 50, .001);
-  add(852, 582, 58, 2, 58, mats.black, 18, .004);   // oven under the hob, facing into the U                          // oven door, facing the U
-  add(855, 581.5, 52, 2.5, 2, mats.steel, 70, .002);
+  add(890, 525, 2, 58, 58, mats.black, 18, .004);                         // oven door in the east run, beside the hob, facing the U
+  add(889.5, 528, 2.5, 52, 2, mats.steel, 70, .002);
   // two 40 cm sinks (owner, Nov 18): one in the east run under the uppers, beside the oven, as in the
   // kitchen photo; one in the bar. Each with a gooseneck tap on the far side from where you stand.
   add(906, 510, 36, 42, 1, mats.steel, 90, .01);   // its left side against the seam of the two worktops                           // east-run sink
   add(752, 598, 42, 36, 1, mats.steel, 90, .01);                           // bar sink
-  add(849, 594, 62, 46, 1, mats.black, 90, .008);                          // hob
-  for (const [bx, by] of [[862, 606], [895, 606], [862, 629], [895, 629]]) cyl(bx, by, 5, 1.5, mats.dark, 91);
+  add(899, 576, 46, 62, 1, mats.black, 90, .008);                          // hob, in the corner
+  for (const [bx, by] of [[911, 591], [933, 591], [911, 623], [933, 623]]) cyl(bx, by, 5, 1.5, mats.dark, 91);
   // a gooseneck tap: a post, then a spout reaching over the sink (dx, dy point toward the sink, px)
   const tap = (x, y, dx, dy) => {
     cyl(x, y, 2.2, 3, mats.steel, 90);
@@ -747,10 +750,10 @@ const bush = new THREE.Mesh(new THREE.IcosahedronGeometry(h(36), 1), mats.leaf);
   };
   tap(949, 531, -16, 0);                                                    // east-run sink: tap at the wall
   tap(773, 640, 0, -15);                                                    // bar sink: tap on the bar side
-  add(922, 440, 34, 160, 70, mats.lacquer, 145, .006);                     // uppers over the oven, east wall
+  add(922, 440, 34, 128, 70, mats.lacquer, 145, .006);                     // uppers on the east wall, stopping short of the hob
   add(787, 440, 135, 34, 70, mats.lacquer, 145, .006);                     // uppers on the back wall too
   for (const x of [832, 877]) add(x, 474, 1.2, 1.2, 66, mats.dark, 147, .001);
-  for (const y of [480, 520, 560]) add(921, y, 1.2, 1.2, 66, mats.dark, 147, .001);
+  for (const y of [483, 525]) add(921, y, 1.2, 1.2, 66, mats.dark, 147, .001);
   for (const sx of [760, 823]) {                                          // two stools at the bar
     begin(); cyl(sx + 19, 728, 19, 5, mats.linen, 62, 18);
     for (const [lx, ly] of [[sx + 5, 714], [sx + 33, 714], [sx + 5, 742], [sx + 33, 742]]) cyl(lx, ly, 1.3, 62, mats.paleOak);
