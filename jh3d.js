@@ -94,14 +94,40 @@ function parts(mask, reach = 2, min = 40) {
 // so a new wall next to a removed one is still drawn with the other new walls.
 // The old laundry closet is wiped clean (its leftover boxes too), and the new walls are drawn solid.
 const LAUNDRY = [745, 438, 913, 600];       // plan px: the utility closet that becomes part of the kitchen
-const INK = [52, 49, 45];                   // new walls are drawn in this charcoal
-function changes(O, C) {
+const INK = [70, 82, 46];                   // new walls are drawn in a deep olive, so they stand out from the charcoal existing walls
+// The plans are redrawn as warm ink on paper, so they read as drawings rather than CAD screenshots:
+// light greys and tints drop out, lines and walls become one soft charcoal.
+const PAPER = [247, 244, 237], INKLINE = [46, 43, 39];
+function inkify(img) {
+  const s = img.data, out = new ImageData(W, H), d = out.data;
+  for (let i = 0; i < s.length; i += 4) {
+    let a = clamp01((232 - lum(s, i)) / 190);
+    a = a < .1 ? 0 : Math.pow(a, .85);
+    for (let k = 0; k < 3; k++) d[i + k] = PAPER[k] + (INKLINE[k] - PAPER[k]) * a;
+    d[i + 3] = 255;
+  }
+  return out;
+}
+function changes(O, C, Ci) {
   const o = O.data, c = C.data, er = new Uint8Array(W * H), dr = new Uint8Array(W * H);
-  const target = new Uint8ClampedArray(c);  // what each pixel becomes
+  const target = new Uint8ClampedArray(Ci.data);  // what each pixel becomes
   for (let p = 0; p < W * H; p++) {
     const i = p * 4;
     if (Math.abs(o[i] - c[i]) + Math.abs(o[i + 1] - c[i + 1]) + Math.abs(o[i + 2] - c[i + 2]) <= 40) continue;
     (lum(c, i) > lum(o, i) ? er : dr)[p] = 1;
+  }
+  // around each removed wall, its dashed outline and stray thin lines go too, so no broken wall is left
+  for (const pt of parts(er, 4, 20)) {
+    for (let y = Math.max(0, pt.y0 - 5); y <= Math.min(H - 1, pt.y1 + 5); y++) for (let x = Math.max(0, pt.x0 - 5); x <= Math.min(W - 1, pt.x1 + 5); x++) {
+      const p = y * W + x; if (dr[p] || lum(c, p * 4) > 249) continue;
+      // keep only solid walls (a mostly dark 7x7 block); thin outlines and dashes go
+      let n = 0;
+      for (let dy = -3; dy <= 3; dy++) for (let dx = -3; dx <= 3; dx++) {
+        const xx = x + dx, yy = y + dy;
+        if (xx >= 0 && yy >= 0 && xx < W && yy < H && lum(c, (yy * W + xx) * 4) < 110) n++;
+      }
+      if (n < 34) er[p] = 1;
+    }
   }
   // the laundry closet: everything inside goes, down to white paper
   for (let y = LAUNDRY[1]; y < LAUNDRY[3]; y++) for (let x = LAUNDRY[0]; x < LAUNDRY[2]; x++) {
@@ -124,7 +150,7 @@ function changes(O, C) {
     for (let y = 0; y < bh; y++) for (let x = 0; x < bw; x++) {
       let all = dil[y * bw + x];
       for (let dy = -R + 1; dy <= R - 1 && all; dy++) for (let dx = -R + 1; dx <= R - 1; dx++) { const xx = x + dx, yy = y + dy; if (xx < 0 || yy < 0 || xx >= bw || yy >= bh || !dil[yy * bw + xx]) { all = 0; break; } }
-      if (all) { const p = (y + y0) * W + x + x0, i = p * 4; px.push(p); target[i] = INK[0]; target[i + 1] = INK[1]; target[i + 2] = INK[2]; }
+      if (all) { const p = (y + y0) * W + x + x0, i = p * 4; px.push(p); dr[p] = 1; er[p] = 0; target[i] = INK[0]; target[i + 1] = INK[1]; target[i + 2] = INK[2]; }
     }
     pt.px = px;
   }
@@ -159,7 +185,10 @@ function changes(O, C) {
       const p = yy * W + xx; if (er[p] && t < tmap[p]) tmap[p] = t;
     }
   });
-  for (const pt of erase) for (const p of pt.px) list.push([p, Math.min(tmap[p], T.erase[1]), .16]);
+  for (const pt of erase) for (const p of pt.px) {
+    const i = p * 4; if (!dr[p]) { target[i] = PAPER[0]; target[i + 1] = PAPER[1]; target[i + 2] = PAPER[2]; }
+    list.push([p, Math.min(tmap[p], T.erase[1]), .16]);
+  }
   // the pen: each new wall drawn from one end to the other, one after another
   drawParts.sort(order);
   const slot = (T.draw[1] - T.draw[0]) / Math.max(1, drawParts.length);
@@ -229,6 +258,30 @@ function readModel(R) {
     }
   };
   scan(true); scan(false);
+  // doorways: a gap of 60 to 120 cm between two ends of the same wall
+  const doorKeys = new Set(), doors = [];
+  const scanDoors = (horizontal) => {
+    const A = horizontal ? ch : cw, B = horizontal ? cw : ch;
+    const isWall = (a, b) => horizontal ? at(b, a) : at(a, b);
+    for (let a = 0; a < A; a++) {
+      let b = 0;
+      while (b < B) {
+        if (!isWall(a, b)) { b++; continue; }
+        while (b < B && isWall(a, b)) b++;
+        const g0 = b; while (b < B && !isWall(a, b)) b++;
+        const g1 = b;
+        if (g1 >= B || g1 - g0 < 12 || g1 - g0 > 24) continue;
+        let t0 = a, t1 = a;
+        while (t0 > 0 && isWall(t0 - 1, g0 - 1) && isWall(t0 - 1, g1)) t0--;
+        while (t1 < A - 1 && isWall(t1 + 1, g0 - 1) && isWall(t1 + 1, g1)) t1++;
+        if (t1 - t0 > 8 || t1 - t0 < 1) continue;
+        const key = [horizontal, t0, g0, g1].join();
+        if (doorKeys.has(key)) continue; doorKeys.add(key);
+        doors.push(horizontal ? [g0 * S, t0 * S, (g1 - g0) * S, (t1 - t0 + 1) * S] : [t0 * S, g0 * S, (t1 - t0 + 1) * S, (g1 - g0) * S]);
+      }
+    }
+  };
+  scanDoors(true); scanDoors(false);
   const near = (i, r, g, b, tol) => Math.abs(d[i] - r) < tol && Math.abs(d[i + 1] - g) < tol && Math.abs(d[i + 2] - b) < tol;
   const bedM = new Uint8Array(W * H), closetM = new Uint8Array(W * H);
   for (let p = 0; p < W * H; p++) {
@@ -240,6 +293,7 @@ function readModel(R) {
   return {
     runs: rowRuns(wall),
     beams: rowRuns(beam),
+    doors,
     windows: (() => {
       const out = [];
       for (const [x, y, w, d] of rowRuns(beam).sort((p, q) => p[0] - q[0] || p[2] - q[2] || p[1] - q[1])) {
@@ -272,13 +326,14 @@ async function start() {
 
   const [io, ic, ir] = await Promise.all(['img/plan-jh-original-no-ac.webp', 'img/plan-jh-changes-construction-wall.webp', 'img/plan-jh-revised-no-ac.webp'].map(load));
   const O = pixels(io), C = pixels(ic), R = pixels(ir);
-  const ch = changes(O, C);
+  const Oi = inkify(O), Ci = inkify(C);
+  const ch = changes(O, C, Ci);
   const model = readModel(R);
 
   // the drawing sheet: one canvas, used as the floor texture throughout
   const sheet = document.createElement('canvas'); sheet.width = W; sheet.height = H;
   const sg = sheet.getContext('2d');
-  const cur = new ImageData(new Uint8ClampedArray(O.data), W, H);
+  const cur = new ImageData(new Uint8ClampedArray(Oi.data), W, H);
   const revisedImg = document.createElement('canvas'); revisedImg.width = W; revisedImg.height = H;
   revisedImg.getContext('2d').putImageData(R, 0, 0);
   const tiled = document.createElement('canvas'); tiled.width = W; tiled.height = H;
@@ -289,7 +344,7 @@ async function start() {
     g.globalAlpha = .3; g.globalCompositeOperation = 'multiply'; g.drawImage(revisedImg, 0, 0); }
   let done = 0;                             // changed pixels before this index are finished
   function sheetAt(t) {
-    const L = ch.list, tg = ch.target, d = cur.data, o = O.data;
+    const L = ch.list, tg = ch.target, d = cur.data, o = Oi.data;
     if (sheetAt.t !== undefined && t < sheetAt.t) { d.set(o); done = 0; }   // loop back
     sheetAt.t = t;
     let moved = false, k = done, allDone = true;
@@ -341,14 +396,15 @@ async function start() {
 
   // walls: white plaster, with the plan's black poche on top; a beam over every window
   const unit = new THREE.BoxGeometry(1, 1, 1); unit.translate(0, .5, 0);
-  const WALL = h(260), HEAD = h(215);
+  const WALL = h(260), HEAD = h(212);
   const plaster = new THREE.MeshStandardMaterial({ color: 0xf3efe8, roughness: .9 });
   const poche = new THREE.MeshStandardMaterial({ color: 0x2a2825, roughness: .8 });
   // the windows (plan px [x, y, w, d], sill in cm), read off the plan: wall gaps the plan crosses with
   // window lines. The detector also flags the front door and the pantry niche, so they are listed by hand.
   const WINDOWS = [[80, 410, 90, 25, 100], [910, 885, 20, 135, 60], [935, 795, 135, 15, 90], [335, 915, 25, 60, 110]];
   // doorways get only the wall above the opening, never glass (the main bedroom’s door to the balcony)
-  const DOORS = [[230, 795, 100, 20]];
+  const overlaps = ([ax, ay, aw, ad], [bx, by, bw, bd]) => ax < bx + bw && bx < ax + aw && ay < by + bd && by < ay + ad;
+  const DOORS = [[230, 795, 100, 20], ...model.doors.filter(dr => Math.min(dr[2], dr[3]) >= 16 && !overlaps(dr, [515, 400, 130, 200]) && !WINDOWS.some(w => overlaps(dr, w)) && !overlaps(dr, [230, 795, 100, 20]))];   // real walls only, not the pantry niche
   // new walls that the revised plan draws only as thin lines: the wall that wraps the bar
   // (the children's room wall, then a short return under the bar)
   // and the short wall that closes the fridge niche on the living-room side (white, as seen from the salon)
@@ -385,6 +441,13 @@ async function start() {
       const o = Math.min(long - 4, Math.max(0, long * i / n - 2));
       slab(horiz ? x + o : px, horiz ? py : y + o, horiz ? 4 : pw, horiz ? pd : 4, sill, HEAD, frameMat);
     }
+  }
+  // door frames: a jamb each side and a head, in pale oak, so each doorway reads as a door
+  const jambMat = new THREE.MeshStandardMaterial({ color: 0xd9c3a2, roughness: .6 });
+  for (const [x, y, w, d] of DOORS) {
+    const horiz = w >= d, DH = h(212), T2 = 3;
+    if (horiz) { slab(x, y - 1, T2, d + 2, 0, DH, jambMat); slab(x + w - T2, y - 1, T2, d + 2, 0, DH, jambMat); slab(x, y - 1, w, d + 2, DH - h(4), DH, jambMat); }
+    else { slab(x - 1, y, w + 2, T2, 0, DH, jambMat); slab(x - 1, y + d - T2, w + 2, T2, 0, DH, jambMat); slab(x - 1, y, w + 2, d, DH - h(4), DH, jambMat); }
   }
   built.add(walls, caps, winGroup);
 
