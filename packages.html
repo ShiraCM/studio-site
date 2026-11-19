@@ -23,7 +23,7 @@
       <a class="hide-sm" href="projects.html">Projects</a>
       <a class="hide-sm" href="guide.html">Buyer’s guide</a>
       <a class="hide-sm" href="packages.html" aria-current="page">Packages</a>
-      <a class="btn btn-primary" href="contact.html">Let’s talk</a>
+      <a class="btn btn-primary" href="contact.html#intro">Free <span class="xs-hide">20-min </span>call</a>
       <button class="menu-btn" type="button" aria-expanded="false" aria-controls="site-menu"><span class="menu-icon" aria-hidden="true"></span><span class="menu-word">Menu</span></button>
       <div class="menu-panel" id="site-menu" hidden>
         <a href="index.html#model">How we help</a>
@@ -54,9 +54,14 @@
   <form class="wrap order" id="order-form" data-saving="750" novalidate>
     <section class="ogroup" aria-labelledby="og-start">
       <h2 id="og-start">Start here</h2>
-      <ul><li class="oitem consult" id="plan-review" data-id="consult" data-price="300" data-name="Consultation">
+      <ul>
+        <li class="ointro" id="intro-call">
+          <span class="otext"><span class="ochip">Free · 20 minutes</span><b>Intro call</b><small>Tell us about the apartment you’re buying or considering and where you are in the process. Send us the sales plan beforehand if you have it, and we’ll point out one thing we’d change. The full review is what the Consultation is for.</small></span>
+          <a class="btn btn-ghost ointro-btn" href="contact.html#intro">Ask for a call</a>
+        </li>
+        <li class="oitem consult" id="plan-review" data-id="consult" data-price="300" data-name="Consultation">
           <label><input type="checkbox" name="consult"><span class="box" aria-hidden="true"></span>
-            <span class="otext"><span class="ochip">01 Prospectus</span><b>Consultation</b><small>We review the contractor’s sales plan with you in English: real dimensions, furniture clearances, circulation and storage, and the changes worth asking for.</small></span></label>
+            <span class="otext"><span class="ochip">01 Prospectus</span><b>Consultation</b><small>We review the contractor’s sales plan with you in English, room by room: real dimensions, furniture clearances, circulation and storage, and every change worth asking for.</small></span></label>
           <span class="oprice"><s hidden>$300</s><span class="amt">$300</span></span>
         </li></ul>
     </section>
@@ -107,6 +112,7 @@
           <a class="btn btn-primary" href="contact.html">Tell us about your apartment</a>
           <a class="btn btn-ghost" href="packages.html">See packages</a>
         </div>
+        <p class="close-intro">Want us to look at your plan first? <a href="contact.html#intro">Start with a free 20-minute call.</a></p>
       </div>
       <p>Tell us what you’re buying for and which decisions are coming up.</p>
     </div>

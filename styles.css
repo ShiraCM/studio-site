@@ -1241,3 +1241,27 @@ html[dir="rtl"] .closet-plan,html[dir="rtl"] .jh-view canvas,html[dir="rtl"] .k3
   .jh-step{min-height:44svh}
 }
 @media (prefers-reduced-motion:reduce){.jh-step{transition:none}}
+
+/* Home hero: "pre-construction apartments" links to the Guide's "Pre-construction or second hand?" section,
+   for visitors who don't know the term (owner, Nov 19). A quiet underline on the olive badge. */
+.niche-link{color:inherit;text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:.18em;text-decoration-color:color-mix(in srgb,currentColor 55%,transparent);transition:text-decoration-color .2s ease}
+.niche-link:hover{text-decoration-color:currentColor}
+.niche-link:focus-visible{outline:2px solid var(--on-olive,#F4F2EA);outline-offset:3px}
+@media (prefers-reduced-motion:reduce){.niche-link{transition:none}}
+
+/* Packages: the free 20-minute intro call, above the Consultation in "Start here" (owner, Nov 19).
+   Not part of the order total: it books a call instead of ticking a box. */
+.ointro{scroll-margin-top:140px;display:grid;grid-template-columns:1fr auto;gap:12px 18px;align-items:center;padding:18px 20px 18px 58px;background:transparent;border:1px dashed color-mix(in srgb,var(--olive) 55%,var(--rule));border-radius:4px}
+[dir=rtl] .ointro{padding:18px 58px 18px 20px}
+.ointro-btn{white-space:nowrap;min-height:44px}
+@media (max-width:560px){.ointro{grid-template-columns:1fr;padding:18px 20px}[dir=rtl] .ointro{padding:18px 20px}.ointro-btn{justify-self:start}}
+
+/* The free 20-minute intro call follows visitors (owner, Nov 19): the header button on every page, and one
+   quiet line under the buttons at the end of each page. */
+.close .close-intro{margin:22px 0 0;font-size:15.5px}
+.close .close-intro a{color:#C9D39E;text-decoration:underline;text-underline-offset:.2em;text-decoration-thickness:1px}
+.close .close-intro a:hover{text-decoration-thickness:2px}
+.close .close-intro a:focus-visible{outline-color:#C9D39E}
+/* On phones the header button says just "Free call", so the logo keeps its one line */
+.xs-show{display:none}
+@media (max-width:440px){.xs-hide{display:none}.xs-show{display:inline}}
