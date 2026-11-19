@@ -1218,3 +1218,13 @@ html[dir="rtl"] .btn svg,html[dir="rtl"] .textlink svg{transform:scaleX(-1)}
 }
 html[dir="rtl"] .brand{direction:ltr}
 html[dir="rtl"] .closet-plan,html[dir="rtl"] .jh-view canvas,html[dir="rtl"] .k3d-view{direction:ltr}
+
+/* Project pages: scrolling plays the plan story (scroll-story.js, owner Nov 19: "someone scrolling down
+   the page totally misses the 3d animation"). The caption and model stay pinned under the header for
+   a stretch of scrolling (.jh-run); on wide screens the words beside them stay put too. */
+.jh-scrolly{align-items:start}
+.jh-scrolly .jh-pin{position:sticky;top:84px}
+.jh-scrolly .jh-run{height:200svh}
+.jh-scrolly .jh-view{max-height:calc(100svh - 190px)}
+@media (min-width:901px){.jh-scrolly .jh-copy{position:sticky;top:calc(84px + 8svh)}}
+@media (max-width:900px){.jh-scrolly .jh-pin{top:max(68px,20svh);background:var(--stone);padding-top:10px}.jh-scrolly .jh-run{height:180svh}}

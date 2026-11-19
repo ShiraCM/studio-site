@@ -657,27 +657,17 @@ async function start() {
     controls = modelControls({ THREE, renderer, scene, camera, view, rooms, from: camera.position.clone(), target: bird.look.clone(), bounds: [wx(38), wx(1988), wz(70), wz(1466)] });
     controls.show();
   }
-  let time = 0, last = 0, playing = false, raf = 0, introDone = false;
-  function tick(now) {
-    raf = 0;
-    if (!playing || introDone) return;
-    const dt = Math.min(.05, (now - last) / 1000); last = now;
-    time = Math.min(INTRO_END, time + dt);
-    frame(time);
-    if (time >= INTRO_END) { introDone = true; done(); return; }
-    raf = requestAnimationFrame(tick);
-  }
+  // scrolling plays the story (scroll-story.js); with reduced motion the finished model straight away
+  let time = 0, introDone = false, story = null;
+  const finishIntro = () => { if (introDone) return; introDone = true; time = INTRO_END; done(); };
   new ResizeObserver(resize).observe(view);
   resize();
-  if (reduce) { time = INTRO_END; introDone = true; done(); }
+  if (reduce) finishIntro();
   else {
-    new IntersectionObserver(es => {
-      const on = es.some(e => e.isIntersecting);
-      if (on && !playing) { playing = true; last = performance.now(); if (!raf) raf = requestAnimationFrame(tick); }
-      if (!on) playing = false;
-    }, { threshold: .35 }).observe(box);
     frame(0);
+    const { scrollStory } = await import('./scroll-story.js');
+    story = scrollStory({ box, end: INTRO_END, frame: t => { if (!introDone) { time = t; frame(t); } }, done: finishIntro });
   }
-  window.__al3d = { jump: t => { if (!controls) { time = t; frame(t); } }, finish: () => { time = INTRO_END; if (!introDone) { introDone = true; done(); } }, T, ROOMS };
+  window.__al3d = { jump: t => { if (!controls) { time = t; frame(t); } }, finish: () => { if (story) story.stop(); else finishIntro(); }, T, ROOMS };
 }
 const PAPER_OUT = '#f7f4ed';
