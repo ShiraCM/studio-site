@@ -92,7 +92,7 @@ function parts(mask, reach = 2, min = 40) {
 // Step 2: which pixels change between the developer's plan and the construction plan, and when.
 // Each pixel is sorted on its own: lighter in the construction plan = erased, darker = drawn,
 // so a new wall next to a removed one is still drawn with the other new walls.
-const INK = [70, 82, 46];                   // new walls are drawn in a deep olive, so they stand out from the charcoal existing walls
+const INK = [210, 102, 43];                 // new walls in a bold orange, so they stand out from the charcoal existing walls (owner, Nov 19; was olive)
 const PAPER = [247, 244, 237], INKLINE = [46, 43, 39];
   const BALCONY = [[185, 1025, 340, 260], [185, 820, 150, 205]];
   const PLAN_WINDOWS = [[72, 404, 94, 32], [904, 884, 26, 132], [930, 790, 134, 24], [330, 916, 34, 52], [216, 792, 114, 28]];   // the last: the bedroom window onto the balcony (owner, Nov 18: a window, not a door)   // in the gaps of the walls below
@@ -335,7 +335,7 @@ async function start() {
   // The drawing's walls, as clean straight blocks [x, y, w, h] in plan px (owner, Nov 18: "lines look
   // jagged, clean them up, even if it's not 100% accurate"). Traced by hand from the developer's and
   // the revised plans, with the owner's corrections. KEEP: in both plans, charcoal. OLD: only in the
-  // developer's plan, erased. NEW: only in the revised plan, drawn in olive.
+  // developer's plan, erased. NEW: only in the revised plan, drawn in orange.
   const KEEP = [
     [40, 36, 612, 28], [40, 64, 32, 384],                       // outer walls: north, west
     [376, 64, 28, 256], [376, 396, 28, 40], [166, 404, 238, 32], // safe room east (with its door), safe room / bedroom

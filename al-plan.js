@@ -3,7 +3,7 @@
    So this is drawn the same way as the Kaduri plan: warm paper, solid charcoal walls, windows as two
    thin lines, the balcony as a light grid and room names in spaced capitals. No fixtures, furniture or
    door swings. Three steps: 1/3 the developer's plan; 2/3 the old walls are rubbed away and the new
-   walls drawn in olive, one by one; 3/3 the revised plan, with its room names. Plays in view and loops.
+   walls drawn in orange, one by one; 3/3 the revised plan, with its room names. Plays in view and loops.
    Walls are rectangles typed by hand in plan px (the 2000 × 1500 drawings, developer's-plan coordinates).
    With reduced motion the revised plan is drawn once and stays. */
 (function () {
@@ -11,7 +11,7 @@
   if (!box) return;
   const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const W = 2000, H = 1500;
-  const PAPER = '#f7f4ed', WALL = '#2e2b27', INK = '#46522e';
+  const PAPER = '#f7f4ed', WALL = '#2e2b27', INK = '#d2662b';   // new walls in a bold orange (owner, Nov 19; was olive)
   // walls [x, y, w, h]: in both plans, only in the developer's plan, only in the revised plan
   const KEEP = [
     [674, 70, 464, 24], [674, 94, 22, 266], [1104, 82, 48, 30], [1102, 228, 26, 234], [1138, 230, 14, 136],
@@ -64,7 +64,7 @@
   ];
   const STEPS = [
     [0, '1/3', 'Developer’s plan', 'A bedroom sits between the living area and the bedrooms.'],
-    [T.wallOut[0], '2/3', 'Demolition and new walls', 'The old walls come down; the new walls go up in olive.'],
+    [T.wallOut[0], '2/3', 'Demolition and new walls', 'The old walls come down; the new walls go up in orange.'],
     [T.wallIn[1], '3/3', 'Revised plan', 'A larger living area, a laundry room, built-in closets and a larger en-suite.'],
     [T.back[0], '1/3', 'Developer’s plan', 'A bedroom sits between the living area and the bedrooms.']
   ];
