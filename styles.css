@@ -1279,3 +1279,29 @@ html[dir="rtl"] .closet-plan,html[dir="rtl"] .jh-view canvas,html[dir="rtl"] .k3
 @media (max-width:900px){
   .nv-hero .case-hero-pic img{object-position:55% 60%}
 }
+
+/* Neve Amim in its own palette (owner, Nov 19: "use this palette for the neve amim page"), taken from her
+   living and dining moodboard: ivory walls, linen, travertine, natural oak, brass and a charcoal vase.
+   Oak takes the olive's place as the accent; text colours keep WCAG AA on the ivory ground. */
+body.theme-amim{
+  --stone:#F2EDE3;      /* ivory wall colour */
+  --sheet:#F9F6EF;
+  --rule:#DDD3C3;       /* linen */
+  --ink:#2A2622;        /* the charcoal vase */
+  --muted:#675C4F;
+  --olive:#7A5534;      /* oak, deepened for text and buttons */
+  --olive-soft:#E8DECD; /* linen */
+  --on-olive:#FBF8F1;
+  --night:#2B2622;
+  --on-night:#F1EADF;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) body.theme-amim{
+  --stone:#1A1714;--sheet:#221E1A;--rule:#3D362E;--ink:#EEE7DC;--muted:#B5AA98;
+  --olive:#D3AA7B;--olive-soft:#3A2F23;--on-olive:#1A1510;--night:#100E0C;--on-night:#EEE7DC}}
+:root[data-theme="dark"] body.theme-amim{
+  --stone:#1A1714;--sheet:#221E1A;--rule:#3D362E;--ink:#EEE7DC;--muted:#B5AA98;
+  --olive:#D3AA7B;--olive-soft:#3A2F23;--on-olive:#1A1510;--night:#100E0C;--on-night:#EEE7DC}
+/* the light accent on the dark closing band: travertine and brass instead of pale olive */
+.theme-amim .close h2 em,.theme-amim .close .close-intro a{color:#DCC6A0}
+.theme-amim .close .btn-primary{background:#DCC6A0;color:#2A2622}
+.theme-amim .close .close-intro a:focus-visible{outline-color:#DCC6A0}
