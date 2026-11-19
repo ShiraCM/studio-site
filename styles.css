@@ -1195,3 +1195,6 @@ dialog.m3d-lb img{max-height:74vh}
 /* the plans' backup image stays hidden while the drawing loads, so the old colour plan never flashes (owner, Nov 19);
    it shows only without JavaScript (a <noscript> style beside it) */
 .jh-anim .jh-fallback{visibility:hidden}
+
+/* Neve Amim decisions: the fifth card, on aging in place, runs the full width (Nov 19) */
+.points div.wide{grid-column:1/-1;padding-left:0;border-left:0}
