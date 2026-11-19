@@ -400,19 +400,24 @@ async function start() {
   // it with a small side table between them, a round stone coffee table and a floor lamp; a clear strip
   // stays in front of the coat closet doors
   rug(524, 712, 340, 380, mats.rugLiving);   // 40 cm toward the kitchen, the furniture centred on it (owner)
+  // true sizes (owner, Nov 19: "are the arm chairs and couch … to scale?"), at 1.16 plan px per cm:
+  // sofa 216 × 95 cm, seat 42 cm; swivel tub chairs 75 cm across, seat 45 cm, back 78 cm; coffee table
+  // 90 cm across, 38 cm high; about 40 cm between the coffee table and the seats all round
   begin();
-  add(574, 1020, 250, 92, 42, mats.oatmeal, 0, .05);                      // sofa seat
-  add(574, 1084, 250, 28, 80, mats.oatmeal, 0, .05);                      // back, toward the balcony doors
-  add(574, 1020, 24, 92, 60, mats.oatmeal, 0, .05); add(800, 1020, 24, 92, 60, mats.oatmeal, 0, .05);
-  add(624, 1062, 40, 22, 34, mats.ivory, 42, .06); add(734, 1062, 40, 22, 34, mats.ivory, 42, .06);
-  begin(); cyl(699, 905, 46, 36, mats.stoneWarm, 0, 46);                   // round travertine coffee table
-  for (const cx of [632, 766]) {                                           // two swivel armchairs, facing south
-    begin(); cyl(cx, 790, 10, 30, mats.brass, 0, 4); cyl(cx, 790, 36, 40, mats.boucle, 30, 36);
-    add(cx - 34, 756, 68, 16, 34, mats.boucle, 62, .06);
+  add(574, 1002, 250, 110, 42, mats.oatmeal, 0, .05);                     // sofa seat, 95 cm deep
+  add(574, 1082, 250, 30, 80, mats.oatmeal, 0, .05);                      // back, toward the balcony doors
+  add(574, 1002, 26, 110, 60, mats.oatmeal, 0, .05); add(798, 1002, 26, 110, 60, mats.oatmeal, 0, .05);
+  add(624, 1056, 42, 24, 36, mats.ivory, 42, .06); add(732, 1056, 42, 24, 36, mats.ivory, 42, .06);
+  begin(); cyl(699, 900, 52, 38, mats.stoneWarm, 0, 52);                   // round travertine coffee table, 90 cm
+  for (const cx of [632, 766]) {                                           // two swivel tub chairs, facing south
+    begin(); cyl(cx, 757, 16, 12, mats.brass, 0, 6);                       // brass swivel base
+    cyl(cx, 757, 43, 33, mats.boucle, 12, 43);                             // the tub, seat at 45 cm
+    add(cx - 41, 714, 82, 20, 33, mats.boucle, 45, .08);                   // the back, to 78 cm
+    add(cx - 43, 726, 14, 52, 22, mats.boucle, 45, .06); add(cx + 29, 726, 14, 52, 22, mats.boucle, 45, .06);   // the arms
   }
-  begin(); cyl(699, 772, 16, 50, mats.paleOak, 0, 14);                     // a small side table between them
-  cyl(699, 772, 7, 14, mats.stoneWarm, 50, 5);
-  begin(); cyl(560, 752, 12, 2, mats.brass); cyl(560, 752, 1.4, 160, mats.brass, 2); cyl(582, 764, 20, 14, mats.brass, 150, 12);   // floor lamp
+  begin(); cyl(699, 757, 16, 50, mats.paleOak, 0, 14);                     // a small side table between them
+  cyl(699, 757, 7, 14, mats.stoneWarm, 50, 5);
+  begin(); cyl(552, 738, 12, 2, mats.brass); cyl(552, 738, 1.4, 160, mats.brass, 2); cyl(574, 750, 20, 14, mats.brass, 150, 12);   // floor lamp
 
   // --- dining: an oak table (clear of the sideboard), six oak chairs with cream seats, three glass
   // globes on brass rods, a white sideboard with an oak top, the bookcase on the hall wall, sheers
