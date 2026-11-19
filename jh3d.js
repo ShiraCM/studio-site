@@ -795,14 +795,14 @@ const bush = new THREE.Mesh(new THREE.IcosahedronGeometry(h(36), 1), mats.leaf);
     const [x0, y0, x1, y1] = rm.r;
     const c = new THREE.Vector3(wx((x0 + x1) / 2), h(60), wz((y0 + y1) / 2));
     const ext = Math.max(x1 - x0, y1 - y0) / U;
-    return { pos: c.clone().addScaledVector(DIR, (ext * 2.35 + .6) * (rm.zoom || 1)), look: c, mid: c.clone().setY(h(90)) };
+    return { pos: c.clone().addScaledVector(DIR, (ext * 2.0 + .5) * (rm.zoom || 1)), look: c, mid: c.clone().setY(h(90)) };
   });
   const top = { pos: new THREE.Vector3(), look: new THREE.Vector3() }, bird = { pos: new THREE.Vector3(), look: new THREE.Vector3() };
   const tmpP = new THREE.Vector3(), tmpL = new THREE.Vector3();
   function cameraAt(t) {
     const dist = fit();
     top.pos.set(0, dist, .001); top.look.set(0, 0, 0);
-    bird.pos.set(-dist * .52, dist * .98, dist * .86); bird.look.set(-.9, 0, .5);
+    bird.pos.set(-dist * .42, dist * .78, dist * .69); bird.look.set(-.9, 0, .5);   // closer (owner, Nov 19: "the model looks very far away")
     let k = ease(span(t, ...T.cam));
     tmpP.lerpVectors(top.pos, bird.pos, k); tmpL.lerpVectors(top.look, bird.look, k);
     let prev = bird;

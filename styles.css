@@ -1152,3 +1152,6 @@ nav.links .menu-panel a:first-child{border-top:0}
   .nv-spread .nv-a,.nv-spread .nv-b,.nv-spread .nv-c,.nv-spread .nv-d,.nv-spread .nv-e,.nv-spread .nv-f{grid-column:auto;margin-top:0}
   .nv-spread .nv-d img{aspect-ratio:4/5}
 }
+
+/* Project plans and 3D models: a wider stage beside a narrower text column (owner, Nov 19: "the model looks very far away") */
+@media (min-width:901px){.jh-anim{grid-template-columns:minmax(0,3.3fr) minmax(0,8.7fr);gap:clamp(24px,3.5vw,56px)}.jh-view{max-height:84svh}}

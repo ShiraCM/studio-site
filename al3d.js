@@ -31,7 +31,7 @@ const ROOMS = [
   { key: 'ensuite', name: 'En-suite', note: 'In the same place as before; only the way in has changed.', img: 'img/al-bath-ensuite.webp', r: [1726, 752, 1952, 1134], zoom: 1.15 },
   { key: 'primary', name: 'Primary bedroom', note: 'Built-in closets, and its own way into the en-suite.', img: 'img/al-primary-bedroom.jpg', r: [1598, 266, 1952, 740] },
   { key: 'bath', name: 'Main bathroom', note: 'The washer has moved out to the laundry room.', img: 'img/al-bath-main.webp', r: [1324, 366, 1586, 578], zoom: 1.15 },
-  { key: 'laundry', name: 'Laundry room', note: 'Once the guest toilet: the washer and dryer side by side, with storage above.', r: [1136, 366, 1314, 578], zoom: 1.2, dir: [-.42, .9, .12] },   // seen from the west, so the machines' fronts show
+  { key: 'laundry', name: 'Laundry room', note: 'Once the guest toilet: the washer and dryer side by side, with storage above.', r: [1136, 366, 1314, 578], zoom: 1.4, dir: [-.42, .9, .12] },   // seen from the west, so the machines' fronts show
   { key: 'safe', name: 'Safe room', note: 'Furnished as a child’s bedroom, with a trundle bed.', img: 'img/al-safe-room.jpg', r: [696, 94, 1102, 436] }
 ];
 
@@ -580,14 +580,14 @@ async function start() {
     const c = new THREE.Vector3(wx((x0 + x1) / 2), h(60), wz((y0 + y1) / 2));
     const ext = Math.max(x1 - x0, y1 - y0) / U;
     const dir = rm.dir ? new THREE.Vector3(...rm.dir).normalize() : DIR;
-    return { pos: c.clone().addScaledVector(dir, (ext * 2.35 + .6) * (rm.zoom || 1)), look: c, mid: c.clone().setY(h(90)) };
+    return { pos: c.clone().addScaledVector(dir, (ext * 2.0 + .5) * (rm.zoom || 1)), look: c, mid: c.clone().setY(h(90)) };
   });
   const top = { pos: new THREE.Vector3(), look: new THREE.Vector3() }, bird = { pos: new THREE.Vector3(), look: new THREE.Vector3() };
   const tmpP = new THREE.Vector3(), tmpL = new THREE.Vector3();
   function cameraAt(t) {
     const dist = fit();
     top.pos.set(0, dist, .001); top.look.set(0, 0, 0);
-    bird.pos.set(-dist * .4, dist * .95, dist * .9); bird.look.set(.2, 0, .4);
+    bird.pos.set(-dist * .32, dist * .76, dist * .72); bird.look.set(.2, 0, .4);   // closer (owner, Nov 19)
     const k = ease(span(t, ...T.cam));
     tmpP.lerpVectors(top.pos, bird.pos, k); tmpL.lerpVectors(top.look, bird.look, k);
     let prev = bird;
