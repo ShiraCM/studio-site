@@ -1191,3 +1191,7 @@ dialog.m3d-lb .m3d-cap-note{font:400 15.5px/1.6 var(--body);color:rgba(236,235,2
 dialog.m3d-lb .m3d-cap-note:empty{display:none}
 dialog.m3d-lb img{max-height:74vh}
 @media (max-width:600px){.m3d-btn.m3d-txt{padding:0 10px;font-size:10px}.m3d-on .m3d-ui{gap:4px}}
+
+/* the plans' backup image stays hidden while the drawing loads, so the old colour plan never flashes (owner, Nov 19);
+   it shows only without JavaScript (a <noscript> style beside it) */
+.jh-anim .jh-fallback{visibility:hidden}
