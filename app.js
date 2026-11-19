@@ -102,7 +102,13 @@
   var pay = document.getElementById('o-pay');
   // Placeholder until PayPal is connected: explains instead of taking payment.
   pay.addEventListener('click', function () { statusEl.textContent = 'Online payment is coming soon. For now, copy your order and we’ll send you a PayPal invoice.'; });
-  var money = function (n) { return '$' + n.toLocaleString('en-US'); };
+  // The Hebrew site shows shekels: the dollar price × 3.1 (owner, Nov 19), written "2,325 ₪".
+  var he = window.__lang === 'he';
+  var money = he ? function (n) { return Math.round(n * 3.1).toLocaleString('en-US') + ' ₪'; }
+                 : function (n) { return '$' + n.toLocaleString('en-US'); };
+  if (he) form.querySelectorAll('.oitem').forEach(function (li) {
+    li.querySelectorAll('.oprice s, .oprice .amt').forEach(function (el) { el.textContent = money(+li.dataset.price); });
+  });
   var userConsult = false;
 
   function calc() {

@@ -23,8 +23,8 @@
   var RULES = [
     [/^1 package \+ consultation$/, 'חבילה אחת + ייעוץ'],
     [/^(\d+) packages \+ consultation$/, '$1 חבילות + ייעוץ'],
-    [/You save (\S+) with (\d+) packages\./g, 'אתם חוסכים $1 עם $2 חבילות.'],
-    [/Add another package to save (\S+) more\./g, 'הוסיפו חבילה וחסכו עוד $1.'],
+    [/You save (.+?) with (\d+) packages\./g, 'אתם חוסכים $1 עם $2 חבילות.'],
+    [/Add another package to save (.+?) more\./g, 'הוסיפו חבילה וחסכו עוד $1.'],
     [/Free if you add any package\./g, 'חינם עם כל חבילה.'],
     [/^See the (.+) finished$/, function (m, name) { return 'לראות את ' + (lookCase(name) || name) + ' גמור'; }]
   ];
