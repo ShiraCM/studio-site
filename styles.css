@@ -1144,12 +1144,14 @@ nav.links .menu-panel a:first-child{border-top:0}
 .nv-spread .nv-c img{aspect-ratio:1600/818}
 .nv-spread .nv-d{grid-column:9/span 4;margin-top:clamp(40px,10vw,150px)}
 .nv-spread .nv-d img{aspect-ratio:680/1000;object-position:50% 40%}
-.nv-spread .nv-e{grid-column:2/span 9}
+.nv-spread .nv-e{grid-column:1/span 8}
+.nv-spread .nv-g{grid-column:9/span 4;margin-top:clamp(40px,10vw,150px)}
+.nv-spread .nv-g img{aspect-ratio:1148/1314}
 .nv-spread .nv-e img{aspect-ratio:1600/889}
 .nv-spread .nv-f{grid-column:1/-1}
 .nv-spread .nv-f img{aspect-ratio:2000/940}
 @media (max-width:760px){
-  .nv-spread .nv-a,.nv-spread .nv-b,.nv-spread .nv-c,.nv-spread .nv-d,.nv-spread .nv-e,.nv-spread .nv-f{grid-column:auto;margin-top:0}
+  .nv-spread .nv-a,.nv-spread .nv-b,.nv-spread .nv-c,.nv-spread .nv-d,.nv-spread .nv-e,.nv-spread .nv-f,.nv-spread .nv-g{grid-column:auto;margin-top:0}
   .nv-spread .nv-d img{aspect-ratio:4/5}
 }
 

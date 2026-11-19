@@ -31,7 +31,7 @@ const ROOMS = [
   { key: 'ensuite', name: 'En-suite', note: 'In its original place, now reached directly from the primary bedroom along an open, unhurried route, planned with aging in place in mind.', img: 'img/al-bath-ensuite.webp', r: [1726, 752, 1952, 1134], zoom: 1.15 },
   { key: 'primary', name: 'Primary bedroom', note: 'A full wall of built-in closets and generous clearances, with a comfortable, direct approach to the en-suite.', img: 'img/al-primary-bedroom.jpg', r: [1598, 266, 1952, 740] },
   { key: 'bath', name: 'Main bathroom', note: 'With the washer moved to a laundry room of its own, a long vanity and a full bath.', img: 'img/al-bath-main.webp', r: [1324, 366, 1586, 578], zoom: 1.15 },
-  { key: 'laundry', name: 'Laundry room', note: 'Once the guest toilet: the washer and dryer side by side, with storage above.', r: [1136, 366, 1314, 578], zoom: 1.4, dir: [-.42, .9, .12] },   // seen from the west, so the machines' fronts show
+  { key: 'laundry', name: 'Laundry room', note: 'Once the guest toilet: the washer and dryer side by side, with storage above.', img: 'img/al-laundry.webp', r: [1136, 366, 1314, 578], zoom: 1.4, dir: [-.42, .9, .12] },   // seen from the west, so the machines' fronts show
   { key: 'safe', name: 'Safe room', note: 'The reinforced safe room, furnished as a child’s bedroom with a trundle bed and closets built around it.', img: 'img/al-safe-room.jpg', r: [696, 94, 1102, 436] }
 ];
 
