@@ -1175,3 +1175,19 @@ nav.links .menu-panel a:first-child{border-top:0}
   @keyframes m3d-pulse{0%,100%{box-shadow:0 0 0 4px rgba(250,248,243,.92),0 2px 8px rgba(30,28,24,.35)}50%{box-shadow:0 0 0 7px rgba(250,248,243,.7),0 2px 8px rgba(30,28,24,.35)}}
 }
 @media (max-width:600px){.m3d-name{font-size:9.5px;padding:5px 6px}.m3d-on .m3d-hint{display:none}}
+
+/* 3D controls, round two (owner, Nov 19): a Turn | Move switch, a labelled Reset, and refined picture captions */
+.jh-view.m3d-pan{cursor:move;touch-action:none}
+.m3d-on .m3d-ui{flex-wrap:wrap;justify-content:flex-end;max-width:calc(100% - 20px)}
+.m3d-seg{display:flex;border-radius:2px;box-shadow:0 2px 10px rgba(30,28,24,.12)}
+.m3d-seg .m3d-btn{box-shadow:none}
+.m3d-seg .m3d-btn+.m3d-btn{border-left:0}
+.m3d-btn.m3d-txt{width:auto;padding:0 14px;font:600 11px/1 var(--body);letter-spacing:.14em;text-transform:uppercase}
+.m3d-btn[aria-pressed="true"]{background:var(--ink);color:#F7F4ED;border-color:var(--ink)}
+dialog.m3d-lb figure{margin:0;display:grid;gap:18px;justify-items:center}
+dialog.m3d-lb figcaption{display:grid;gap:8px;max-width:56ch;text-align:center;color:#ECEBE3;padding:0 16px}
+dialog.m3d-lb .m3d-cap-name{font:400 clamp(26px,3vw,36px)/1.05 var(--display);letter-spacing:-.005em}
+dialog.m3d-lb .m3d-cap-note{font:400 15.5px/1.6 var(--body);color:rgba(236,235,227,.78)}
+dialog.m3d-lb .m3d-cap-note:empty{display:none}
+dialog.m3d-lb img{max-height:74vh}
+@media (max-width:600px){.m3d-btn.m3d-txt{padding:0 10px;font-size:10px}.m3d-on .m3d-ui{gap:4px}}

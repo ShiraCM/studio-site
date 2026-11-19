@@ -25,14 +25,14 @@ const lerp = (a, b, t) => a + (b - a) * t;
 
 // Rooms for the tour, plan px [x0, y0, x1, y1], in the order the camera visits them
 const ROOMS = [
-  { key: 'kitchen', name: 'Kitchen', note: 'Open to the living and dining area.', img: 'img/al-kitchen.jpg', r: [64, 608, 430, 1134], dir: [.5, .85, .14] },   // seen from the living area, looking west, as in its picture,
-  { key: 'dining', name: 'Dining', note: 'Where the third bedroom stood.', img: 'img/al-dining.jpg', r: [906, 740, 1314, 1134] },
+  { key: 'kitchen', name: 'Kitchen', note: 'Open to the living and dining area, with a stone island at its center.', img: 'img/al-kitchen.jpg', r: [64, 608, 430, 1134], dir: [.5, .85, .14] },   // seen from the living area, looking west, as in its picture,
+  { key: 'dining', name: 'Dining', note: 'Set where the developer’s third bedroom once stood, now part of one open living space.', img: 'img/al-dining.jpg', r: [906, 740, 1314, 1134] },
   { key: 'bedroom', name: 'Bedroom', note: 'Two single beds, with built-in closets.', r: [1322, 740, 1716, 1134] },
-  { key: 'ensuite', name: 'En-suite', note: 'In the same place as before; only the way in has changed.', img: 'img/al-bath-ensuite.webp', r: [1726, 752, 1952, 1134], zoom: 1.15 },
-  { key: 'primary', name: 'Primary bedroom', note: 'Built-in closets, and its own way into the en-suite.', img: 'img/al-primary-bedroom.jpg', r: [1598, 266, 1952, 740] },
-  { key: 'bath', name: 'Main bathroom', note: 'The washer has moved out to the laundry room.', img: 'img/al-bath-main.webp', r: [1324, 366, 1586, 578], zoom: 1.15 },
+  { key: 'ensuite', name: 'En-suite', note: 'In its original place, now entered directly from the primary bedroom.', img: 'img/al-bath-ensuite.webp', r: [1726, 752, 1952, 1134], zoom: 1.15 },
+  { key: 'primary', name: 'Primary bedroom', note: 'A full wall of built-in closets, with its own way into the en-suite.', img: 'img/al-primary-bedroom.jpg', r: [1598, 266, 1952, 740] },
+  { key: 'bath', name: 'Main bathroom', note: 'With the washer moved to a laundry room of its own, a long vanity and a full bath.', img: 'img/al-bath-main.webp', r: [1324, 366, 1586, 578], zoom: 1.15 },
   { key: 'laundry', name: 'Laundry room', note: 'Once the guest toilet: the washer and dryer side by side, with storage above.', r: [1136, 366, 1314, 578], zoom: 1.4, dir: [-.42, .9, .12] },   // seen from the west, so the machines' fronts show
-  { key: 'safe', name: 'Safe room', note: 'Furnished as a child’s bedroom, with a trundle bed.', img: 'img/al-safe-room.jpg', r: [696, 94, 1102, 436] }
+  { key: 'safe', name: 'Safe room', note: 'The reinforced safe room, furnished as a child’s bedroom with a trundle bed and closets built around it.', img: 'img/al-safe-room.jpg', r: [696, 94, 1102, 436] }
 ];
 
 // Timeline, seconds. The drawing (al-plan.js) runs to 7.6; the model rises after a short hold.
@@ -63,7 +63,7 @@ async function start() {
   const stepEl = box.querySelector('.k3d-tag-step'), noteEl = box.querySelector('.jh-tag-note');
   const STEPS = [
     P.STEPS[0], P.STEPS[1],
-    [T.rise[0], '3/3', '3D model', 'Drag to turn it. Tap a room to see it finished.']
+    [T.rise[0], '3/3', '3D model', 'Turn it or move it, and tap a room to see it finished.']
   ];
   // ---- the drawing sheet (floor texture): the plan animation, then the finished floors
   const sheet = document.createElement('canvas'); sheet.width = W; sheet.height = H;
@@ -631,7 +631,7 @@ async function start() {
     frame(INTRO_END);
     const { modelControls } = await import('./model-controls.js');
     const rooms = ROOMS.map(rm => ({ ...rm, at: new THREE.Vector3(wx((rm.r[0] + rm.r[2]) / 2), h(120), wz((rm.r[1] + rm.r[3]) / 2)) }));
-    controls = modelControls({ THREE, renderer, scene, camera, view, rooms, from: camera.position.clone(), target: bird.look.clone() });
+    controls = modelControls({ THREE, renderer, scene, camera, view, rooms, from: camera.position.clone(), target: bird.look.clone(), bounds: [wx(38), wx(1988), wz(70), wz(1466)] });
     controls.show();
   }
   let time = 0, last = 0, playing = false, raf = 0, introDone = false;
