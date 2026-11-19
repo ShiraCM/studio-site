@@ -1,33 +1,24 @@
-/* Scrolling drives the plan story on the project pages (owner, Nov 19: "someone scrolling down the page
-   totally misses the 3d animation"). Shared by jh3d.js (Kaduri) and al3d.js (Neve Amim).
-   The step caption and the model stay pinned under the header while the visitor scrolls a stretch of
-   the page (.jh-run), and the scroll position is the story's time: developer's plan → walls out and new
-   walls in → the model rises. Scrolling back up plays it backwards. The story is finished a little before
-   the stretch ends, so the finished model holds for a moment; then it is handed over (turn, move, room
-   buttons) and the page scrolls on. */
+/* Scrolling drives the plan story on the project pages. Shared by jh3d.js (Kaduri) and al3d.js (Neve Amim).
+   Owner, Nov 19: "someone scrolling down the page totally misses the 3d animation"; then, of a pinned
+   version: "it feels like the scrolling is stuck". So nothing is pinned: the page scrolls normally, and
+   the story follows where the model sits on the screen. It starts as the model comes up from the bottom
+   (developer's plan), the walls change as it moves up, and the model has risen by the time its top
+   reaches the header. Scrolling back up plays it backwards. Then the model is handed over (turn, move,
+   room buttons) and stays that way. */
 export function scrollStory({ box, end, frame, done }) {
-  const fig = box.querySelector('.jh-stage');
-  const pin = document.createElement('div');
-  pin.className = 'jh-pin';
-  while (fig.firstChild) pin.append(fig.firstChild);
-  const run = document.createElement('div');
-  run.className = 'jh-run';
-  run.setAttribute('aria-hidden', 'true');
-  fig.append(pin, run);
-  box.classList.add('jh-scrolly');
-
-  const FINISH_AT = .82;   // share of the stretch at which the model is complete
+  const view = box.querySelector('.jh-view');
+  const HEADER = 76;              // the sticky header, plus a little air
   let finished = false, raf = 0, shown = -1;
   function update() {
     raf = 0;
     if (finished) return;
-    const r = fig.getBoundingClientRect();
-    const top = parseFloat(getComputedStyle(pin).top) || 0;
-    const travel = Math.max(1, r.height - pin.offsetHeight);
-    const p = Math.min(1, Math.max(0, (top - r.top) / travel));
-    const t = Math.min(end, p / FINISH_AT * end);
+    const ih = innerHeight, top = view.getBoundingClientRect().top;
+    const from = ih * .8;         // story starts when the model's top is 80% down the screen
+    const to = HEADER;            // and is complete when its top reaches the header
+    const p = Math.min(1, Math.max(0, (from - top) / Math.max(1, from - to)));
+    const t = p * end;
     if (t !== shown) { shown = t; frame(t); }
-    if (t >= end) stop();
+    if (p >= 1) stop();
   }
   const on = () => { if (!raf) raf = requestAnimationFrame(update); };
   function stop() {
