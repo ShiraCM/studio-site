@@ -47,7 +47,7 @@ const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 function webglOK() {
   try { const c = document.createElement('canvas'); return !!(c.getContext('webgl2') || c.getContext('webgl')); } catch { return false; }
 }
-if (box && !reduce && webglOK()) {
+if (box && webglOK()) {
   const io = new IntersectionObserver(es => {
     if (es.some(e => e.isIntersecting)) { io.disconnect(); start().catch(err => console.error(err)); }
   }, { rootMargin: '200px' });
@@ -63,18 +63,8 @@ async function start() {
   const stepEl = box.querySelector('.k3d-tag-step'), noteEl = box.querySelector('.jh-tag-note');
   const STEPS = [
     P.STEPS[0], P.STEPS[1],
-    [T.rise[0], '3/3', '3D model', 'The revised plan, built up and furnished.'],
-    ...ROOMS.map((rm, i) => [LEGS[i].fly[0] + 1.2, '', rm.name, rm.note]),
-    [T.back[0], '3/3', '3D model', 'The revised plan, built up and furnished.']
+    [T.rise[0], '3/3', '3D model', 'Drag to turn it. Tap a room to see it finished.']
   ];
-  // the rooms' pictures, stacked over the model
-  const photos = ROOMS.map(rm => {
-    if (!rm.img) return null;
-    const el = document.createElement('img');
-    el.className = 'jh-photo'; el.src = rm.img; el.alt = ''; el.setAttribute('aria-hidden', 'true'); el.decoding = 'async';
-    el.style.visibility = 'hidden'; view.append(el); return el;
-  });
-
   // ---- the drawing sheet (floor texture): the plan animation, then the finished floors
   const sheet = document.createElement('canvas'); sheet.width = W; sheet.height = H;
   const sg = sheet.getContext('2d');
@@ -615,17 +605,6 @@ async function start() {
       g.visible = k > 0; g.scale.y = Math.max(k, .001);
     });
     cameraAt(t);
-    photos.forEach((el, i) => {
-      if (!el) return;
-      const L = LEGS[i], p = easeOut(span(t, ...L.open)) * (1 - ease(span(t, ...L.close)));
-      if (p > 0) {
-        const [cx, cy] = onScreen(roomPose[i].mid);
-        el.style.clipPath = `circle(${(p * 125).toFixed(2)}% at ${cx.toFixed(1)}% ${cy.toFixed(1)}%)`;
-        el.style.visibility = 'visible';
-      } else el.style.visibility = 'hidden';
-    });
-    const out = span(t, T.end - .9, T.end);
-    renderer.domElement.style.opacity = (1 - out).toFixed(3);
     let s = 0; for (let i = 0; i < STEPS.length; i++) if (t >= STEPS[i][0]) s = i;
     if (s !== stepNow) {
       stepNow = s;
@@ -641,26 +620,41 @@ async function start() {
     const w = view.clientWidth, hh = view.clientHeight;
     renderer.setSize(w, hh, false);
     camera.aspect = w / hh; camera.updateProjectionMatrix();
+    if (controls) controls.render(); else frame(time);
+  }
+
+  // ---- the plan story plays once when it comes into view, the model rises, and then it is the
+  // visitor's: drag to turn it, zoom, and open each room's picture from its button (owner, Nov 19)
+  const INTRO_END = T.cam[1] + .2;
+  let controls = null;
+  async function done() {
+    frame(INTRO_END);
+    const { modelControls } = await import('./model-controls.js');
+    const rooms = ROOMS.map(rm => ({ ...rm, at: new THREE.Vector3(wx((rm.r[0] + rm.r[2]) / 2), h(120), wz((rm.r[1] + rm.r[3]) / 2)) }));
+    controls = modelControls({ THREE, renderer, scene, camera, view, rooms, from: camera.position.clone(), target: bird.look.clone() });
+    controls.show();
+  }
+  let time = 0, last = 0, playing = false, raf = 0, introDone = false;
+  function tick(now) {
+    raf = 0;
+    if (!playing || introDone) return;
+    const dt = Math.min(.05, (now - last) / 1000); last = now;
+    time = Math.min(INTRO_END, time + dt);
+    frame(time);
+    if (time >= INTRO_END) { introDone = true; done(); return; }
+    raf = requestAnimationFrame(tick);
   }
   new ResizeObserver(resize).observe(view);
   resize();
-
-  // ---- play while in view; loop
-  let time = 0, last = 0, playing = false, raf = 0;
-  function tick(now) {
-    raf = 0;
-    if (!playing) return;
-    const dt = Math.min(.05, (now - last) / 1000); last = now;
-    time += dt; if (time > T.end) { time = 0; sheetKey = ''; }
-    frame(time);
-    raf = requestAnimationFrame(tick);
+  if (reduce) { time = INTRO_END; introDone = true; done(); }
+  else {
+    new IntersectionObserver(es => {
+      const on = es.some(e => e.isIntersecting);
+      if (on && !playing) { playing = true; last = performance.now(); if (!raf) raf = requestAnimationFrame(tick); }
+      if (!on) playing = false;
+    }, { threshold: .35 }).observe(box);
+    frame(0);
   }
-  new IntersectionObserver(es => {
-    const on = es.some(e => e.isIntersecting);
-    if (on && !playing) { playing = true; last = performance.now(); if (!raf) raf = requestAnimationFrame(tick); }
-    if (!on) playing = false;
-  }, { threshold: .35 }).observe(box);
-  frame(0);
-  window.__al3d = { jump: t => { time = t; frame(t); }, T, LEGS, ROOMS };
+  window.__al3d = { jump: t => { if (!controls) { time = t; frame(t); } }, finish: () => { time = INTRO_END; if (!introDone) { introDone = true; done(); } }, T, ROOMS };
 }
 const PAPER_OUT = '#f7f4ed';

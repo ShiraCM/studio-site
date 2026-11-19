@@ -1155,3 +1155,23 @@ nav.links .menu-panel a:first-child{border-top:0}
 
 /* Project plans and 3D models: a wider stage beside a narrower text column (owner, Nov 19: "the model looks very far away") */
 @media (min-width:901px){.jh-anim{grid-template-columns:minmax(0,3.3fr) minmax(0,8.7fr);gap:clamp(24px,3.5vw,56px)}.jh-view{max-height:84svh}}
+
+/* Project 3D models: turn, zoom and room buttons (owner, Nov 19: rotate it, buttons in each room, the photo pops up) */
+.jh-view.m3d-on{cursor:grab;touch-action:pan-y}
+.jh-view.m3d-drag{cursor:grabbing}
+.jh-view:focus-visible{outline:2px solid var(--olive);outline-offset:3px}
+.m3d-ui,.m3d-spot,.m3d-hint{display:none}
+.m3d-on .m3d-ui{display:flex;position:absolute;right:10px;bottom:10px;gap:6px;z-index:3}
+.m3d-btn{width:44px;height:44px;display:grid;place-items:center;border:1px solid var(--rule);border-radius:2px;background:rgba(250,248,243,.94);color:var(--ink);font:400 22px/1 var(--body);cursor:pointer;box-shadow:0 2px 10px rgba(30,28,24,.12)}
+.m3d-btn:hover{background:#fff}
+.m3d-btn:focus-visible,.m3d-spot:focus-visible{outline:2px solid var(--olive);outline-offset:2px}
+.m3d-on .m3d-hint{display:block;position:absolute;left:12px;bottom:12px;margin:0;padding:6px 9px;font:600 10.5px/1.2 var(--body);letter-spacing:.12em;text-transform:uppercase;color:#5d574d;background:rgba(250,248,243,.9);border-radius:2px;pointer-events:none;z-index:3}
+.m3d-on .m3d-spot{display:inline-flex;position:absolute;left:0;top:0;align-items:center;gap:7px;min-height:44px;padding:0 4px;border:0;background:none;cursor:pointer;z-index:2;will-change:transform}
+.m3d-dot{flex:none;width:14px;height:14px;border-radius:50%;background:#D2662B;box-shadow:0 0 0 4px rgba(250,248,243,.92),0 2px 8px rgba(30,28,24,.35);transition:transform .2s}
+.m3d-name{font:600 10.5px/1 var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--ink);background:rgba(250,248,243,.95);padding:6px 8px;border-radius:2px;box-shadow:0 2px 10px rgba(30,28,24,.14);white-space:nowrap}
+.m3d-spot:hover .m3d-dot,.m3d-spot:focus-visible .m3d-dot{transform:scale(1.2)}
+@media (prefers-reduced-motion:no-preference){
+  .m3d-dot{animation:m3d-pulse 2.4s ease-in-out infinite}
+  @keyframes m3d-pulse{0%,100%{box-shadow:0 0 0 4px rgba(250,248,243,.92),0 2px 8px rgba(30,28,24,.35)}50%{box-shadow:0 0 0 7px rgba(250,248,243,.7),0 2px 8px rgba(30,28,24,.35)}}
+}
+@media (max-width:600px){.m3d-name{font-size:9.5px;padding:5px 6px}.m3d-on .m3d-hint{display:none}}

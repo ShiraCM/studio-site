@@ -169,7 +169,7 @@
   window.AL_PLAN = { W, H, KEEP, OLD, NEW, WINDOWS, BALCONY, T, STEPS, paper, paint };
   // with WebGL (and motion allowed) the 3D model (al3d.js) plays this drawing and then builds on it
   const gl = (() => { try { const c = document.createElement('canvas'); return !!(c.getContext('webgl2') || c.getContext('webgl')); } catch (e) { return false; } })();
-  if (!still && gl && box.hasAttribute('data-three')) return;
+  if (gl && box.hasAttribute('data-three')) return;   // the 3D model handles reduced motion itself (it shows the finished model)
   const go = () => (document.fonts ? document.fonts.ready : Promise.resolve()).then(start).catch(err => console.error(err));
   const io = new IntersectionObserver(es => {
     if (es.some(e => e.isIntersecting)) { io.disconnect(); go(); }
