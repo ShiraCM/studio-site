@@ -1317,3 +1317,14 @@ body.theme-amim{
 .opick .osum small{max-width:44ch}
 .opick .obar .btn{background:var(--on-night);color:var(--night);border-color:var(--on-night)}
 .opick .obar .btn[disabled]{background:transparent;color:var(--on-night);border-color:rgba(255,255,255,.35)}
+
+/* Neve Amim opening, owner's portfolio text (Nov 19): a longer headline, the overview and four highlights */
+.nv-hero h1{font-size:clamp(40px,4.4vw,66px);line-height:1.02}
+.nv-hero .case-hero-copy>*{max-width:600px}
+.nv-highlights{list-style:none;margin:6px 0 0;padding:0;display:grid;gap:10px;font-size:15.5px;line-height:1.5}
+.nv-highlights li{padding-left:16px;border-left:2px solid var(--olive)}
+html[dir="rtl"] .nv-highlights li{padding-left:0;padding-right:16px;border-left:0;border-right:2px solid var(--olive)}
+.nv-highlights b{font-weight:600;color:var(--ink)}
+@media (max-width:900px){.nv-hero h1{font-size:clamp(34px,9vw,48px)}}
+@media (min-width:901px){.nv-highlights{grid-template-columns:1fr 1fr;gap:12px 22px}}
+h2.label{margin:0;font-family:var(--body)}
