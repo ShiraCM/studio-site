@@ -26,7 +26,7 @@ const lerp = (a, b, t) => a + (b - a) * t;
 // Rooms for the tour, plan px [x0, y0, x1, y1], in the order the camera visits them
 const ROOMS = [
   { key: 'kitchen', name: 'Kitchen', note: 'Open to the living and dining area, with a stone island at its center.', img: 'img/al-kitchen.jpg', r: [64, 608, 430, 1134], dir: [.5, .85, .14] },   // seen from the living area, looking west, as in its picture,
-  { key: 'dining', name: 'Dining', note: 'Set where the developer’s third bedroom once stood, now part of one open living space.', img: 'img/al-dining.jpg', r: [906, 740, 1314, 1134] },
+  { key: 'dining', name: 'Dining', note: 'Set where the developer’s third bedroom once stood, now part of one open living space.', img: 'img/al-dining-living.jpg', r: [906, 740, 1314, 1134] },
   { key: 'bedroom', name: 'Bedroom', note: 'Two single beds, with built-in closets.', r: [1322, 740, 1716, 1134] },
   { key: 'ensuite', name: 'En-suite', note: 'In its original place, now reached directly from the primary bedroom along an open, unhurried route, planned with aging in place in mind.', img: 'img/al-bath-ensuite.webp', r: [1726, 752, 1952, 1134], zoom: 1.15 },
   { key: 'primary', name: 'Primary bedroom', note: 'A full wall of built-in closets and generous clearances, with a comfortable, direct approach to the en-suite.', img: 'img/al-primary-bedroom.jpg', r: [1598, 266, 1952, 740] },
@@ -466,8 +466,8 @@ async function start() {
     for (let k = 1; k < 3; k++) add(639.4, 352 + 164 * k / 3 - .6, 1.2, 1.2, 256, mats.dark, 2, .001);   // three doors (owner: wider)
     for (let k = 0; k < 3; k++) add(638.8, 352 + 164 * (k + .5) / 3 - 1, 1.6, 2, 30, mats.brass, 85, .002);
   }
-  closet(690, 460, 262, 64, 's', mats.warmWhite, 5);   // five doors (owner: wider)
-  begin(); for (let k = 0; k < 5; k++) add(690 + 262 * (k + .5) / 5 - 1, 524.2, 2, 1.6, 30, mats.brass, 90, .002);
+  closet(690, 460, 262, 64, 's', mats.warmWhite, 4);   // four doors (owner: wider still)
+  begin(); for (let k = 0; k < 4; k++) add(690 + 262 * (k + .5) / 4 - 1, 524.2, 2, 1.6, 30, mats.brass, 90, .002);
 
   // --- laundry room (from the SketchUp sketches): along the east wall a tall built-in unit 65 cm deep,
   // with the washer and dryer side by side on a drawer base and wire baskets and shelves above;
