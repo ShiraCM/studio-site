@@ -19,8 +19,8 @@
     [1490, 330, 70, 36], [1154, 330, 10, 36], [1234, 330, 102, 36], [456, 332, 218, 20], [456, 352, 20, 18],
     [454, 496, 24, 114], [38, 584, 416, 24], [38, 608, 26, 528],
     [674, 360, 22, 100], [674, 436, 326, 24],             // bedroom's west wall runs straight down into its south wall (owner: the offset piece looked sloppy)
-    [952, 460, 18, 166], [1136, 578, 12, 14], [1230, 578, 170, 14], [1480, 580, 118, 12], [1586, 366, 12, 226],
-    [1586, 592, 12, 24], [904, 720, 302, 20],
+    [952, 460, 18, 156], [1136, 578, 12, 14], [1230, 578, 170, 14], [1480, 580, 118, 12], [1586, 366, 12, 226],
+    [1586, 592, 12, 29], [904, 720, 302, 20],
     [1300, 720, 64, 20],                                   // owner: only this short piece is thick; the rest was a thin line and a door
     [1314, 740, 8, 396], [1952, 626, 36, 326], [1952, 1022, 36, 150],
     [38, 1134, 56, 38], [234, 1134, 50, 38], [424, 1134, 120, 38], [850, 1134, 202, 38], [1194, 1134, 296, 38],
@@ -38,7 +38,7 @@
   KEEP.push([1716, 918, 10, 26], [1716, 1030, 10, 104]);
   const NEW = [
     [1314, 366, 10, 226],                                  // laundry room / main bathroom
-    [1506, 592, 14, 40],                                   // owner: a jamb below the bathroom wall
+    [1502, 592, 12, 29],                                   // owner: 25 cm below the bathroom wall, in line with the closet wall across the hall (a 90 cm doorway between)
     [1478, 728, 34, 10],                                   // owner: a jamb at the closets' corner
     [674, 460, 16, 66],                                    // owner, Nov 19: a 60 cm wall below the bedroom, between the sefarim and the coat closet
     [640, 516, 50, 12],                                    // owner: a 30 cm wall closing the sefarim cabinet in the entry

@@ -159,7 +159,8 @@ async function start() {
     [1400, 580, 80, 12],      // main bathroom
     [1206, 720, 94, 20],      // hall to the dining area
     [1396, 722, 82, 18],      // second bedroom (beside the new short wall for its closet)
-    [1762, 740, 108, 12]      // en-suite, from the primary bedroom
+    [1762, 740, 108, 12],     // en-suite, from the primary bedroom
+    [1502, 621, 12, 107]      // into the primary bedroom from the hall (90 cm)
   ];
   const blocks = [...P.KEEP, ...P.NEW].map(r => [r, 0, WALL]).concat([...WINDOWS, ...DOORS].map(([x, y, w, d]) => [[x, y, w, d], HEAD, WALL]));
   const built = new THREE.Group(); scene.add(built);
@@ -426,7 +427,7 @@ async function start() {
   // gold bands on their spines, deep blue, burgundy, dark green and black, with a little space left over
   {
     begin();
-    const X = 917, Y = 740, Wd = 276, D = 34, Hc = 236, cols = 4, rows = 6, t = 3;   // between its two new 30 cm walls
+    const X = 917, Y = 740, Wd = 276, D = 34, Hc = 259, cols = 4, rows = 6, t = 3;   // between its two new 30 cm walls
     add(X, Y, Wd, 3, Hc, mats.white, 0, .002);                                   // back
     for (let c = 0; c <= cols; c++) add(X + (Wd - t) * c / cols, Y, t, D, Hc, mats.white, 0, .002);   // uprights
     for (let k = 0; k <= rows; k++) add(X, Y, Wd, D, 2.5, mats.white, k * (Hc - 2.5) / rows, .002);  // shelves
@@ -451,12 +452,12 @@ async function start() {
   // south wall, its doors facing the living area, between the new 60 cm wall and the existing stub
   {
     begin();
-    add(640, 352, 34, 164, 240, mats.warmWhite, 0, .006);
-    for (let k = 1; k < 4; k++) add(639.4, 352 + 164 * k / 4 - .6, 1.2, 1.2, 236, mats.dark, 2, .001);
-    for (let k = 0; k < 4; k++) add(638.8, 352 + 164 * (k + .5) / 4 - 1, 1.6, 2, 30, mats.brass, 85, .002);
+    add(640, 352, 34, 164, 260, mats.warmWhite, 0, .004);   // to the ceiling (owner)
+    for (let k = 1; k < 3; k++) add(639.4, 352 + 164 * k / 3 - .6, 1.2, 1.2, 256, mats.dark, 2, .001);   // three doors (owner: wider)
+    for (let k = 0; k < 3; k++) add(638.8, 352 + 164 * (k + .5) / 3 - 1, 1.6, 2, 30, mats.brass, 85, .002);
   }
-  closet(690, 460, 262, 64, 's', mats.warmWhite, 6);
-  begin(); for (let k = 0; k < 6; k++) add(690 + 262 * (k + .5) / 6 - 1, 524.2, 2, 1.6, 30, mats.brass, 90, .002);
+  closet(690, 460, 262, 64, 's', mats.warmWhite, 5);   // five doors (owner: wider)
+  begin(); for (let k = 0; k < 5; k++) add(690 + 262 * (k + .5) / 5 - 1, 524.2, 2, 1.6, 30, mats.brass, 90, .002);
 
   // --- laundry room (from the SketchUp sketches): along the east wall a tall built-in unit 65 cm deep,
   // with the washer and dryer side by side on a drawer base and wire baskets and shelves above;
