@@ -372,7 +372,7 @@ async function start() {
   ];
   function drawLabels(t) {
     sg.save();
-    sg.font = '600 23px "Hanken Grotesk", Helvetica, Arial, sans-serif';
+    sg.font = '600 23px "Hanken Grotesk", "Assistant", Helvetica, Arial, sans-serif';
     sg.textAlign = 'center'; sg.textBaseline = 'middle';
     try { sg.letterSpacing = '4px'; } catch (e) {}
     for (const [name, x, y, from, to] of LABELS) {
@@ -381,7 +381,7 @@ async function start() {
       if (to != null) a *= 1 - clamp01((t - to) / .8);
       if (a <= 0) continue;
       sg.globalAlpha = a * .72; sg.fillStyle = 'rgb(70,64,56)';
-      name.toUpperCase().split('\n').forEach((line, k, all) => sg.fillText(line, x, y + (k - (all.length - 1) / 2) * 30));
+      (window.__t ? window.__t(name) : name).toUpperCase().split('\n').forEach((line, k, all) => sg.fillText(line, x, y + (k - (all.length - 1) / 2) * 30));
     }
     sg.restore();
   }

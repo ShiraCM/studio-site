@@ -106,14 +106,14 @@
   function labels(g, t) {
       g.save(); g.textAlign = 'center'; g.textBaseline = 'middle';
       for (const [name, x, y, from, to, size = 37] of LABELS) {
-        g.font = '600 ' + size + 'px "Hanken Grotesk", Helvetica, Arial, sans-serif';
+        g.font = '600 ' + size + 'px "Hanken Grotesk", "Assistant", Helvetica, Arial, sans-serif';
         try { g.letterSpacing = Math.round(size / 6) + 'px'; } catch (e) {}
         let a = 1;
         if (from != null) a *= clamp01((t - from) / .6);
         if (to != null) a *= 1 - clamp01((t - to) / .8);
         if (a <= 0) continue;
         g.globalAlpha = a * .62; g.fillStyle = 'rgb(70,64,56)';
-        name.toUpperCase().split('\n').forEach((line, k, all) => g.fillText(line, x, y + (k - (all.length - 1) / 2) * size * 1.25));
+        (window.__t ? window.__t(name) : name).toUpperCase().split('\n').forEach((line, k, all) => g.fillText(line, x, y + (k - (all.length - 1) / 2) * size * 1.25));
       }
       g.restore();
   }
