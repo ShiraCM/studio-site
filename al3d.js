@@ -395,19 +395,24 @@ async function start() {
   for (const sy of [814, 954]) { begin(); cyl(386, sy, 18, 6, mats.linen, 64, 19); for (const [lx, ly] of [[374, sy - 12], [398, sy - 12], [374, sy + 12], [398, sy + 12]]) cyl(lx, ly, 1.2, 64, mats.steel); }
   for (const px of [290, 360]) { begin(); ball(px, 884, 14, 180, mats.globe); cyl(px, 884, .5, 66, mats.black, 194); cyl(px, 884, 3, 5, mats.brass, 190); }
 
-  // --- living, as in the dining picture (taken looking east): the armchair on the north side facing
-  // south, the sofa on the south side facing north with its back to the balcony doors, a round stone
-  // coffee table between them on a light rug, a floor lamp by the armchair
-  rug(590, 830, 310, 260, mats.rugLiving);
+  // --- living (owner, Nov 19): a larger rug reaching toward the coat closet, set 40 cm toward the kitchen,
+  // with the furniture centred on it: the sofa on the south side facing north, two swivel armchairs facing
+  // it with a small side table between them, a round stone coffee table and a floor lamp; a clear strip
+  // stays in front of the coat closet doors
+  rug(524, 712, 340, 380, mats.rugLiving);   // 40 cm toward the kitchen, the furniture centred on it (owner)
   begin();
-  add(620, 1020, 250, 92, 42, mats.oatmeal, 0, .05);                      // sofa seat
-  add(620, 1084, 250, 28, 80, mats.oatmeal, 0, .05);                      // back, toward the balcony doors
-  add(620, 1020, 24, 92, 60, mats.oatmeal, 0, .05); add(846, 1020, 24, 92, 60, mats.oatmeal, 0, .05);
-  add(670, 1062, 40, 22, 34, mats.ivory, 42, .06); add(780, 1062, 40, 22, 34, mats.ivory, 42, .06);
-  begin(); cyl(745, 955, 42, 36, mats.stoneWarm, 0, 42);                   // round travertine coffee table
-  begin(); cyl(720, 845, 10, 30, mats.brass, 0, 4); cyl(720, 845, 36, 40, mats.boucle, 30, 36);   // swivel armchair, facing south
-  add(686, 811, 68, 16, 34, mats.boucle, 62, .06);
-  begin(); cyl(650, 800, 12, 2, mats.brass); cyl(650, 800, 1.4, 160, mats.brass, 2); cyl(672, 812, 20, 14, mats.brass, 150, 12);   // floor lamp
+  add(574, 1020, 250, 92, 42, mats.oatmeal, 0, .05);                      // sofa seat
+  add(574, 1084, 250, 28, 80, mats.oatmeal, 0, .05);                      // back, toward the balcony doors
+  add(574, 1020, 24, 92, 60, mats.oatmeal, 0, .05); add(800, 1020, 24, 92, 60, mats.oatmeal, 0, .05);
+  add(624, 1062, 40, 22, 34, mats.ivory, 42, .06); add(734, 1062, 40, 22, 34, mats.ivory, 42, .06);
+  begin(); cyl(699, 905, 46, 36, mats.stoneWarm, 0, 46);                   // round travertine coffee table
+  for (const cx of [632, 766]) {                                           // two swivel armchairs, facing south
+    begin(); cyl(cx, 790, 10, 30, mats.brass, 0, 4); cyl(cx, 790, 36, 40, mats.boucle, 30, 36);
+    add(cx - 34, 756, 68, 16, 34, mats.boucle, 62, .06);
+  }
+  begin(); cyl(699, 772, 16, 50, mats.paleOak, 0, 14);                     // a small side table between them
+  cyl(699, 772, 7, 14, mats.stoneWarm, 50, 5);
+  begin(); cyl(560, 752, 12, 2, mats.brass); cyl(560, 752, 1.4, 160, mats.brass, 2); cyl(582, 764, 20, 14, mats.brass, 150, 12);   // floor lamp
 
   // --- dining: an oak table (clear of the sideboard), six oak chairs with cream seats, three glass
   // globes on brass rods, a white sideboard with an oak top, the bookcase on the hall wall, sheers
