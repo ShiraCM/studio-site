@@ -1219,3 +1219,25 @@ html[dir="rtl"] .btn svg,html[dir="rtl"] .textlink svg{transform:scaleX(-1)}
 html[dir="rtl"] .brand{direction:ltr}
 html[dir="rtl"] .closet-plan,html[dir="rtl"] .jh-view canvas,html[dir="rtl"] .k3d-view{direction:ltr}
 
+
+/* Project pages: the plan story told in three captions that scroll by beside the model, like the
+   kitchen story on the home page (scroll-story.js, owner Nov 19). The model stays beside them on wide
+   screens and under the header on phones; the caption at the reading line is the current one. */
+.jh-scrolly{grid-template-areas:"copy stage" "steps stage";align-items:start}
+.jh-scrolly .jh-copy{grid-area:copy}
+.jh-scrolly .jh-stage{grid-area:stage;position:sticky;top:84px;align-self:start}
+.jh-scrolly .jh-tag{display:none}
+.jh-scrolly .jh-view{max-height:calc(100svh - 120px)}
+.jh-steps{grid-area:steps;list-style:none;margin:0;padding:12svh 0 30svh;display:grid;gap:0}
+.jh-step{min-height:62svh;display:grid;align-content:center;gap:8px;opacity:.4;transition:opacity .5s ease}
+.jh-step.on{opacity:1}
+.jh-step-name{margin:0;font-family:var(--display);font-size:clamp(24px,2.2vw,30px);line-height:1.15;color:var(--ink)}
+.jh-step-name b{font-family:var(--body);font-size:13px;font-weight:500;letter-spacing:.08em;color:var(--olive);margin-inline-end:10px;vertical-align:.25em}
+.jh-step-note{margin:0;color:var(--muted);max-width:34ch}
+@media (max-width:900px){
+  .jh-scrolly{grid-template-areas:"copy" "stage" "steps"}
+  .jh-scrolly .jh-stage{top:68px;z-index:2;background:var(--stone);padding-top:8px;box-shadow:0 14px 18px -14px var(--stone)}
+  .jh-steps{padding:4svh 0 22svh}
+  .jh-step{min-height:44svh}
+}
+@media (prefers-reduced-motion:reduce){.jh-step{transition:none}}

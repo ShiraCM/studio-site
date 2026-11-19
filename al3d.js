@@ -666,7 +666,7 @@ async function start() {
   else {
     frame(0);
     const { scrollStory } = await import('./scroll-story.js');
-    story = scrollStory({ box, end: INTRO_END, frame: t => { if (!introDone) { time = t; frame(t); } }, done: finishIntro });
+    story = scrollStory({ box, steps: STEPS, end: INTRO_END, frame: t => { if (!introDone) { time = t; frame(t); } }, done: finishIntro });
   }
   window.__al3d = { jump: t => { if (!controls) { time = t; frame(t); } }, finish: () => { if (story) story.stop(); else finishIntro(); }, T, ROOMS };
 }
