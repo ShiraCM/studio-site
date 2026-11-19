@@ -1126,3 +1126,11 @@ nav.links .menu-panel a:first-child{border-top:0}
 .closet-plan .carve rect{fill:rgba(70,82,46,.14);stroke:#46522E;stroke-width:1.4;stroke-dasharray:5 4}
 .closet-plan .carve .cap{font-size:10px;fill:#46522E}
 @media (prefers-reduced-motion:no-preference){.closet-plan.armed .dim .d.len2{stroke-dasharray:400;stroke-dashoffset:400}.closet-plan.armed.in .dim .d.len2{stroke-dashoffset:0}}
+
+/* Neve Amim refinements (owner, Nov 19); palette and fonts unchanged */
+.pcard .textlink{padding-bottom:8px}
+.phero.nv{padding-top:clamp(56px,8vw,104px)}
+.phero.nv .lede{max-width:48ch}
+.nv,.nv h1,.nv h2{scroll-margin-top:120px}
+.al-anim .jh-tag{margin-bottom:20px}
+.nv .points div{padding-top:32px;padding-bottom:32px}
