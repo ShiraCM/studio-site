@@ -4,7 +4,7 @@
    3.   The drawing rises into a model built from the same wall rectangles (KEEP + NEW), with a beam over
         every window and doorway, glass in the windows and oak door frames. Each room is furnished after
         its picture: the kitchen, dining, primary bedroom, en-suite, main bathroom and safe room from the
-        owner's photos and styled pictures; the laundry room from her SketchUp sketches; the second bedroom
+        owner's photos and styled pictures; the laundry room from her own rendering; the second bedroom
         after the twin-bed picture (model only, no picture in the tour).
    4.   A tour: the camera goes to each room; where there is a picture, it opens in a circle out of the room.
    It plays when it comes into view and loops. three.js loads on demand. Plan px are the 2000 × 1500
@@ -31,7 +31,7 @@ const ROOMS = [
   { key: 'ensuite', name: 'En-suite', note: 'In its original place, now reached directly from the primary bedroom along an open, unhurried route, planned with aging in place in mind.', img: 'img/al-bath-ensuite.webp', r: [1726, 752, 1952, 1134], zoom: 1.15 },
   { key: 'primary', name: 'Primary bedroom', note: 'A full wall of built-in closets and generous clearances, with a comfortable, direct approach to the en-suite.', img: 'img/al-primary-bedroom.jpg', r: [1598, 266, 1952, 740] },
   { key: 'bath', name: 'Main bathroom', note: 'With the washer moved to a laundry room of its own, a long vanity and a full bath.', img: 'img/al-bath-main.webp', r: [1324, 366, 1586, 578], zoom: 1.15 },
-  { key: 'laundry', name: 'Laundry room', note: 'Once the guest toilet: the washer and dryer side by side, with storage above.', img: 'img/al-laundry.webp', r: [1136, 366, 1314, 578], zoom: 1.4, dir: [-.42, .9, .12] },   // seen from the west, so the machines' fronts show
+  { key: 'laundry', name: 'Laundry room', note: 'Once the guest toilet: the dryer stacked on the washer, beside open shelves lit from beneath.', img: 'img/al-laundry.webp', r: [1136, 366, 1314, 578], zoom: 1.4, dir: [-.42, .9, .12] },   // seen from the west, so the machines' fronts show
   { key: 'safe', name: 'Safe room', note: 'The reinforced safe room, furnished as a child’s bedroom with a trundle bed and closets built around it.', img: 'img/al-safe-room.jpg', r: [696, 94, 1102, 436] }
 ];
 
@@ -469,21 +469,33 @@ async function start() {
   closet(690, 460, 262, 64, 's', mats.warmWhite, 4);   // four doors (owner: wider still)
   begin(); for (let k = 0; k < 4; k++) add(690 + 262 * (k + .5) / 4 - 1, 524.2, 2, 1.6, 30, mats.brass, 90, .002);
 
-  // --- laundry room (from the SketchUp sketches): along the east wall a tall built-in unit 65 cm deep,
-  // with the washer and dryer side by side on a drawer base and wire baskets and shelves above;
-  // under the window a low unit 52 cm deep and 126 cm high (ironing board, iron, robot vacuum)
+  // --- laundry room (owner, Nov 19: her own rendering, "like my real design in the actual plans"): along the
+  // east wall a tall built-in unit 65 cm deep. Facing it, from left (north) to right: a hanging column with
+  // shelves below; open shelves lit by warm LED strips, with four mesh bins stacked at the bottom; and the
+  // dryer stacked on the washer, with lit shelves above. Under the window a low unit 52 cm deep and 126 cm high.
   begin();
   add(1239, 366, 75, 212, 250, mats.slate, 0, .006);
-  for (const [y0, dy] of [[414, 77], [491, 77]]) {
-    add(1236, y0 + 2, 4, dy - 4, 85, mats.white, 82, .008);                 // the machines' white fronts
-    const door = cyl(1234, y0 + dy / 2, 22, 2, mats.mirror, 0); door.rotation.z = Math.PI / 2; door.position.set(wx(1234), h(118), wz(y0 + dy / 2));
-    add(1236, y0 + 4, 4, dy - 8, 10, mats.steel, 155, .004);               // control panels
+  add(1238, 368, 2, 44, 245, mats.dark, 4, .002);                           // the hanging column
+  for (const lift of [40, 90]) add(1240, 368, 72, 44, 2, mats.slate, lift, .002);
+  add(1236, 372, 1.2, 36, 1.2, mats.steel, 180, .001);                      // rail, with a few garments
+  for (const [y, w, hh] of [[374, 9, 60], [384, 10, 55], [395, 9, 62]]) add(1234, y, 3, w, hh, y === 384 ? mats.warmWhite : mats.white, 178 - hh, .004);
+  add(1238, 414, 2, 76, 245, mats.dark, 4, .002);                           // the lit shelf column
+  for (const lift of [95, 140, 185, 230]) {
+    add(1236.5, 414, 3.5, 76, 2, mats.slate, lift, .002);
+    add(1236, 416, 1.5, 72, .8, mats.glow, lift - 1.2, .001);               // LED strip under each shelf
   }
-  for (const lift of [26, 54]) add(1237.5, 414, 1.5, 154, 1.2, mats.dark, lift, .001);   // drawer joints under the machines
-  add(1237, 414, 3, 154, 2, mats.dark, 170, .001);                          // the shelf over the machines
-  for (const [y0, dy] of [[416, 74], [492, 74]]) for (const lift of [178, 205, 232]) add(1238, y0, 3, dy, 18, mats.black, lift, .002);   // wire baskets
-  add(1238, 368, 2, 44, 245, mats.dark, 4, .002);                           // the open shelf column
-  for (const lift of [40, 90, 140, 190]) add(1240, 368, 72, 44, 2, mats.slate, lift, .002);
+  for (const lift of [3, 24, 45, 66]) add(1235, 418, 4, 68, 18, mats.steel, lift, .003);   // mesh bins
+  for (const [y, hh] of [[424, 22], [432, 26], [441, 22], [458, 14], [466, 14]]) add(1236, y, 3, 6, hh, y < 450 ? mats.black : mats.white, 97, .003);   // bottles
+  const yc = 491 + 77 / 2;
+  for (const lift of [2, 89]) {                                             // washer below, dryer on top
+    add(1236, 493, 4, 73, 85, mats.white, lift, .008);
+    const door = cyl(1234, yc, 22, 2, mats.mirror, 0); door.rotation.z = Math.PI / 2; door.position.set(wx(1234), h(lift + 38), wz(yc));
+    add(1236, 495, 4, 69, 10, mats.steel, lift + 73, .004);                // control panels
+  }
+  for (const lift of [178, 214]) {
+    add(1236.5, 491, 3.5, 77, 2, mats.slate, lift, .002);
+    add(1236, 493, 1.5, 73, .8, mats.glow, lift - 1.2, .001);
+  }
   add(1136, 366, 103, 60, 126, mats.slate, 0, .006);                        // the low unit under the window
   add(1146, 425, 40, 2, 1.2, mats.dark, 2, .001);
   add(1140, 424, 96, 3, 1.2, mats.dark, 80, .001);
