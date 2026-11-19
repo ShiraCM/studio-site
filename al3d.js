@@ -426,7 +426,7 @@ async function start() {
   // gold bands on their spines, deep blue, burgundy, dark green and black, with a little space left over
   {
     begin();
-    const X = 920, Y = 740, Wd = 280, D = 36, Hc = 236, cols = 4, rows = 6, t = 3;
+    const X = 917, Y = 740, Wd = 276, D = 34, Hc = 236, cols = 4, rows = 6, t = 3;   // between its two new 30 cm walls
     add(X, Y, Wd, 3, Hc, mats.white, 0, .002);                                   // back
     for (let c = 0; c <= cols; c++) add(X + (Wd - t) * c / cols, Y, t, D, Hc, mats.white, 0, .002);   // uprights
     for (let k = 0; k <= rows; k++) add(X, Y, Wd, D, 2.5, mats.white, k * (Hc - 2.5) / rows, .002);  // shelves
@@ -445,6 +445,18 @@ async function start() {
     }
   }
   begin(); add(1036, 1112, 26, 14, 250, mats.sheer, 0, .01); add(1186, 1112, 26, 14, 250, mats.sheer, 0, .01);  // sheers
+
+  // --- entry (owner, Nov 19): a sefarim cabinet about 30 cm deep along the bedroom wall, with doors on its
+  // face toward the entry, closed off by a short wall; and a coat closet about 60 cm deep under the bedroom's
+  // south wall, its doors facing the living area, between the new 60 cm wall and the existing stub
+  {
+    begin();
+    add(640, 352, 34, 164, 240, mats.warmWhite, 0, .006);
+    for (let k = 1; k < 4; k++) add(639.4, 352 + 164 * k / 4 - .6, 1.2, 1.2, 236, mats.dark, 2, .001);
+    for (let k = 0; k < 4; k++) add(638.8, 352 + 164 * (k + .5) / 4 - 1, 1.6, 2, 30, mats.brass, 85, .002);
+  }
+  closet(690, 460, 262, 64, 's', mats.warmWhite, 6);
+  begin(); for (let k = 0; k < 6; k++) add(690 + 262 * (k + .5) / 6 - 1, 524.2, 2, 1.6, 30, mats.brass, 90, .002);
 
   // --- laundry room (from the SketchUp sketches): along the east wall a tall built-in unit 65 cm deep,
   // with the washer and dryer side by side on a drawer base and wire baskets and shelves above;

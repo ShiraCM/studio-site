@@ -40,6 +40,9 @@
     [1314, 366, 10, 226],                                  // laundry room / main bathroom
     [1506, 592, 14, 40],                                   // owner: a jamb below the bathroom wall
     [1478, 728, 34, 10],                                   // owner: a jamb at the closets' corner
+    [674, 460, 16, 66],                                    // owner, Nov 19: a 60 cm wall below the bedroom, between the sefarim and the coat closet
+    [640, 516, 50, 12],                                    // owner: a 30 cm wall closing the sefarim cabinet in the entry
+    [904, 740, 12, 35], [1194, 740, 12, 35],               // owner: 30 cm walls either side of the dining bookcase
     [1364, 722, 32, 18],                                   // owner: a short wall so the bedroom closet can run the length of its west wall
     [1504, 728, 8, 98], [1504, 818, 212, 8],               // built-in closets
     [1716, 944, 10, 86],                                   // the en-suite's old door, closed
