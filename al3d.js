@@ -95,7 +95,7 @@ async function start() {
     };
     tiles([1316, 360, 276, 224], '#6b655c', 70);                           // main bathroom: dark stone
     tiles([1720, 746, 236, 392], '#d4c7b1', 70);                           // en-suite: warm beige stone
-    tiles([1130, 360, 190, 224], '#d9d6cf', 52);                           // laundry room: pale porcelain
+    // laundry room: the oak parquet runs on into it (owner, Nov 19)
     tiles(P.BALCONY, '#cfc6b8', 66);                                       // balcony
     g.fillStyle = PAPER_OUT; g.fillRect(0, 1172, 454, H); g.fillRect(1240, 1172, W, H);   // outside the apartment
     g.fillRect(0, 0, W, 70); g.fillRect(0, 0, 38, H); g.fillRect(1988, 0, 12, H);

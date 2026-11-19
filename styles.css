@@ -1267,3 +1267,15 @@ html[dir="rtl"] .closet-plan,html[dir="rtl"] .jh-view canvas,html[dir="rtl"] .k3
 /* On phones the header button says just "Free call", so the logo keeps its one line */
 .xs-show{display:none}
 @media (max-width:440px){.xs-hide{display:none}.xs-show{display:inline}}
+
+/* Neve Amim opens with a picture, like Kaduri (owner, Nov 19): the kitchen. On wide screens the picture sits
+   to the right of the text, so the island stays clear of the pale veil behind the words. */
+.nv-hero .case-hero-copy .lede{max-width:46ch;margin:0}
+@media (min-width:901px){
+  .nv-hero .case-hero-pic{left:34%}
+  html[dir="rtl"] .nv-hero .case-hero-pic{left:0;right:34%}
+  .nv-hero .case-hero-pic img{object-position:55% 50%}
+}
+@media (max-width:900px){
+  .nv-hero .case-hero-pic img{object-position:55% 60%}
+}
