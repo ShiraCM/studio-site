@@ -87,74 +87,36 @@
   }
 })();
 
-// Order page: tick packages, keep a running total, copy the order.
-// Every package after the first saves data-saving dollars; the consultation is free with any package.
+// Packages page (owner, Nov 19: no prices, no cart): tick the packages you're interested in and send them to us.
+// "Send" opens the visitor's email app with the list ready; if there's no email address set, it copies the list.
 (function () {
-  var form = document.getElementById('order-form');
+  var form = document.getElementById('pick-form');
   if (!form) return;
-  var saving = +form.dataset.saving || 0;
-  var consult = form.querySelector('.oitem.consult');
-  var consultBox = consult.querySelector('input');
-  var pkgs = Array.prototype.slice.call(form.querySelectorAll('.oitem:not(.consult)'));
-  var countEl = document.getElementById('o-count'), totalEl = document.getElementById('o-total');
-  var noteEl = document.getElementById('o-note'), statusEl = document.getElementById('o-status');
+  var rows = Array.prototype.slice.call(form.querySelectorAll('.oitem'));
+  var countEl = document.getElementById('o-count'), statusEl = document.getElementById('o-status');
   var fallback = document.getElementById('o-fallback'), submit = form.querySelector('button[type=submit]');
-  var pay = document.getElementById('o-pay');
-  // Placeholder until PayPal is connected: explains instead of taking payment.
-  pay.addEventListener('click', function () { statusEl.textContent = 'Online payment is coming soon. For now, copy your order and we’ll send you a PayPal invoice.'; });
-  // The Hebrew site shows shekels: the dollar price × 3.1 (owner, Nov 19), written "2,325 ₪".
-  var he = window.__lang === 'he';
-  var money = he ? function (n) { return Math.round(n * 3.1).toLocaleString('en-US') + ' ₪'; }
-                 : function (n) { return '$' + n.toLocaleString('en-US'); };
-  if (he) form.querySelectorAll('.oitem').forEach(function (li) {
-    li.querySelectorAll('.oprice s, .oprice .amt').forEach(function (el) { el.textContent = money(+li.dataset.price); });
-  });
-  var userConsult = false;
-
-  function calc() {
-    var picked = pkgs.filter(function (li) { return li.querySelector('input').checked; });
-    var sub = picked.reduce(function (s, li) { return s + +li.dataset.price; }, 0);
-    var off = Math.max(0, picked.length - 1) * saving;
-    var consultFree = picked.length > 0;
-    var consultOn = consultFree || consultBox.checked;
-    if (consultOn && !consultFree) sub += +consult.dataset.price;
-    return { picked: picked, sub: sub, off: off, total: sub - off, consultOn: consultOn, consultFree: consultFree };
-  }
-
+  function picked() { return rows.filter(function (li) { return li.querySelector('input').checked; }); }
   function update() {
-    var r = calc();
-    consult.classList.toggle('included', r.consultFree);
-    consultBox.checked = r.consultFree || userConsult;
-    consultBox.disabled = r.consultFree;
-    consult.querySelector('s').hidden = !r.consultFree;
-    consult.querySelector('.amt').textContent = r.consultFree ? 'Included' : money(+consult.dataset.price);
-    var n = r.picked.length;
-    countEl.textContent = n ? n + (n === 1 ? ' package' : ' packages') + ' + consultation'
-                            : (r.consultOn ? 'Consultation' : 'Nothing selected yet');
-    totalEl.textContent = money(r.total);
-    var notes = [];
-    if (r.off) notes.push('You save ' + money(r.off) + ' with ' + n + ' packages.');
-    if (n && n < pkgs.length) notes.push('Add another package to save ' + money(saving) + ' more.');
-    if (!n && r.consultOn) notes.push('Free if you add any package.');
-    noteEl.textContent = notes.join(' ');
-    submit.disabled = !r.consultOn;
-    pay.disabled = !r.consultOn;
+    var n = picked().length;
+    countEl.textContent = !n ? 'Nothing ticked yet' : n === 1 ? '1 package ticked' : n + ' packages ticked';
+    submit.disabled = !n;
     statusEl.textContent = ''; fallback.hidden = true;
   }
-  consultBox.addEventListener('change', function () { userConsult = consultBox.checked; });
   form.addEventListener('change', update);
-
   form.addEventListener('submit', function (e) {
     e.preventDefault();
-    var r = calc(); if (!r.consultOn) return;
-    var lines = ['Hello Shira Svei Design Studio team,', '', 'I’d like to order:', ''];
-    lines.push('• Consultation: ' + (r.consultFree ? 'included' : money(+consult.dataset.price)));
-    r.picked.forEach(function (li) { lines.push('• ' + li.dataset.name + ': ' + money(+li.dataset.price)); });
-    if (r.off) lines.push('', 'Package savings: −' + money(r.off));
-    lines.push('Total: ' + money(r.total));
-    var text = lines.join('\n');
+    var list = picked(); if (!list.length) return;
+    var lines = ['Hello Shira Svei Design Studio team,', '', 'I’m interested in:', ''];
+    list.forEach(function (li) { lines.push('• ' + li.dataset.name); });
+    lines.push('', 'About my apartment (project, city, where I am in the process):', '');
+    var text = lines.join('\n'), to = form.getAttribute('data-email');
+    if (to) {
+      location.href = 'mailto:' + to + '?subject=' + encodeURIComponent('Packages I’m interested in') + '&body=' + encodeURIComponent(text);
+      statusEl.textContent = 'Your email app should open with your selection. Add a line about your apartment and press Send.';
+      return;
+    }
     function showFallback() { fallback.value = text; fallback.hidden = false; fallback.focus(); fallback.select(); statusEl.textContent = 'Copy the selected text below.'; }
-    try { navigator.clipboard.writeText(text).then(function () { statusEl.textContent = 'Order copied. Paste it into an email to us.'; }, showFallback); }
+    try { navigator.clipboard.writeText(text).then(function () { statusEl.textContent = 'Copied. Paste it into an email to us.'; }, showFallback); }
     catch (err) { showFallback(); }
   });
   update();

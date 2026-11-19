@@ -21,6 +21,7 @@
   var ATTRS = ['alt', 'aria-label', 'placeholder', 'title'];
   // sentences the order form builds from numbers
   var RULES = [
+    [/^(\d+) packages ticked$/, 'סימנתם $1 חבילות'],
     [/^1 package \+ consultation$/, 'חבילה אחת + ייעוץ'],
     [/^(\d+) packages \+ consultation$/, '$1 חבילות + ייעוץ'],
     [/You save (.+?) with (\d+) packages\./g, 'אתם חוסכים $1 עם $2 חבילות.'],
