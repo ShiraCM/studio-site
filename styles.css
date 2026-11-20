@@ -1335,3 +1335,7 @@ h2.label{margin:0;font-family:var(--body)}
 .nv-spread .nv-h{grid-column:3/span 10}
 .nv-spread .nv-h img{aspect-ratio:1376/768}
 @media (max-width:760px){.nv-spread .nv-h{grid-column:auto;margin-top:0}}
+
+/* Neve Amim bedroom plan: fine dimension lines for the clearances (owner, Nov 20) */
+.closet-plan .fine-dim path{stroke:#6b655b;stroke-width:1;fill:none}
+.closet-plan .fine-dim text{font:400 14px var(--body);fill:#5F5A52;letter-spacing:.02em}
