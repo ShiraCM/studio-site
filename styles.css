@@ -1282,14 +1282,15 @@ html[dir="rtl"] .closet-plan,html[dir="rtl"] .jh-view canvas,html[dir="rtl"] .k3
 
 /* Neve Amim in its own palette (owner, Nov 19: "use this palette for the neve amim page"), taken from her
    living and dining moodboard: ivory walls, linen, travertine, natural oak, brass and a charcoal vase.
-   Oak takes the olive's place as the accent; text colours keep WCAG AA on the ivory ground. */
+   The studio's olive stays the accent so the brand reads the same on every page (owner, Nov 20);
+   text colours keep WCAG AA on the ivory ground. */
 body.theme-amim{
   --stone:#F2EDE3;      /* ivory wall colour */
   --sheet:#F9F6EF;
   --rule:#DDD3C3;       /* linen */
   --ink:#2A2622;        /* the charcoal vase */
   --muted:#675C4F;
-  --olive:#7A5534;      /* oak, deepened for text and buttons */
+  --olive:#4E5A33;      /* the studio's olive stays the accent (owner, Nov 20) */
   --olive-soft:#E8DECD; /* linen */
   --on-olive:#FBF8F1;
   --night:#2B2622;
@@ -1297,14 +1298,10 @@ body.theme-amim{
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) body.theme-amim{
   --stone:#1A1714;--sheet:#221E1A;--rule:#3D362E;--ink:#EEE7DC;--muted:#B5AA98;
-  --olive:#D3AA7B;--olive-soft:#3A2F23;--on-olive:#1A1510;--night:#100E0C;--on-night:#EEE7DC}}
+  --olive:#A9B67E;--olive-soft:#3A2F23;--on-olive:#15170F;--night:#100E0C;--on-night:#EEE7DC}}
 :root[data-theme="dark"] body.theme-amim{
   --stone:#1A1714;--sheet:#221E1A;--rule:#3D362E;--ink:#EEE7DC;--muted:#B5AA98;
-  --olive:#D3AA7B;--olive-soft:#3A2F23;--on-olive:#1A1510;--night:#100E0C;--on-night:#EEE7DC}
-/* the light accent on the dark closing band: travertine and brass instead of pale olive */
-.theme-amim .close h2 em,.theme-amim .close .close-intro a{color:#DCC6A0}
-.theme-amim .close .btn-primary{background:#DCC6A0;color:#2A2622}
-.theme-amim .close .close-intro a:focus-visible{outline-color:#DCC6A0}
+  --olive:#A9B67E;--olive-soft:#3A2F23;--on-olive:#15170F;--night:#100E0C;--on-night:#EEE7DC}
 
 /* Packages without prices (owner, Nov 19): the consultation stands beside the intro call with its price and a
    booking button; below it, the packages are a list to tick and send. */
@@ -1328,3 +1325,13 @@ html[dir="rtl"] .nv-highlights li{padding-left:0;padding-right:16px;border-left:
 @media (max-width:900px){.nv-hero h1{font-size:clamp(34px,9vw,48px)}}
 @media (min-width:901px){.nv-highlights{grid-template-columns:1fr 1fr;gap:12px 22px}}
 h2.label{margin:0;font-family:var(--body)}
+
+/* Neve Amim: the owner's living and dining materials board, after the opening (Nov 20) */
+.nv-palette .section-head{margin-bottom:clamp(18px,3vw,28px)}
+.nv-board{margin:0}
+.nv-board img{width:100%;height:auto;display:block;border-radius:4px;box-shadow:0 18px 40px -28px rgba(42,38,34,.45)}
+
+/* Neve Amim gallery: the second bedroom (Nov 20), a wide picture before the main bathroom */
+.nv-spread .nv-h{grid-column:3/span 10}
+.nv-spread .nv-h img{aspect-ratio:1376/768}
+@media (max-width:760px){.nv-spread .nv-h{grid-column:auto;margin-top:0}}

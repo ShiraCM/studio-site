@@ -27,7 +27,7 @@ const lerp = (a, b, t) => a + (b - a) * t;
 const ROOMS = [
   { key: 'kitchen', name: 'Kitchen', note: 'Open to the living and dining area, with a stone island at its center.', img: 'img/al-kitchen.jpg', r: [64, 608, 430, 1134], dir: [.5, .85, .14] },   // seen from the living area, looking west, as in its picture,
   { key: 'dining', name: 'Dining', note: 'Set where the developer’s third bedroom once stood, now part of one open living space.', img: 'img/al-dining-living.jpg', r: [906, 740, 1314, 1134] },
-  { key: 'bedroom', name: 'Bedroom', note: 'Two single beds, with built-in closets.', r: [1322, 740, 1716, 1134] },
+  { key: 'bedroom', name: 'Bedroom', note: 'Two single beds, with built-in closets.', img: 'img/al-bedroom.webp', r: [1322, 740, 1716, 1134] },
   { key: 'ensuite', name: 'En-suite', note: 'In its original place, now reached directly from the primary bedroom along an open, unhurried route, planned with aging in place in mind.', img: 'img/al-bath-ensuite.webp', r: [1726, 752, 1952, 1134], zoom: 1.15 },
   { key: 'primary', name: 'Primary bedroom', note: 'A full wall of built-in closets and generous clearances, with a comfortable, direct approach to the en-suite.', img: 'img/al-primary-bedroom.jpg', r: [1598, 266, 1952, 740] },
   { key: 'bath', name: 'Main bathroom', note: 'With the washer moved to a laundry room of its own, a long vanity and a full bath.', img: 'img/al-bath-main.webp', r: [1324, 366, 1586, 578], zoom: 1.15 },
