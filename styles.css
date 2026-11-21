@@ -1339,3 +1339,12 @@ h2.label{margin:0;font-family:var(--body)}
 /* Neve Amim bedroom plan: fine dimension lines for the clearances (owner, Nov 20) */
 .closet-plan .fine-dim path{stroke:#6b655b;stroke-width:1;fill:none}
 .closet-plan .fine-dim text{font:400 14px var(--body);fill:#5F5A52;letter-spacing:.02em}
+
+/* Apartment 12: the live 3D room (fs3d.js, Nov 21). The drag-to-compare pictures stay as the fallback. */
+.fs3d-live .compare{display:none}
+.fs-view{aspect-ratio:4/3;max-height:80svh;border:1px solid var(--rule);border-radius:3px;background:linear-gradient(180deg,#fbfaf6,#f1eee6)}
+.fs-switch{position:absolute;left:10px;top:10px;z-index:3}
+.fs-clash{position:absolute;left:0;top:0;z-index:2;pointer-events:none;visibility:hidden;font:600 10.5px/1 var(--body);letter-spacing:.14em;text-transform:uppercase;color:#fff;background:#B8452E;padding:6px 8px;border-radius:2px;box-shadow:0 2px 10px rgba(30,28,24,.2);white-space:nowrap}
+.fs-status{min-height:3em;margin:0}
+html[dir="rtl"] .fs-view canvas{direction:ltr}
+@media (max-width:600px){.fs-view{aspect-ratio:1/1}}

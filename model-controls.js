@@ -7,7 +7,7 @@
      or Shift-drag always moves.
    - + and − zoom (a trackpad pinch too); Reset returns to the first view and re-centres it.
    - A button sits on each room that has a picture; it opens the picture with the room's name and note. */
-export function modelControls({ THREE, renderer, scene, camera, view, rooms, from, target, bounds }) {
+export function modelControls({ THREE, renderer, scene, camera, view, rooms, from, target, bounds, onRender }) {
   const off = from.clone().sub(target);
   let r = off.length(), theta = Math.atan2(off.x, off.z), phi = Math.acos(Math.min(1, Math.max(-1, off.y / r)));
   const home = { r, theta, phi, target: target.clone() };
@@ -34,7 +34,8 @@ export function modelControls({ THREE, renderer, scene, camera, view, rooms, fro
     mode = m;
     ui.querySelectorAll('[data-mode]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.mode === m)));
     view.classList.toggle('m3d-pan', m === 'pan');
-    hint.textContent = m === 'pan' ? 'Drag to move · tap a room to see it' : 'Drag to turn · tap a room to see it';
+    const tap = rooms.some(rm => rm.img);   // the furniture study (fs3d.js) has no room pictures
+    hint.textContent = m === 'pan' ? (tap ? 'Drag to move · tap a room to see it' : 'Drag to move') : (tap ? 'Drag to turn · tap a room to see it' : 'Drag to turn');
   };
   setMode('turn');
   ui.addEventListener('click', e => {
@@ -77,6 +78,7 @@ export function modelControls({ THREE, renderer, scene, camera, view, rooms, fro
     camera.position.set(target.x + r * Math.sin(phi) * Math.sin(theta), target.y + r * Math.cos(phi), target.z + r * Math.sin(phi) * Math.cos(theta));
     camera.lookAt(target);
     renderer.render(scene, camera);
+    if (onRender) onRender();
     const w = view.clientWidth, hh = view.clientHeight;
     for (const { b, at } of spots) {
       v.copy(at).project(camera);

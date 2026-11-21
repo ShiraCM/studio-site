@@ -62,7 +62,7 @@
 </div>
 
     </div>
-    <div style="display:grid;gap:14px">
+    <div class="fs3d" data-three style="display:grid;gap:14px">
       <div class="titleblock" style="margin-bottom:6px"><span class="num">3D</span><span class="gloss">Cutaway of each layout</span><span class="when">Drag to compare</span></div>
       <div class="compare" id="cmp2" style="--pos:50%;aspect-ratio:1126/724">
   <img src="img/furniture-2-sales.webp" alt="3D cutaway of the sales layout showing the suggested gap" width="1126" height="724">
@@ -72,7 +72,7 @@
   <input type="range" min="0" max="100" value="50" aria-label="Drag to compare sales layout with scaled layout">
 </div>
 
-      <p class="cap">The 3D views show furniture footprints. Heights and finishes are schematic.</p>
+      <p class="cap fs-note">Furniture is drawn to its true footprint; materials and heights are for illustration.</p>
     </div>
     <p class="note" style="margin:0">We check these clearances early, so there’s still time to rearrange the room or ask the contractor to adjust the layout.</p>
   </div>
@@ -104,6 +104,6 @@
 </section>
 
     <script src="app.js"></script>
-    
+    <script type="module" src="fs3d.js"></script>
     </body>
     </html>
