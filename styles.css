@@ -1348,3 +1348,10 @@ h2.label{margin:0;font-family:var(--body)}
 .fs-status{min-height:3em;margin:0}
 html[dir="rtl"] .fs-view canvas{direction:ltr}
 @media (max-width:600px){.fs-view{aspect-ratio:1/1}}
+.fs-clash.fs-note-tag{background:#2A2622}
+@media (max-width:600px){.fs-switch .m3d-btn.m3d-txt{padding:0 8px;font-size:9.5px;letter-spacing:.1em}.fs-clash{font-size:9.5px;padding:5px 6px}}
+@media (max-width:600px){.fs-switch{left:6px;top:6px;right:6px}.fs-switch .m3d-btn.m3d-txt{padding:0 6px;font-size:9px;letter-spacing:.06em}}
+.fs-clash.fs-fix-tag{background:var(--olive)}
+.fs-switch{flex-wrap:wrap;max-width:calc(100% - 20px)}
+.fs-switch .fs-play{margin-left:6px;border-left:1px solid var(--rule)}
+.fs-switch .fs-play[aria-pressed="true"]{background:var(--olive);border-color:var(--olive)}

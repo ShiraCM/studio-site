@@ -7,21 +7,21 @@
    Measured from the two plans (furniture-1-sales / furniture-1-scaled, 1126 × 756 px): about 1.5 cm per
    px (the six-seat table, 90 × 193 cm, is 60 × 129 px). Walls are cut at 105 cm, like a cutaway. */
 let THREE;
-const CM = 1.5;                                   // cm per plan px
+const CM = 1.703;                                 // cm per plan px: the owner's 705 cm from the kitchen wall to the bedroom wall (Nov 21)
 const S = CM / 100;                               // world metres per plan px
 const CX = 400, CY = 380;                         // plan px at the world origin
 const wx = px => (px - CX) * S, wz = py => (py - CY) * S, h = cm => cm / 100;
 
 // ---- the room, plan px [x0, y0, x1, y1]
 const WALLS = [
-  [78, 288, 92, 583], [78, 288, 300, 302], [282, 240, 300, 302],       // west wall, the kitchen's north wall, the entry jog
-  [285, 161, 345, 176], [340, 161, 352, 222],                          // the entry hall
-  [340, 210, 525, 222], [512, 222, 522, 308],                          // the closet wall above the dining area and its stub
-  [507, 354, 660, 362], [507, 362, 515, 583],                          // the bedroom beside the living room
-  [588, 150, 598, 300]                                                 // the bathroom along the hallway
+  [78, 288, 92, 583], [78, 288, 300, 302], [284, 240, 300, 302],       // west wall, the kitchen's north wall, the entry jog
+  [284, 161, 410, 175], [400, 175, 410, 224],                          // the entry hall
+  [400, 215, 541, 224], [532, 224, 541, 307],                          // the closet wall above the dining area and its stub
+  [506, 355, 657, 362], [506, 362, 513, 583],                          // the bedroom beside the living room
+  [603, 140, 613, 290]                                                 // the bathroom along the hallway
 ];
-const FACADE = { y0: 562, y1: 580, wall: [[78, 105], [170, 200], [270, 330], [480, 530], [620, 660]], glass: [[105, 170], [200, 270], [330, 480], [530, 620]] };
-const FLOORS = [[92, 302, 507, 562], [300, 222, 512, 302], [286, 176, 340, 302], [522, 222, 588, 354], [515, 362, 660, 562]];
+const FACADE = { y0: 562, y1: 580, wall: [[78, 105], [173, 196], [263, 320], [467, 564], [627, 660]], glass: [[105, 173], [196, 263], [320, 467], [564, 627]] };
+const FLOORS = [[92, 302, 506, 562], [300, 175, 400, 302], [400, 224, 532, 302], [506, 302, 541, 355], [541, 224, 603, 355], [513, 355, 657, 562]];
 
 // ---- furniture: where the sales plan draws it, and where it really goes at true size
 const SOFA = { sales: [316, 434, 364, 558], true: [309, 417, 363, 558] };
@@ -36,8 +36,46 @@ for (const [i, cy] of [245, 275, 305].entries()) {
 }
 chairs.push({ face: 's', sales: null, true: [420, 242, 450, 271] });          // the end chairs appear at true size
 chairs.push({ face: 'n', sales: null, true: [420, 400, 450, 429], clash: true });
-const ROUTE = [[180, 352], [300, 352], [505, 346], [548, 318], [556, 250]];
+const ROUTE = [[180, 352], [300, 352], [515, 334], [566, 314], [572, 244]];
 const CLASH = [436, 412];
+// Rearranged (owner, Nov 21: "show the furniture being rearranged so it doesn't bump into each other and
+// doesn't block the pathway to the bedrooms … the point is to show that the alternatives aren't great"):
+// owner: "the table has to go where the seating is currently". The dining table turns and moves into the
+// living area by the windows, with all eight chairs; the sofa turns and goes into the dining nook, its
+// back to the nook's wall, facing the table; the loveseat and the coffee table have no room left.
+// The path to the bedrooms opens.
+const RE_TABLE = { c: [392, 500], rot: Math.PI / 2 };
+const RE_SOFA = { c: [415.5, 251], rot: -Math.PI / 2 };
+const RE_CHAIRS = {
+  0: { c: [348, 455.5], face: 's' }, 2: { c: [392, 455.5], face: 's' }, 4: { c: [436, 455.5], face: 's' },
+  1: { c: [348, 544.5], face: 'n' }, 3: { c: [392, 544.5], face: 'n' }, 5: { c: [436, 544.5], face: 'n' },
+  6: { c: [313, 500], face: 'e' }, 7: { c: [471, 500], face: 'w' }
+};
+const ANG = { e: 0, n: Math.PI / 2, w: Math.PI, s: -Math.PI / 2 };
+// Our solution (owner, Nov 21: "come up with an idea that DOES help", then: a religious family needs a
+// big table "and DEFINITELY put people at the 2 heads"): the table turns to run across the room, between
+// the kitchen and the living area, with three chairs on each side and both heads (eight seats). The walk
+// from the front door to the bedrooms runs along the empty dining nook, past the table's east head. The
+// sofa and coffee table stay; an armchair by the window takes the loveseat's place.
+const FIX_TABLE = { c: [394.5, 335], rot: Math.PI / 2 };
+const FIX_CHAIRS = {
+  0: { c: [352, 290.5], face: 's' }, 2: { c: [395, 290.5], face: 's' }, 4: { c: [437, 290.5], face: 's' },
+  1: { c: [352, 379.5], face: 'n' }, 3: { c: [395, 379.5], face: 'n' }, 5: { c: [437, 379.5], face: 'n' },
+  6: { c: [315.5, 335], face: 'e' }, 7: { c: [473.5, 335], face: 'w' }
+};
+const FIX_ARMCHAIR = { c: [464, 532], sx: 48 / 92, rot: Math.PI };
+const ROUTE_FIX = [[345, 190], [350, 252], [490, 256], [524, 318], [566, 314], [572, 244]];
+// The solution (owner, Nov 21: the bedroom wall stays; "what if we move the kitchen to this wall?"): the
+// kitchen becomes one long run along the north wall, backing onto the entrance hall. The dining table then
+// runs east-west along the windows, eight seats with both heads; the living room takes the east side, the
+// sofa's back to the table, facing the TV on the bedroom wall, the loveseat along the windows.
+const SOL = {
+  sofa: { c: [362, 470.5] }, loveseat: { c: [441, 532.5], rot: Math.PI }, coffee: { c: [428.5, 470] },
+  table: { c: [214.5, 460], rot: Math.PI / 2 }, rug: { c: [420, 470] }, tree: { c: [312, 545] },
+  chairs: { 0: [172, 415.5, 's'], 2: [215, 415.5, 's'], 4: [257, 415.5, 's'], 1: [172, 504.5, 'n'], 3: [215, 504.5, 'n'], 5: [257, 504.5, 'n'], 6: [135.5, 460, 'e'], 7: [293.5, 460, 'w'] }
+};
+const ROUTE_SOL = [[345, 190], [350, 258], [480, 264], [524, 318], [566, 314], [572, 244]];
+const ROUTE_KITCHEN = [[470, 280], [478, 335], [430, 372], [300, 372], [150, 372]];
 
 const box = document.querySelector('.fs3d[data-three]');
 const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -60,11 +98,20 @@ async function start() {
   const sw = document.createElement('div');
   sw.className = 'm3d-seg fs-switch'; sw.setAttribute('role', 'group'); sw.setAttribute('aria-label', 'Furniture size');
   sw.innerHTML = '<button type="button" class="m3d-btn m3d-txt" data-size="sales" aria-pressed="false">Sales plan</button>' +
-                 '<button type="button" class="m3d-btn m3d-txt" data-size="true" aria-pressed="true">True size</button>';
+                 '<button type="button" class="m3d-btn m3d-txt" data-size="true" aria-pressed="true">True size</button>' +
+                 '<button type="button" class="m3d-btn m3d-txt" data-size="re" aria-pressed="false">Try 1</button>' +
+                 '<button type="button" class="m3d-btn m3d-txt" data-size="fix" aria-pressed="false">Try 2</button>' +
+                 '<button type="button" class="m3d-btn m3d-txt" data-size="sol" aria-pressed="false">Solution</button>' +
+                 '<button type="button" class="m3d-btn m3d-txt fs-play" data-play aria-pressed="false">▶ Play</button>';
   view.append(sw);
   const clashTag = document.createElement('span');
   clashTag.className = 'fs-clash'; clashTag.textContent = 'Chair meets sofa';
   view.append(clashTag);
+  const fourTag = document.createElement('span'); fourTag.className = 'fs-clash fs-note-tag'; fourTag.textContent = 'The seating area, at the entrance'; view.append(fourTag);
+  const loveTag = document.createElement('span'); loveTag.className = 'fs-clash fs-note-tag'; loveTag.textContent = 'No room for the loveseat or coffee table'; view.append(loveTag);
+  const fixTags = ['Seats eight, with both heads', 'Tight way to the kitchen', 'Clear path to the bedrooms'].map(t => { const el = document.createElement('span'); el.className = 'fs-clash fs-fix-tag'; el.textContent = t; view.append(el); return el; });
+  fixTags[1].className = 'fs-clash';
+  const solTags = ['The kitchen, along this wall', 'A 16 in closet behind the kitchen', 'Seats eight, with both heads'].map(t => { const el = document.createElement('span'); el.className = 'fs-clash fs-fix-tag'; el.textContent = t; view.append(el); return el; });
   const status = document.createElement('p');
   status.className = 'cap fs-status'; status.setAttribute('aria-live', 'polite');
   box.querySelector('.compare').before(view);
@@ -231,43 +278,41 @@ async function start() {
     for (const xx of [a, (a + b) / 2 - 1, b - 2]) block(scene, [xx, FACADE.y0 + 7, xx + 2, FACADE.y1 - 7], 60, mats.frame, 45, .002);
     const g = block(scene, [a, FACADE.y0 + 8, b, FACADE.y1 - 8], 60, mats.glass, 45, .001); g.castShadow = false;
   }
-  // the kitchen: an L of flat-front cabinets under a quartz top, with the sink, tap and hob, and a tall
-  // fridge column with a pantry beside it
-  for (const run of [[92, 340, 128, 562, 'e'], [92, 302, 208, 340, 's']]) {
-    const [x0, y0, x1, y1, face] = run;
-    block(scene, [x0, y0, x1, y1], 8, mats.plinth, 0, .002);
-    if (face === 'e') block(scene, [x0, y0, x1 - 1.5, y1], 80, mats.front, 8, .004);
-    else block(scene, [x0, y0, x1, y1 - 1.5], 80, mats.front, 8, .004);
-    block(scene, [x0 - .5, y0 - .5, x1 + 1, y1 + 1], 3.5, mats.counter, 88, .004);
-    if (face === 'e') for (let y = y0 + 40; y < y1 - 5; y += 40) block(scene, [x1 - 1.7, y - .4, x1 - 1.1, y + .4], 78, mats.groove, 9, .001);
-    else for (let x = x0 + 40; x < x1 - 5; x += 40) block(scene, [x - .4, y1 - 1.7, x + .4, y1 - 1.1], 78, mats.groove, 9, .001);
-    if (face === 'e') for (let y = y0 + 20; y < y1; y += 40) block(scene, [x1 - 1.3, y - 6, x1 - .4, y + 6], 1.2, mats.brass, 80, .002);
-    else for (let x = x0 + 20; x < x1; x += 40) block(scene, [x - 6, y1 - 1.3, x + 6, y1 - .4], 1.2, mats.brass, 80, .002);
-  }
-  block(scene, [98, 396, 122, 428], 1, mats.steel, 90.6, .01); block(scene, [98, 430, 122, 458], 1, mats.steel, 90.6, .01);
-  cyl(scene, 96, 428, 1.2, 26, mats.steel, 91.5);
-  block(scene, [98, 520, 124, 558], .8, mats.hob, 91.4, .004);
-  for (const [x, y] of [[104, 528], [117, 528], [104, 548], [117, 548]]) { const r = new THREE.Mesh(new THREE.TorusGeometry(h(8), h(.35), 6, 36), mats.steel); r.rotation.x = Math.PI / 2; r.position.set(wx(x), h(92.4), wz(y)); scene.add(r); }
-  block(scene, [210, 302, 262, 350], 215, mats.front, 0, .006);
-  block(scene, [214, 348, 216, 349.6], 90, mats.brass, 95, .002);
-  block(scene, [92, 302, 128, 340], 1, mats.ceramic, 91.5, .002).visible = false;
-  // the TV console in oak with a vase and books
-  block(scene, [489, 430, 505, 550], 46, mats.oak, 4, .01); block(scene, [491, 432, 503, 548], 4, mats.plinth, 0, .002);
-  cyl(scene, 497, 450, 6, 26, mats.ceramic, 50, 4); block(scene, [491, 505, 503, 530], 4, mats.bookB, 50, .004); block(scene, [492, 507, 502, 528], 3, mats.book, 54, .004);
-  // a wool rug under the living area, an olive tree in a pot by the window, and a floor lamp
-  block(scene, [326, 446, 484, 556], .8, mats.rug, 0, .01).castShadow = false;
-  {
-    cyl(scene, 296, 540, 15, 34, mats.terracotta, 0, 18);
-    cyl(scene, 296, 540, 1.8, 80, mats.bark, 32, 1.2, 8);
-    const foliage = new THREE.Group(); scene.add(foliage);
-    for (let i = 0; i < 70; i++) {
-      const a = rnd() * 7, rr = Math.sqrt(rnd()) * 24, y = 104 + rnd() * 46;
-      const m = new THREE.Mesh(new THREE.IcosahedronGeometry(h(3 + rnd() * 3), 0), rnd() < .5 ? mats.leaf : mats.leafDark);
-      m.position.set(wx(296) + Math.cos(a) * h(rr), h(y), wz(540) + Math.sin(a) * h(rr)); m.rotation.set(rnd() * 3, rnd() * 3, 0);
-      m.castShadow = true; foliage.add(m);
+  // the kitchen: flat-front cabinets under a quartz top, the sink and tap, the hob, and a tall fridge column.
+  // As drawn by the developer, an L along the west wall (oldKitchen); in the solution (owner, Nov 21:
+  // "what if we move the kitchen to this wall?") one long run along the north wall (newKitchen)
+  function kitchen(parent, runs, sinks, tap, hob, fridge) {
+    for (const [x0, y0, x1, y1, face] of runs) {
+      block(parent, [x0, y0, x1, y1], 8, mats.plinth, 0, .002);
+      if (face === 'e') block(parent, [x0, y0, x1 - 1.5, y1], 80, mats.front, 8, .004);
+      else block(parent, [x0, y0, x1, y1 - 1.5], 80, mats.front, 8, .004);
+      block(parent, [x0 - .5, y0 - .5, x1 + 1, y1 + 1], 3.5, mats.counter, 88, .004);
+      if (face === 'e') for (let y = y0 + 40; y < y1 - 5; y += 40) block(parent, [x1 - 1.7, y - .4, x1 - 1.1, y + .4], 78, mats.groove, 9, .001);
+      else for (let x = x0 + 40; x < x1 - 5; x += 40) block(parent, [x - .4, y1 - 1.7, x + .4, y1 - 1.1], 78, mats.groove, 9, .001);
+      if (face === 'e') for (let y = y0 + 20; y < y1; y += 40) block(parent, [x1 - 1.3, y - 6, x1 - .4, y + 6], 1.2, mats.brass, 80, .002);
+      else for (let x = x0 + 20; x < x1; x += 40) block(parent, [x - 6, y1 - 1.3, x + 6, y1 - .4], 1.2, mats.brass, 80, .002);
     }
+    for (const r of sinks) block(parent, r, 1, mats.steel, 90.6, .01);
+    cyl(parent, tap[0], tap[1], 1.2, 26, mats.steel, 91.5);
+    block(parent, hob, .8, mats.hob, 91.4, .004);
+    const hx = (hob[0] + hob[2]) / 2, hy = (hob[1] + hob[3]) / 2, dx = (hob[2] - hob[0]) / 4, dy = (hob[3] - hob[1]) / 4;
+    for (const [x, y] of [[hx - dx, hy - dy], [hx + dx, hy - dy], [hx - dx, hy + dy], [hx + dx, hy + dy]]) {
+      const r = new THREE.Mesh(new THREE.TorusGeometry(h(8), h(.35), 6, 36), mats.steel); r.rotation.x = Math.PI / 2; r.position.set(wx(x), h(92.4), wz(y)); parent.add(r);
+    }
+    block(parent, fridge, 215, mats.front, 0, .006);
+    block(parent, [fridge[0] + 4, fridge[3] - 2, fridge[0] + 6, fridge[3] - .4], 90, mats.brass, 95, .002);
   }
-
+  const oldKitchen = new THREE.Group(); scene.add(oldKitchen);
+  kitchen(oldKitchen, [[92, 340, 128, 562, 'e'], [92, 302, 208, 340, 's']], [[98, 396, 122, 428], [98, 430, 122, 458]], [96, 428], [98, 520, 124, 558], [210, 302, 262, 350]);
+  const newKitchen = new THREE.Group(); scene.add(newKitchen);
+  // the fridge column at the west end (owner), and a 40 cm closet back to back with the kitchen where the
+  // run crosses the entrance hall, its doors facing the way in
+  kitchen(newKitchen, [[135, 302, 405, 340, 's']], [[240, 306, 262, 334], [264, 306, 284, 334]], [263, 304], [160, 306, 202, 334], [93, 302, 135, 346]);
+  block(newKitchen, [300, 278.5, 405, 302], 100, mats.front, 0, .004);
+  for (let x = 300 + 26; x < 405 - 5; x += 26) block(newKitchen, [x - .4, 278.1, x + .4, 279], 92, mats.groove, 4, .001);
+  for (let x = 300 + 13; x < 405; x += 26) block(newKitchen, [x - .5, 277.6, x + .5, 278.5], 14, mats.brass, 46, .002);
+  block(newKitchen, [300, 278.5, 405, 302], .6, mats.cut, 100, .001);
+  newKitchen.visible = false;
   // ---- furniture, each built at true size around its own centre; the sales size scales it
   const items = [];
   function piece(spec, build) {
@@ -330,77 +375,172 @@ async function start() {
     });
     if (ch.clash) g.userData.clash = true;
   }
+  // the TV console, and the rug under the seating: they move with the living room in the solution
+  const CONSOLE = { sales: [489, 430, 505, 550], true: [489, 430, 505, 550] };
+  piece(CONSOLE, (g, c) => {
+    block(g, [489, 430, 505, 550], 46, mats.oak, 4, .01, c); block(g, [491, 432, 503, 548], 4, mats.plinth, 0, .002, c);
+    const v = new THREE.Mesh(new THREE.CylinderGeometry(h(4), h(6), h(26), 20), mats.ceramic); v.position.set((497 - c[0]) * S, h(63), (450 - c[1]) * S); v.castShadow = true; g.add(v);
+    block(g, [491, 505, 503, 530], 4, mats.bookB, 50, .004, c); block(g, [492, 507, 502, 528], 3, mats.book, 54, .004, c);
+  });
+  // an olive tree in a pot by the window
+  const TREE = { sales: [157, 525, 187, 555], true: [157, 525, 187, 555] };
+  piece(TREE, (g, c) => {
+    const pot = new THREE.Mesh(new THREE.CylinderGeometry(h(18), h(15), h(34), 28), mats.terracotta); pot.position.set(0, h(17), 0); pot.castShadow = true; g.add(pot);
+    const trunk = new THREE.Mesh(new THREE.CylinderGeometry(h(1.2), h(1.8), h(80), 8), mats.bark); trunk.position.set(0, h(72), 0); g.add(trunk);
+    for (let i = 0; i < 70; i++) {
+      const a = rnd() * 7, rr = Math.sqrt(rnd()) * 24, y = 104 + rnd() * 46;
+      const m = new THREE.Mesh(new THREE.IcosahedronGeometry(h(3 + rnd() * 3), 0), rnd() < .5 ? mats.leaf : mats.leafDark);
+      m.position.set(Math.cos(a) * h(rr), h(y), Math.sin(a) * h(rr)); m.rotation.set(rnd() * 3, rnd() * 3, 0); m.castShadow = true; g.add(m);
+    }
+  });
+  const RUG = { sales: [326, 446, 484, 556], true: [326, 446, 484, 556] };
+  piece(RUG, (g, c) => { const m = block(g, RUG.true, .8, mats.rug, 0, .01, c); m.castShadow = false; });
 
   // ---- the path to the hallway, a dashed line on the floor
-  const dashes = [];
-  for (let i = 0; i < ROUTE.length - 1; i++) {
-    const [ax, ay] = ROUTE[i], [bx, by] = ROUTE[i + 1], len = Math.hypot(bx - ax, by - ay), n = Math.round(len / 14);
-    for (let k = 0; k < n; k++) {
-      const t = (k + .25) / n, x = ax + (bx - ax) * t, y = ay + (by - ay) * t;
-      const m = new THREE.Mesh(new THREE.BoxGeometry(7 * S, .004, 2.2 * S), mats.path);
-      m.position.set(wx(x), .004, wz(y)); m.rotation.y = -Math.atan2(by - ay, bx - ax);
-      m.userData.x = x; scene.add(m); dashes.push(m);
+  function route(pts) {
+    const list = [];
+    for (let i = 0; i < pts.length - 1; i++) {
+      const [ax, ay] = pts[i], [bx, by] = pts[i + 1], len = Math.hypot(bx - ax, by - ay), n = Math.max(1, Math.round(len / 14));
+      for (let k = 0; k < n; k++) {
+        const t = (k + .25) / n, x = ax + (bx - ax) * t, y = ay + (by - ay) * t;
+        const m = new THREE.Mesh(new THREE.BoxGeometry(7 * S, .004, 2.2 * S), mats.path);
+        m.position.set(wx(x), .004, wz(y)); m.rotation.y = -Math.atan2(by - ay, bx - ax);
+        m.userData.x = x; scene.add(m); list.push(m);
+      }
     }
+    const [ex, ey] = pts[pts.length - 1];
+    const tip = new THREE.Mesh(new THREE.ConeGeometry(6 * S, 12 * S, 3), mats.path);
+    tip.rotation.x = -Math.PI / 2; tip.position.set(wx(ex), .006, wz(ey - 6)); tip.scale.y = .1; scene.add(tip);
+    return { list, tip };
   }
-  const tip = new THREE.Mesh(new THREE.ConeGeometry(6 * S, 12 * S, 3), mats.path);
-  tip.rotation.x = -Math.PI / 2; tip.position.set(wx(556), .006, wz(244)); tip.scale.y = .1; scene.add(tip);
+  const { list: dashes, tip } = route(ROUTE);
+  const routeFix = route(ROUTE_FIX);
+  const routeSol = route(ROUTE_SOL), routeKitchen = route(ROUTE_KITCHEN);
   const ring = new THREE.Mesh(new THREE.RingGeometry(22 * S, 26 * S, 40), new THREE.MeshBasicMaterial({ color: 0xb8452e, transparent: true }));
   ring.rotation.x = -Math.PI / 2; ring.position.set(wx(CLASH[0]), .006, wz(CLASH[1])); scene.add(ring);
 
-  // ---- the switch between the two sizes
+  // what each piece does when the room is rearranged: undefined = stays, null = has no room
+  items[0].re = RE_SOFA;
+  items[1].re = null;                                                    // the loveseat
+  items[2].re = null;                                                    // the coffee table
+  items[3].re = RE_TABLE;
+  chairs.forEach((ch, j) => { const r = RE_CHAIRS[j]; items[4 + j].re = r ? { c: r.c, rot: ANG[r.face] - ANG[ch.face] } : null; });
+  items[1].fix = FIX_ARMCHAIR; items[3].fix = FIX_TABLE;
+  chairs.forEach((ch, j) => { const r = FIX_CHAIRS[j]; items[4 + j].fix = r ? { c: r.c, rot: ANG[r.face] - ANG[ch.face] } : null; });
+  items[0].sol = SOL.sofa; items[1].sol = SOL.loveseat; items[2].sol = SOL.coffee; items[3].sol = SOL.table;
+  chairs.forEach((ch, j) => { const [x, y, f] = SOL.chairs[j]; items[4 + j].sol = { c: [x, y], rot: ANG[f] - ANG[ch.face] }; });
+  items[13].sol = SOL.tree; items[14].sol = SOL.rug;
+  // where the loveseat stood: a pale footprint when it has to go
+  const ghost = new THREE.Mesh(new THREE.PlaneGeometry((LOVESEAT.true[2] - LOVESEAT.true[0]) * S, (LOVESEAT.true[3] - LOVESEAT.true[1]) * S),
+    new THREE.MeshBasicMaterial({ color: 0xb8452e, transparent: true, opacity: 0, depthWrite: false }));
+  ghost.rotation.x = -Math.PI / 2; ghost.position.set(wx((LOVESEAT.true[0] + LOVESEAT.true[2]) / 2), .007, wz((LOVESEAT.true[1] + LOVESEAT.true[3]) / 2)); scene.add(ghost);
+
+  // ---- the switch between the three layouts
   const ease = t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
   const lerp = (a, b, t) => a + (b - a) * t;
+  const angLerp = (a, b, t) => { let d = b - a; while (d > Math.PI) d -= 2 * Math.PI; while (d < -Math.PI) d += 2 * Math.PI; return a + d * t; };
   const ok = new THREE.Color(0xffffff), bad = new THREE.Color(0xe0614a);
-  let k = 1, from = 1, to = 1, t0 = 0, anim = 0;
-  function pose(k) {
-    for (const it of items) {
+  function targetOf(it, st) {
+    const tc = it.c, base = { x: tc[0], y: tc[1], sx: 1, sz: 1, r: 0, v: 1 };
+    if (st === 'true') return base;
+    if (st === 'sales') {
       const s = it.spec.sales;
-      if (!s) { it.g.visible = k > .02; it.g.scale.set(1, Math.max(k, .001), 1); it.g.position.set(wx(it.c[0]), 0, wz(it.c[1])); continue; }
-      const sc = [(s[0] + s[2]) / 2, (s[1] + s[3]) / 2];
-      it.g.position.set(wx(lerp(sc[0], it.c[0], k)), 0, wz(lerp(sc[1], it.c[1], k)));
-      it.g.scale.set(lerp((s[2] - s[0]) / it.w, 1, k), 1, lerp((s[3] - s[1]) / it.d, 1, k));
-      it.g.visible = true;
+      if (!s) return { ...base, v: 0 };
+      return { x: (s[0] + s[2]) / 2, y: (s[1] + s[3]) / 2, sx: (s[2] - s[0]) / it.w, sz: (s[3] - s[1]) / it.d, r: 0, v: 1 };
     }
-    const bk = Math.max(0, (k - .6) / .4);
-    if (clashChair) clashChair.color.copy(ok).lerp(bad, bk);
-    for (const m of dashes) m.material = k > .6 && m.userData.x > 360 ? mats.pathBad : mats.path;
-    tip.material = k > .6 ? mats.pathBad : mats.path;
-    ring.visible = k > .6; ring.material.opacity = bk;
+    const alt = st === 'fix' ? it.fix : st === 'sol' ? it.sol : it.re;
+    if (alt === undefined) return base;
+    if (alt === null) return { ...base, v: 0 };
+    return { x: alt.c[0], y: alt.c[1], sx: alt.sx || 1, sz: alt.sz || 1, r: alt.rot || 0, v: 1 };
+  }
+  const weights = st => ({ bad: st === 'true' ? 1 : 0, re: st === 're' ? 1 : 0, fix: st === 'fix' ? 1 : 0, sol: st === 'sol' ? 1 : 0 });
+  let W = weights('true'), Wfrom = W, Wto = W;
+  for (const it of items) it.cur = targetOf(it, 'true');
+  let fromP = [], toP = [], t0 = 0, anim = 0;
+  function apply(p) {
+    items.forEach((it, i) => {
+      const q = p[i]; it.cur = q;
+      it.g.position.set(wx(q.x), 0, wz(q.y)); it.g.rotation.y = q.r;
+      it.g.scale.set(q.sx, Math.max(q.v, .001), q.sz); it.g.visible = q.v > .02;
+    });
+    if (clashChair) clashChair.color.copy(ok).lerp(bad, W.bad);
+    for (const m of dashes) m.material = W.bad > .5 && m.userData.x > 360 ? mats.pathBad : mats.path;
+    tip.material = W.bad > .5 ? mats.pathBad : mats.path;
+    ring.visible = W.bad > .05; ring.material.opacity = W.bad;
+    ghost.visible = W.re > .05; ghost.material.opacity = .18 * W.re;
+    const way = W.fix > .5 ? 'fix' : W.sol > .5 ? 'sol' : 'base';
+    const show = (r, on) => { for (const m of r.list) m.visible = on; r.tip.visible = on; };
+    show({ list: dashes, tip }, way === 'base'); show(routeFix, way === 'fix'); show(routeSol, way === 'sol'); show(routeKitchen, way === 'sol');
+    oldKitchen.scale.y = Math.max(1 - W.sol, .001); oldKitchen.visible = W.sol < .98;
+    newKitchen.scale.y = Math.max(W.sol, .001); newKitchen.visible = W.sol > .02;
   }
   const TEXT = {
     sales: 'As the sales plan draws it: the table looks small, and there’s a clear path between it and the loveseat to the hallway.',
-    true: 'At true size, the table and its chairs take far more room: the end chair runs into the loveseat, and the path to the hallway closes.'
+    true: 'At true size, the table and its chairs take far more room: the end chair runs into the loveseat, and the path to the hallway closes.',
+    fix: 'Second try: turn the table across the room. It seats eight with both heads, but the way from the front door into the kitchen squeezes to about 26 in, between the fridge and the head chair.',
+    sol: 'The solution: move the kitchen to the wall along the entrance, with a 16 in closet back to back with it facing the way in. The dining table then runs along the windows and seats eight with both heads, the living room gets its own corner facing the TV, and the ways to the kitchen and the bedrooms stay clear.',
+    re: 'First try: swap the areas. Nothing collides and the path to the bedrooms opens, but the dining table takes over the living room, and the seating area shrinks to a single sofa at the entrance.'
   };
   let size = 'true';
-  function setSize(s, instant) {
-    size = s;
-    sw.querySelectorAll('[data-size]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.size === s)));
-    status.textContent = TEXT[s];
-    from = k; to = s === 'true' ? 1 : 0; t0 = performance.now();
-    if (instant || reduce) { k = to; pose(k); controls && controls.render(); return; }
+  function setSize(st, instant) {
+    size = st;
+    sw.querySelectorAll('[data-size]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.size === st)));
+    status.textContent = TEXT[st];
+    fromP = items.map(it => ({ ...it.cur })); toP = items.map(it => targetOf(it, st));
+    Wfrom = { ...W }; Wto = weights(st); t0 = performance.now();
+    if (instant || reduce) { W = Wto; apply(toP); controls && controls.render(); return; }
     if (!anim) anim = requestAnimationFrame(step);
   }
   function step(now) {
     anim = 0;
-    const p = Math.min(1, (now - t0) / 1100);
-    k = lerp(from, to, ease(p)); pose(k); controls.render();
+    const p = Math.min(1, (now - t0) / 1300), e = ease(p);
+    W = {}; for (const key in Wto) W[key] = lerp(Wfrom[key], Wto[key], e);
+    apply(fromP.map((a, i) => { const b = toP[i]; return { x: lerp(a.x, b.x, e), y: lerp(a.y, b.y, e), sx: lerp(a.sx, b.sx, e), sz: lerp(a.sz, b.sz, e), r: angLerp(a.r, b.r, e), v: lerp(a.v, b.v, e) }; }));
+    controls.render();
     if (p < 1) anim = requestAnimationFrame(step);
   }
-  sw.addEventListener('click', e => { const b = e.target.closest('[data-size]'); if (b && b.dataset.size !== size) setSize(b.dataset.size); });
+  // Play: the whole search, one step after another, from the sales plan to the solution
+  const ORDER = ['sales', 'true', 're', 'fix', 'sol'];
+  const playBtn = sw.querySelector('[data-play]');
+  let playTimer = 0;
+  const stopPlay = () => { clearTimeout(playTimer); playTimer = 0; playBtn.setAttribute('aria-pressed', 'false'); };
+  function playFrom(i) {
+    setSize(ORDER[i]);
+    if (i < ORDER.length - 1) playTimer = setTimeout(() => playFrom(i + 1), reduce ? 2500 : 4200);
+    else stopPlay();
+  }
+  sw.addEventListener('click', e => {
+    if (e.target.closest('[data-play]')) { if (playTimer) stopPlay(); else { playBtn.setAttribute('aria-pressed', 'true'); playFrom(0); } return; }
+    const b = e.target.closest('[data-size]'); if (!b) return;
+    stopPlay(); if (b.dataset.size !== size) setSize(b.dataset.size);
+  });
 
-  // the "Chair meets sofa" tag follows the clash on screen
-  const v = new THREE.Vector3(wx(CLASH[0]), h(95), wz(CLASH[1]));
+  // the tags follow their spots on screen: the clash at true size, the compromises when rearranged
+  const TAGS = [
+    { el: clashTag, at: new THREE.Vector3(wx(CLASH[0]), h(95), wz(CLASH[1])), w: () => W.bad },
+    { el: fourTag, at: new THREE.Vector3(wx(415), h(95), wz(251)), w: () => W.re },
+    { el: loveTag, at: new THREE.Vector3(wx(415), h(40), wz(404)), w: () => W.re },
+    { el: fixTags[0], at: new THREE.Vector3(wx(380), h(80), wz(372)), w: () => W.fix },
+    { el: fixTags[1], at: new THREE.Vector3(wx(282), h(80), wz(338)), w: () => W.fix },
+    { el: solTags[0], at: new THREE.Vector3(wx(250), h(110), wz(321)), w: () => W.sol },
+    { el: solTags[1], at: new THREE.Vector3(wx(352), h(108), wz(290)), w: () => W.sol },
+    { el: solTags[2], at: new THREE.Vector3(wx(214), h(95), wz(460)), w: () => W.sol },
+    { el: fixTags[2], at: new THREE.Vector3(wx(530), h(10), wz(300)), w: () => W.fix }
+  ];
   function onRender() {
-    const p = v.clone().project(camera), w = view.clientWidth, hh = view.clientHeight;
-    const x = (p.x * .5 + .5) * w, y = (-p.y * .5 + .5) * hh;
-    const show = k > .9 && p.z < 1 && x > 20 && x < w - 20 && y > 20 && y < hh - 20;
-    clashTag.style.visibility = show ? 'visible' : 'hidden';
-    if (show) clashTag.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px) translate(-50%, -100%)`;
+    const w = view.clientWidth, hh = view.clientHeight;
+    for (const t of TAGS) {
+      const p = t.at.clone().project(camera);
+      const x = (p.x * .5 + .5) * w, y = (-p.y * .5 + .5) * hh;
+      const show = t.w() > .9 && p.z < 1 && x > 20 && x < w - 20 && y > 20 && y < hh - 20;
+      t.el.style.visibility = show ? 'visible' : 'hidden';
+      if (show) t.el.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px) translate(-50%, -100%)`;
+    }
   }
 
   // ---- camera and controls (turn, move, zoom, reset), shared with the other models
   const target = new THREE.Vector3(wx(390), 0, wz(380));
-  const fromPos = target.clone().add(new THREE.Vector3(-5.6, 10.6, 9.8));
+  const fromPos = target.clone().add(new THREE.Vector3(-6.4, 12, 11.1));
   camera.position.copy(fromPos); camera.lookAt(target);
   const { modelControls } = await import('./model-controls.js');
   const controls = modelControls({ THREE, renderer, scene, camera, view, rooms: [], from: fromPos, target, bounds: [wx(120), wx(620), wz(200), wz(560)], onRender });
