@@ -212,7 +212,7 @@ async function start() {
   box.querySelector('.compare, .fs-slot').before(view);
   view.after(status);
   const when = box.querySelector('.titleblock .when');
-  if (when) when.textContent = PROCESS ? 'Turn it · switch options' : 'Turn it · switch sizes';
+  if (when) when.textContent = PROCESS ? 'Switch options' : 'Turn it · switch sizes';
 
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
   renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
@@ -932,12 +932,28 @@ async function start() {
   const target = new THREE.Vector3(wx(405), 0, wz(380));   // a little east, so Option 3's bedroom is in view
   const fromPos = target.clone().add(new THREE.Vector3(-6.4, 12, 11.1).multiplyScalar(1.06));
   camera.position.copy(fromPos); camera.lookAt(target);
-  const { modelControls } = await import('./model-controls.js');
-  const controls = modelControls({ THREE, renderer, scene, camera, view, rooms: [], from: fromPos, target, bounds: [wx(120), wx(700), wz(200), wz(560)], onRender });
+  // On the Neve Amim page the model stays still, straight from above (owner, Nov 22: "i dont want the part with the
+  // 5 versions to be rotatable … i want it to stay birds eye"): no turning, moving or zooming; the light and
+  // shadows give it depth. The camera backs off far enough to fit the whole drawn area in the view.
+  let controls;
+  if (PROCESS) {
+    const SPAN = [(716 - 92) * S * 1.06, (583 - 175) * S * 1.3];   // the drawn area, with a margin (more at the top, under the buttons), in metres
+    controls = { render() { renderer.render(scene, camera); onRender(); }, show() {} };
+    controls.fit = () => {
+      const half = Math.tan(camera.fov * Math.PI / 360);
+      const vis = Math.max(SPAN[1], SPAN[0] / camera.aspect), d = vis / 2 / half + h(WALL_H);
+      const z = target.z - vis * .07;   // the plan sits a little low, clear of the option buttons
+      camera.position.set(target.x, d, z + .001); camera.lookAt(target.x, 0, z);
+    };
+  } else {
+    const { modelControls } = await import('./model-controls.js');
+    controls = modelControls({ THREE, renderer, scene, camera, view, rooms: [], from: fromPos, target, bounds: [wx(120), wx(700), wz(200), wz(560)], onRender });
+  }
   function resize() {
     const w = view.clientWidth, hh = view.clientHeight;
     renderer.setSize(w, hh, false);
     camera.aspect = w / hh; camera.updateProjectionMatrix();
+    if (controls.fit) controls.fit();
     controls.render();
   }
   new ResizeObserver(resize).observe(view);
