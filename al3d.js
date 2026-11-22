@@ -96,10 +96,12 @@ async function start() {
     tiles([1316, 360, 276, 224], '#6b655c', 70);                           // main bathroom: dark stone
     tiles([1720, 746, 236, 392], '#d4c7b1', 70);                           // en-suite: warm beige stone
     // laundry room: the oak parquet runs on into it (owner, Nov 19)
+    g.clearRect(454, 1172, 786, H - 1172);                                // around the balcony: no oak outside the walls
     tiles(P.BALCONY, '#cfc6b8', 66);                                       // balcony
-    g.fillStyle = PAPER_OUT; g.fillRect(0, 1172, 454, H); g.fillRect(1240, 1172, W, H);   // outside the apartment
-    g.fillRect(0, 0, W, 70); g.fillRect(0, 0, 38, H); g.fillRect(1988, 0, 12, H);
-    for (const r of [[38, 70, 418, 514], [456, 70, 218, 262], [1152, 70, 408, 260], [1560, 70, 440, 166]]) g.fillRect(...r);
+    // outside the apartment: left clear, so the model sits straight on the page's beige (owner, Nov 22)
+    g.clearRect(0, 1172, 454, H); g.clearRect(1240, 1172, W, H);
+    g.clearRect(0, 0, W, 70); g.clearRect(0, 0, 38, H); g.clearRect(1988, 0, 12, H);
+    for (const r of [[38, 70, 418, 514], [456, 70, 218, 262], [1152, 70, 408, 260], [1560, 70, 440, 166]]) g.clearRect(...r);
     g.globalAlpha = .15; g.globalCompositeOperation = 'multiply'; g.drawImage(paperBase, 0, 0); g.globalCompositeOperation = 'source-over'; g.globalAlpha = 1;   // the walls' footprint, no room names
   }
   let sheetKey = '';
@@ -141,7 +143,7 @@ async function start() {
   const tex = new THREE.CanvasTexture(sheet);
   tex.colorSpace = THREE.SRGBColorSpace;
   tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
-  const floor = new THREE.Mesh(new THREE.PlaneGeometry(W / U, H / U), new THREE.MeshStandardMaterial({ map: tex, roughness: .9, emissive: 0xffffff, emissiveMap: tex, emissiveIntensity: .9 }));
+  const floor = new THREE.Mesh(new THREE.PlaneGeometry(W / U, H / U), new THREE.MeshStandardMaterial({ map: tex, roughness: .9, emissive: 0xffffff, emissiveMap: tex, emissiveIntensity: .9, transparent: true }));
   floor.rotation.x = -Math.PI / 2; floor.receiveShadow = true;
   scene.add(floor);
 
@@ -682,4 +684,3 @@ async function start() {
   }
   window.__al3d = { jump: t => { if (!controls) { time = t; frame(t); } }, finish: () => { if (story) story.stop(); else finishIntro(); }, T, ROOMS };
 }
-const PAPER_OUT = '#f7f4ed';

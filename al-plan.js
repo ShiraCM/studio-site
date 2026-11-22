@@ -11,7 +11,7 @@
   if (!box) return;
   const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const W = 2000, H = 1500;
-  const PAPER = '#f7f4ed', WALL = '#2e2b27', INK = '#d2662b';   // new walls in a bold orange (owner, Nov 19; was olive)
+  const WALL = '#2e2b27', INK = '#d2662b';   // new walls in a bold orange (owner, Nov 19; was olive)
   // walls [x, y, w, h]: in both plans, only in the developer's plan, only in the revised plan
   const KEEP = [
     [674, 70, 464, 24], [674, 94, 22, 266], [1104, 82, 48, 30], [1102, 228, 26, 234], [1138, 230, 14, 136],
@@ -84,7 +84,7 @@
   function paper() {
     const c = document.createElement('canvas'); c.width = W; c.height = H;
     const g = c.getContext('2d');
-    g.fillStyle = PAPER; g.fillRect(0, 0, W, H);
+    // no paper fill: the plan sits straight on the page's beige (owner, Nov 22: "get rid of the white background")
     const [bx, by, bw, bh] = BALCONY;
     g.strokeStyle = 'rgba(46,43,39,.16)'; g.lineWidth = 2;
     g.beginPath();
@@ -112,13 +112,13 @@
         if (from != null) a *= clamp01((t - from) / .6);
         if (to != null) a *= 1 - clamp01((t - to) / .8);
         if (a <= 0) continue;
-        g.globalAlpha = a * .62; g.fillStyle = 'rgb(70,64,56)';
+        g.globalAlpha = a * .92; g.fillStyle = WALL;   // darker room names (owner, Nov 22; were 62% of a warm grey)
         (window.__t ? window.__t(name) : name).toUpperCase().split('\n').forEach((line, k, all) => g.fillText(line, x, y + (k - (all.length - 1) / 2) * size * 1.25));
       }
       g.restore();
   }
   function paint(g, base, t) {
-      g.drawImage(base, 0, 0);
+      g.clearRect(0, 0, W, H); g.drawImage(base, 0, 0);
       OLD.forEach((r, k) => {                              // old walls: wiped away from one end
         const [a0, a1] = slot(T.wallOut, OLD.length, k), left = 1 - clamp01((t - a0) / (a1 - a0));
         if (left > 0) { g.fillStyle = WALL; g.fillRect(...along(r, left, true)); }
@@ -145,7 +145,7 @@
     function frame(t) {
       const busy = t > T.wallOut[0] - .1 && t < T.wallIn[1] + .9;
       if (t >= T.back[0]) {
-        g.drawImage(last, 0, 0);
+        g.clearRect(0, 0, W, H); g.drawImage(last, 0, 0);
         g.globalAlpha = ease(clamp01((t - T.back[0]) / (T.back[1] - T.back[0]))); g.drawImage(first, 0, 0); g.globalAlpha = 1;
         shown = -1;
       } else if (busy || shown !== (t < T.wallOut[0] ? 0 : 1)) {
