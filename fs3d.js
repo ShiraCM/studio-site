@@ -22,7 +22,7 @@ const WALLS = [
 ];
 const WALL_H = 260;   // full-height walls (owner, Nov 22: "pull up the walls to full height"); they were cut at 105 cm
 const FACADE = { y0: 562, y1: 580, wall: [[78, 105], [173, 196], [263, 320], [467, 564], [627, 716]], glass: [[105, 173], [196, 263], [320, 467], [564, 627]] };
-const FLOORS = [[92, 302, 506, 562], [300, 175, 400, 302], [400, 224, 532, 302], [506, 302, 541, 355], [541, 224, 603, 355], [513, 355, 708, 562], [506, 355, 513, 562]];
+const FLOORS = [[92, 302, 506, 562], [300, 175, 400, 302], [400, 224, 532, 302], [506, 302, 541, 355], [541, 224, 603, 355], [513, 355, 708, 562], [506, 355, 513, 562], [603, 290, 716, 355]];   // the last: the hallway outside the bedroom door
 // The bedroom's west wall (and the start of its north wall), which Option 3 moves 1 m east (owner, Nov 22;
 // the bedroom is 334 cm wide inside, x 513–709 on the plan).
 const BWALL_OLD = [[506, 362, 513, 583]];   // the bedroom's north wall is structural and stays (owner, Nov 22)
@@ -41,7 +41,9 @@ for (const [i, cy] of [245, 275, 305].entries()) {
 }
 chairs.push({ face: 's', sales: null, true: [420, 242, 450, 271] });          // the end chairs appear at true size
 chairs.push({ face: 'n', sales: null, true: [420, 400, 450, 429], clash: true });
-const ROUTE = [[180, 352], [300, 352], [515, 334], [566, 314], [572, 244]];
+// The way to the bedrooms at true size, from the front door: it runs into the table and the end chair (red past x 360).
+// No path is shown on the sales plan (owner, Nov 22).
+const ROUTE = [[345, 190], [350, 300], [350, 345], [515, 334], [566, 314], [572, 244]];
 const CLASH = [436, 412];
 // Rearranged (owner, Nov 21: "show the furniture being rearranged so it doesn't bump into each other and
 // doesn't block the pathway to the bedrooms … the point is to show that the alternatives aren't great"):
@@ -138,6 +140,17 @@ const U4_ENTRY = { sales: null, true: [400, 224, 532, 259] };   // Option 4: the
 const U4_SECT = { sales: null, true: [596, 413, 708, 562] };
 const U4_ARMS = { sales: null, true: [513, 405, 557, 499] };
 const ROUTE_U4 = [[345, 190], [350, 285], [495, 285], [524, 318], [566, 314], [572, 244]];
+// Walking access (owner, Nov 22: "kitchen, dining, bedrooms" only; a path must never cross a wall): from the
+// entrance to the kitchen and to the dining table (Option 4 also into the living room, through the opening where
+// the old bedroom's wall stood, and on through its old door to the bedroom hallway, owner Nov 22), added to each option's path to the bedrooms (Option 2's
+// kitchen path is ROUTE_KITCHEN). Every segment was checked against the walls and the fridge.
+const ACCESS = {
+  true: [[[350, 300], [300, 365], [165, 380]], [[350, 300], [372, 330]]],   // at true size the kitchen and the table can still be reached
+  fix: [[[350, 285], [300, 375], [165, 385]], [[350, 285], [380, 440]]],
+  big: [[[350, 285], [300, 375], [165, 385]], [[350, 285], [380, 440]]],
+  sol: [[[430, 372], [340, 455]]],
+  u4: [[[350, 285], [320, 320], [315, 375], [270, 378]], [[350, 285], [372, 338]], [[315, 375], [330, 400], [330, 535], [285, 540]], [[350, 285], [480, 335], [492, 385], [575, 385], [684, 385], [684, 325]]]
+};
 const ROUTE_SOL = [[345, 190], [350, 258], [480, 264], [524, 318], [566, 314], [572, 244]];
 const ROUTE_KITCHEN = [[470, 280], [478, 335], [430, 372], [300, 372], [150, 372]];
 
@@ -310,7 +323,7 @@ async function start() {
     ceramic: M({ color: 0xe7dfd2, roughness: .6 }), terracotta: M({ color: 0xb9774f, roughness: .85 }),
     leaf: M({ color: 0x6f7d55, roughness: .8 }), leafDark: M({ color: 0x55633f, roughness: .8 }), bark: M({ color: 0x6b5a48, roughness: .9 }),
     book: M({ color: 0x8b5e4a, roughness: .8 }), bookB: M({ color: 0xd9cfbd, roughness: .8 }),
-    path: M({ color: 0x4e5a33, roughness: .9 }), pathBad: M({ color: 0xb8452e, roughness: .9 })
+    path: new THREE.MeshBasicMaterial({ color: 0x55633a }), pathBad: new THREE.MeshBasicMaterial({ color: 0xb8452e })
   };
   function rbox(w, hh, d, r = .012) {
     r = Math.max(.001, Math.min(r, w / 2 - .001, d / 2 - .001, hh / 2 - .001));
@@ -592,25 +605,43 @@ async function start() {
   });
 
   // ---- the path to the hallway, a dashed line on the floor
-  function route(pts) {
-    const list = [];
-    for (let i = 0; i < pts.length - 1; i++) {
-      const [ax, ay] = pts[i], [bx, by] = pts[i + 1], len = Math.hypot(bx - ax, by - ay), n = Math.max(1, Math.round(len / 14));
-      for (let k = 0; k < n; k++) {
-        const t = (k + .25) / n, x = ax + (bx - ax) * t, y = ay + (by - ay) * t;
-        const m = new THREE.Mesh(new THREE.BoxGeometry(7 * S, .004, 2.2 * S), mats.path);
-        m.position.set(wx(x), .012, wz(y)); m.rotation.y = -Math.atan2(by - ay, bx - ax);
-        m.userData.x = x; scene.add(m); list.push(m);
+  // A walking path: a fine line of small dots with softly rounded corners and a slim chevron at its end (owner,
+  // Nov 22: "more sophisticated looking"; it was chunky dashes and a cone)
+  const dotGeo = new THREE.CircleGeometry(1.9 * S, 14); dotGeo.rotateX(-Math.PI / 2);
+  function smooth(pts) {
+    let p = pts.map(q => q.slice());
+    for (let it = 0; it < 3; it++) {
+      const out = [p[0]];
+      for (let i = 0; i < p.length - 1; i++) {
+        const [ax, ay] = p[i], [bx, by] = p[i + 1];
+        if (i > 0) out.push([ax * .75 + bx * .25, ay * .75 + by * .25]);
+        if (i < p.length - 2) out.push([ax * .25 + bx * .75, ay * .25 + by * .75]);
       }
+      out.push(p[p.length - 1]); p = out;
     }
-    const [ex, ey] = pts[pts.length - 1];
-    const tip = new THREE.Mesh(new THREE.ConeGeometry(6 * S, 12 * S, 3), mats.path);
-    tip.rotation.x = -Math.PI / 2; tip.position.set(wx(ex), .014, wz(ey - 6)); tip.scale.y = .1; scene.add(tip);
+    return p;
+  }
+  function route(pts) {
+    const list = [], p = smooth(pts), gap = 8;
+    let total = 0; const seg = [];
+    for (let i = 0; i < p.length - 1; i++) { const l = Math.hypot(p[i + 1][0] - p[i][0], p[i + 1][1] - p[i][1]); seg.push(l); total += l; }
+    const at = d => { let i = 0; while (i < seg.length - 1 && d > seg[i]) { d -= seg[i]; i++; } const t = seg[i] ? d / seg[i] : 0; return [p[i][0] + (p[i + 1][0] - p[i][0]) * t, p[i][1] + (p[i + 1][1] - p[i][1]) * t]; };
+    for (let d = 3; d < total - 9; d += gap) {
+      const [x, y] = at(d), m = new THREE.Mesh(dotGeo, mats.path);
+      m.position.set(wx(x), .012, wz(y)); m.userData.x = x; scene.add(m); list.push(m);
+    }
+    const [ex, ey] = at(total - 2), [px, py] = at(total - 10), ang = Math.atan2(ey - py, ex - px);
+    const tip = new THREE.Group(); tip.position.set(wx(ex), .013, wz(ey)); tip.rotation.y = -ang; scene.add(tip);
+    for (const sgn of [1, -1]) {
+      const arm = new THREE.Mesh(new THREE.BoxGeometry(8 * S, .002, 1.5 * S), mats.path);
+      arm.position.set(-3.4 * S, 0, sgn * 2.2 * S); arm.rotation.y = sgn * .62; tip.add(arm);
+    }
     return { list, tip };
   }
   const { list: dashes, tip } = route(ROUTE);
   const routeFix = route(ROUTE_FIX);
   const routeSol = route(ROUTE_SOL), routeKitchen = route(ROUTE_KITCHEN), routeU4 = route(ROUTE_U4);
+  const access = {}; for (const k in ACCESS) access[k] = ACCESS[k].map(route);
   const ring = new THREE.Mesh(new THREE.RingGeometry(22 * S, 26 * S, 40), new THREE.MeshBasicMaterial({ color: 0xb8452e, transparent: true }));
   ring.rotation.x = -Math.PI / 2; ring.position.set(wx(CLASH[0]), .006, wz(CLASH[1])); scene.add(ring);
 
@@ -670,12 +701,14 @@ async function start() {
     });
     if (clashChair) clashChair.color.copy(ok).lerp(bad, W.bad);
     for (const m of dashes) m.material = W.bad > .5 && m.userData.x > 360 ? mats.pathBad : mats.path;
-    tip.material = W.bad > .5 ? mats.pathBad : mats.path;
+    for (const c of tip.children) c.material = W.bad > .5 ? mats.pathBad : mats.path;
     ring.visible = W.bad > .05; ring.material.opacity = W.bad;
     ghost.visible = W.re > .05; ghost.material.opacity = .18 * W.re;
     const way = W.fix > .5 || W.big > .5 ? 'fix' : W.sol > .5 ? 'sol' : W.u4 > .5 ? 'u4' : 'base';
     const show = (r, on) => { for (const m of r.list) m.visible = on; r.tip.visible = on; };
-    show({ list: dashes, tip }, way === 'base'); show(routeFix, way === 'fix'); show(routeSol, way === 'sol'); show(routeKitchen, way === 'sol'); show(routeU4, way === 'u4');
+    show({ list: dashes, tip }, way === 'base' && W.bad > .5); show(routeFix, way === 'fix'); show(routeSol, way === 'sol'); show(routeKitchen, way === 'sol'); show(routeU4, way === 'u4');
+    const opt = W.bad > .5 ? 'true' : ['fix', 'sol', 'big', 'u4'].find(k => W[k] > .5);
+    for (const k in access) for (const r of access[k]) show(r, k === opt);
     oldKitchen.scale.y = Math.max(1 - W.sol - W.u4, .001); oldKitchen.visible = W.sol + W.u4 < .98;
     uKitchen.scale.y = Math.max(W.u4, .001); uKitchen.visible = W.u4 > .02;
     u4Walls.scale.y = Math.max(W.u4, .001); u4Walls.visible = W.u4 > .02;
@@ -749,8 +782,45 @@ async function start() {
     { el: solTags[1], at: new THREE.Vector3(wx(352), h(108), wz(290)), w: () => W.sol },
     { el: solTags[2], at: new THREE.Vector3(wx(214), h(95), wz(460)), w: () => W.sol },
   ];
+  // Room sizes, quiet labels on the floor (owner, Nov 22: feet and inches in English, metres in Hebrew; "not
+  // obtrusive but should be there"). Inside wall-to-wall sizes in cm, measured off the plan at CM cm per px.
+  const base = () => 1 - W.fix - W.sol - W.big - W.u4, notBig = () => 1 - W.big - W.u4;
+  const K = ['Kitchen', 'מטבח'], D = ['Dining', 'פינת אוכל'], L = ['Living', 'סלון'], E = ['Entry', 'כניסה'], B = ['Bedroom', 'חדר שינה'];
+  // Each area with its floor area (owner, Nov 22: "i want each area marked", "square feet of each area"). r = the
+  // area in plan px; room: true for a walled room (its wall-to-wall size is shown too); open-plan zones are
+  // approximate and say so. at = where the label sits.
+  const DIMS = [
+    { name: E, r: [300, 175, 400, 302], room: true, at: [350, 235], w: () => 1 },
+    { name: B, r: [513, 362, 709, 562], room: true, at: [640, 405], w: notBig },
+    { name: K, r: [92, 302, 262, 562], at: [175, 420], w: base }, { name: D, r: [262, 302, 506, 420], at: [436, 300], w: base }, { name: L, r: [262, 420, 506, 562], at: [380, 500], w: base },
+    { name: K, r: [92, 302, 262, 409], at: [175, 360], w: () => W.fix + W.big }, { name: D, r: [128, 409, 380, 562], at: [270, 530], w: () => W.fix + W.big },
+    { name: L, r: [380, 302, 506, 562], at: [470, 475], w: () => W.fix }, { name: L, r: [380, 302, 565, 562], at: [500, 475], w: () => W.big },
+    { name: K, r: [92, 302, 461, 382], at: [300, 360], w: () => W.sol }, { name: D, r: [92, 382, 380, 562], at: [214, 525], w: () => W.sol }, { name: L, r: [380, 382, 506, 562], at: [480, 470], w: () => W.sol },
+    { name: B, r: [572, 362, 709, 562], room: true, at: [675, 430], w: () => W.big },
+    { name: K, r: [92, 302, 307, 443], at: [235, 322], w: () => W.u4 }, { name: B, r: [92, 448, 301, 562], room: true, at: [160, 480], w: () => W.u4 },
+    { name: D, r: [308, 302, 506, 562], at: [410, 525], w: () => W.u4 }, { name: L, r: [513, 362, 709, 562], room: true, at: [640, 405], w: () => W.u4 }
+  ];
+  const ftin = cm => { const t = Math.round(cm / 2.54); return Math.floor(t / 12) + '′ ' + (t % 12) + '″'; };
+  const metres = cm => (cm / 100).toFixed(2);
+  let dimLang = '';
+  for (const d of DIMS) {
+    d.el = document.createElement('span'); d.el.className = 'fs-dim'; d.el.setAttribute('translate', 'no'); view.append(d.el);
+    TAGS.push({ el: d.el, at: new THREE.Vector3(wx(d.at[0]), .02, wz(d.at[1])), w: d.w });
+  }
   function onRender() {
     const w = view.clientWidth, hh = view.clientHeight;
+    const lang = (document.documentElement.lang || '').startsWith('he') ? 'he' : 'en';
+    if (lang !== dimLang) {
+      dimLang = lang;
+      for (const d of DIMS) {
+        const he = lang === 'he', nm = d.name[he ? 1 : 0];
+        const wc = (d.r[2] - d.r[0]) * CM, dc = (d.r[3] - d.r[1]) * CM, a = wc * dc;
+        const area = he ? (d.room ? '' : 'כ־') + (a / 1e4).toFixed(1) + ' מ״ר' : (d.room ? '' : 'about ') + Math.round(a / 929.03) + ' sq ft';
+        const size = !d.room ? '' : he ? metres(wc) + ' × ' + metres(dc) + ' מ׳' : ftin(wc) + ' × ' + ftin(dc);
+        d.el.innerHTML = '<b>' + nm + '</b>' + (size ? '<span>' + size + '</span>' : '') + '<span>' + area + '</span>';
+        d.el.dir = lang === 'he' ? 'rtl' : 'ltr';
+      }
+    }
     for (const t of TAGS) {
       const p = t.at.clone().project(camera);
       const x = (p.x * .5 + .5) * w, y = (-p.y * .5 + .5) * hh;
