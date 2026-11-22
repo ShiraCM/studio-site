@@ -698,6 +698,7 @@ async function start() {
     size = st;
     sw.querySelectorAll('[data-size]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.size === st)));
     status.textContent = TEXT[st];
+    const note = box.querySelector('.fs-note'); if (note) note.hidden = st === 'sales';   // the sales plan view is not to scale (owner, Nov 22)
     fromP = items.map(it => ({ ...it.cur })); toP = items.map(it => targetOf(it, st));
     Wfrom = { ...W }; Wto = weights(st); t0 = performance.now();
     if (instant || reduce) { W = Wto; apply(toP); controls && controls.render(); return; }
