@@ -5,7 +5,7 @@
    draws it and its real size: the dining table grows, the chairs grow and two end chairs appear, and at
    true size the end chair runs into the loveseat and the path to the hallway closes.
    Measured from the two plans (furniture-1-sales / furniture-1-scaled, 1126 × 756 px): about 1.5 cm per
-   px (the six-seat table, 90 × 193 cm, is 60 × 129 px). Walls are cut at 105 cm, like a cutaway. */
+   px (the six-seat table, 90 × 193 cm, is 60 × 129 px). Walls are full height (WALL_H, 260 cm; Nov 22). */
 let THREE;
 const CM = 1.703;                                 // cm per plan px: the owner's 705 cm from the kitchen wall to the bedroom wall (Nov 21)
 const S = CM / 100;                               // world metres per plan px
@@ -17,11 +17,16 @@ const WALLS = [
   [78, 288, 92, 583], [78, 288, 300, 302], [284, 240, 300, 302],       // west wall, the kitchen's north wall, the entry jog
   [284, 161, 410, 175], [400, 175, 410, 224],                          // the entry hall
   [400, 215, 541, 224], [532, 224, 541, 307],                          // the closet wall above the dining area and its stub
-  [506, 355, 657, 362], [506, 362, 513, 583],                          // the bedroom beside the living room
+  [506, 355, 660, 362], [708, 355, 716, 583],                          // the bedroom beside the living room: north wall to its door, east wall
   [603, 140, 613, 290]                                                 // the bathroom along the hallway
 ];
-const FACADE = { y0: 562, y1: 580, wall: [[78, 105], [173, 196], [263, 320], [467, 564], [627, 660]], glass: [[105, 173], [196, 263], [320, 467], [564, 627]] };
-const FLOORS = [[92, 302, 506, 562], [300, 175, 400, 302], [400, 224, 532, 302], [506, 302, 541, 355], [541, 224, 603, 355], [513, 355, 657, 562]];
+const WALL_H = 260;   // full-height walls (owner, Nov 22: "pull up the walls to full height"); they were cut at 105 cm
+const FACADE = { y0: 562, y1: 580, wall: [[78, 105], [173, 196], [263, 320], [467, 564], [627, 716]], glass: [[105, 173], [196, 263], [320, 467], [564, 627]] };
+const FLOORS = [[92, 302, 506, 562], [300, 175, 400, 302], [400, 224, 532, 302], [506, 302, 541, 355], [541, 224, 603, 355], [513, 355, 708, 562], [506, 355, 513, 562]];
+// The bedroom's west wall (and the start of its north wall), which Option 3 moves 1 m east (owner, Nov 22;
+// the bedroom is 334 cm wide inside, x 513–709 on the plan).
+const BWALL_OLD = [[506, 362, 513, 583]];   // the bedroom's north wall is structural and stays (owner, Nov 22)
+const BWALL_NEW = [[565, 362, 572, 583]];
 
 // ---- furniture: where the sales plan draws it, and where it really goes at true size
 const SOFA = { sales: [316, 434, 364, 558], true: [309, 417, 363, 558] };
@@ -45,7 +50,7 @@ const CLASH = [436, 412];
 // back to the nook's wall, facing the table; the loveseat and the coffee table have no room left.
 // The path to the bedrooms opens.
 const RE_TABLE = { c: [392, 500], rot: Math.PI / 2 };
-const RE_SOFA = { c: [415.5, 251], rot: -Math.PI / 2 };
+const RE_SOFA = { c: [461.5, 251], rot: -Math.PI / 2 };   // pushed into the nook's corner, out of the way in (owner)
 const RE_CHAIRS = {
   0: { c: [348, 455.5], face: 's' }, 2: { c: [392, 455.5], face: 's' }, 4: { c: [436, 455.5], face: 's' },
   1: { c: [348, 544.5], face: 'n' }, 3: { c: [392, 544.5], face: 'n' }, 5: { c: [436, 544.5], face: 'n' },
@@ -57,14 +62,44 @@ const ANG = { e: 0, n: Math.PI / 2, w: Math.PI, s: -Math.PI / 2 };
 // the kitchen and the living area, with three chairs on each side and both heads (eight seats). The walk
 // from the front door to the bedrooms runs along the empty dining nook, past the table's east head. The
 // sofa and coffee table stay; an armchair by the window takes the loveseat's place.
-const FIX_TABLE = { c: [394.5, 335], rot: Math.PI / 2 };
+// Option 2, redone (owner, Nov 22: "rotate the table 90 degrees. instead of a whole seating thing, do a L
+// shaped sectional against the bedroom wall and sliding door wall with a coffee table"): the table runs
+// north-south beside the kitchen, eight seats with both heads; an L sectional fills the corner of the
+// bedroom wall and the window wall, a coffee table in front of it. Sofa, loveseat and TV console go.
+// Then (owner, Nov 22): the kitchen becomes one run along the west (back) wall with the fridge, a 110 cm
+// aisle, then a peninsula off the window wall; the living room moves to the sliding doors: a three-seat
+// sofa with its back to them, a chair each side, a coffee table. The table turns across the room.
+// Then (owner, Nov 22: "switch the couch area with the table and still have a normal setup"): the table
+// runs east-west along the sliding doors, eight seats with both heads; the sofa backs onto it, facing a TV
+// console on the nook wall, with a coffee table and one armchair (a second one would block the step down
+// from the entrance). The peninsula is 70 cm deep, with seats at its north end.
+// Then (owner, Nov 22: "still not loving option 2"): the kitchen goes back to the developer's L, mirrored:
+// the long run on the west wall, its foot along the window wall (the fridge stays at the north end, not
+// in front of the window); the table, eight seats with both heads, moves up into the corner where the
+// L's foot and fridge stood; an L sectional fills the corner of the bedroom wall and the sliding doors,
+// with a coffee table and rug.
+// Then (owner, Nov 22: "rotate the table 90 degree"): the table runs east-west, 100 cm from the kitchen
+// run at its west head and about 66 cm below the north wall, so the way from the entrance to the kitchen
+// stays open behind the north chairs.
+// Then (owner, Nov 22): the kitchen goes back to the developer's L as drawn (fixKitchen is no longer
+// shown), and the table moves down toward the window wall.
+// Then (owner, Nov 22): a bit toward the kitchen (17 cm) and 50 cm off the windows.
+const FIX_TABLE = { c: [270.5, 468.6], rot: Math.PI / 2 };
 const FIX_CHAIRS = {
-  0: { c: [352, 290.5], face: 's' }, 2: { c: [395, 290.5], face: 's' }, 4: { c: [437, 290.5], face: 's' },
-  1: { c: [352, 379.5], face: 'n' }, 3: { c: [395, 379.5], face: 'n' }, 5: { c: [437, 379.5], face: 'n' },
-  6: { c: [315.5, 335], face: 'e' }, 7: { c: [473.5, 335], face: 'w' }
+  0: { c: [228, 424.1], face: 's' }, 2: { c: [270.5, 424.1], face: 's' }, 4: { c: [313, 424.1], face: 's' },
+  1: { c: [228, 513.1], face: 'n' }, 3: { c: [270.5, 513.1], face: 'n' }, 5: { c: [313, 513.1], face: 'n' },
+  6: { c: [191.5, 468.6], face: 'e' }, 7: { c: [349.5, 468.6], face: 'w' }
 };
-const FIX_ARMCHAIR = { c: [464, 532], sx: 48 / 92, rot: Math.PI };
-const ROUTE_FIX = [[345, 190], [350, 252], [490, 256], [524, 318], [566, 314], [572, 244]];
+// Then (owner, Nov 22): the sectional runs the whole bedroom wall, four seats, with one seat turning
+// toward the kitchen; the coffee table and rug turn to follow it. The kitchen's foot is a little longer.
+const SECTIONAL = { sales: null, true: [394, 362, 506, 562] };
+const FIX_COFFEE = { c: [415, 440] };
+const FIX_RUG = { c: [440, 455], rot: Math.PI / 2 };
+const FIX_TREE = { c: [372, 545] };
+// Then (owner, Nov 22): an entry closet, 60 cm deep, along the nook's north wall where the path ran; the
+// path to the bedrooms now passes in front of it.
+const ENTRY_CLOSET = { sales: null, true: [400, 224, 532, 259] };   // the full nook wall, 215 cm tall like the fridge
+const ROUTE_FIX = [[345, 190], [350, 285], [495, 285], [524, 318], [566, 314], [572, 244]];
 // The solution (owner, Nov 21: the bedroom wall stays; "what if we move the kitchen to this wall?"): the
 // kitchen becomes one long run along the north wall, backing onto the entrance hall. The dining table then
 // runs east-west along the windows, eight seats with both heads; the living room takes the east side, the
@@ -74,6 +109,35 @@ const SOL = {
   table: { c: [214.5, 460], rot: Math.PI / 2 }, rug: { c: [420, 470] }, tree: { c: [312, 545] },
   chairs: { 0: [172, 415.5, 's'], 2: [215, 415.5, 's'], 4: [257, 415.5, 's'], 1: [172, 504.5, 'n'], 3: [215, 504.5, 'n'], 5: [257, 504.5, 'n'], 6: [135.5, 460, 'e'], 7: [293.5, 460, 'w'] }
 };
+// Then (owner, Nov 22: "sectional against the bedroom wall and window wall"): Option 2 uses the same corner
+// sectional, coffee table and rug as Option 1; its sofa, loveseat and TV console go.
+// Then (owner, Nov 22): in Option 2 the corner sectional loses the seat nearest the hallway (it made the way
+// in too tight): three seats along the bedroom wall, the corner one included, and one along the windows.
+const SOL_SOFA4 = { sales: null, true: [394, 413, 506, 562] };
+// Option 3 (owner, Nov 22: "move the bedroom wall over 1 meter, show how there is still room for a bed with a
+// trundle and a small closet. put a proper sitting area - still with the sectional but add 2 arm chairs and
+// a larger rug"): the developer's kitchen and Option 1's table and entry closet; the sectional moves east
+// with the wall, two armchairs face it across the coffee table, one larger rug under the seating.
+const BIG_SECTIONAL = { sales: null, true: [453, 413, 565, 562] };
+const BIG_ARMCHAIRS = { sales: null, true: [395, 412, 439, 506] };
+const BEDROOM3 = { sales: null, true: [572, 362, 709, 562] };
+const BIG_ENTRY_TOP = { sales: null, true: [400, 224, 532, 259] };   // Option 3: the entry closet topped up to the ceiling
+// Option 4 (owner, Nov 22, her drawing; replaces the first "crazy idea"): a U-shaped kitchen in the
+// developer's kitchen corner (north wall, west wall, and a run facing back into it); behind that run, along the
+// windows, a small bedroom (thin walls) with a twin bed whose trundle pulls out 50 cm and a closet; the dining
+// table in the middle; the bedroom beside the living room opens up (its west wall comes out) and becomes the
+// living room: the sectional, two armchairs, a coffee table and rug. Entry closet as in Option 1.
+const U4_WALLS = [[92, 443, 308, 448], [301, 448, 308, 513]];   // 25 cm narrower (owner, Nov 22)
+const U4_TABLE = { c: [410, 420] };
+const U4_CHAIRS = {
+  0: [365.5, 381, 'e'], 2: [365.5, 420, 'e'], 4: [365.5, 459, 'e'], 1: [454.5, 381, 'w'], 3: [454.5, 420, 'w'], 5: [454.5, 459, 'w'],
+  6: [410, 341, 's'], 7: [410, 499, 'n']
+};
+const U4_BEDROOM = { sales: null, true: [92, 448, 301, 530] };
+const U4_ENTRY = { sales: null, true: [400, 224, 532, 259] };   // Option 4: the entry closet to the ceiling, 10 cm shorter at the entrance end, with a wall there
+const U4_SECT = { sales: null, true: [596, 413, 708, 562] };
+const U4_ARMS = { sales: null, true: [513, 405, 557, 499] };
+const ROUTE_U4 = [[345, 190], [350, 285], [495, 285], [524, 318], [566, 314], [572, 244]];
 const ROUTE_SOL = [[345, 190], [350, 258], [480, 264], [524, 318], [566, 314], [572, 244]];
 const ROUTE_KITCHEN = [[470, 280], [478, 335], [430, 372], [300, 372], [150, 372]];
 
@@ -99,9 +163,10 @@ async function start() {
   sw.className = 'm3d-seg fs-switch'; sw.setAttribute('role', 'group'); sw.setAttribute('aria-label', 'Furniture size');
   sw.innerHTML = '<button type="button" class="m3d-btn m3d-txt" data-size="sales" aria-pressed="false">Sales plan</button>' +
                  '<button type="button" class="m3d-btn m3d-txt" data-size="true" aria-pressed="true">True size</button>' +
-                 '<button type="button" class="m3d-btn m3d-txt" data-size="re" aria-pressed="false">Try 1</button>' +
-                 '<button type="button" class="m3d-btn m3d-txt" data-size="fix" aria-pressed="false">Try 2</button>' +
-                 '<button type="button" class="m3d-btn m3d-txt" data-size="sol" aria-pressed="false">Solution</button>' +
+                 '<button type="button" class="m3d-btn m3d-txt" data-size="fix" aria-pressed="false">Option 1</button>' +
+                 '<button type="button" class="m3d-btn m3d-txt" data-size="sol" aria-pressed="false">Option 2</button>' +
+                 '<button type="button" class="m3d-btn m3d-txt" data-size="big" aria-pressed="false">Option 3</button>' +
+                 '<button type="button" class="m3d-btn m3d-txt" data-size="u4" aria-pressed="false">Option 4</button>' +
                  '<button type="button" class="m3d-btn m3d-txt fs-play" data-play aria-pressed="false">▶ Play</button>';
   view.append(sw);
   const clashTag = document.createElement('span');
@@ -109,9 +174,10 @@ async function start() {
   view.append(clashTag);
   const fourTag = document.createElement('span'); fourTag.className = 'fs-clash fs-note-tag'; fourTag.textContent = 'The seating area, at the entrance'; view.append(fourTag);
   const loveTag = document.createElement('span'); loveTag.className = 'fs-clash fs-note-tag'; loveTag.textContent = 'No room for the loveseat or coffee table'; view.append(loveTag);
-  const fixTags = ['Seats eight, with both heads', 'Tight way to the kitchen', 'Clear path to the bedrooms'].map(t => { const el = document.createElement('span'); el.className = 'fs-clash fs-fix-tag'; el.textContent = t; view.append(el); return el; });
-  fixTags[1].className = 'fs-clash';
+  const fixTags = ['Seats eight, with both heads', 'The kitchen, as the developer drew it', 'Clear path to the bedrooms', 'A sectional in the corner', 'An entry closet'].map(t => { const el = document.createElement('span'); el.className = 'fs-clash fs-fix-tag'; el.textContent = t; view.append(el); return el; });
   const solTags = ['The kitchen, along this wall', 'A 16 in closet behind the kitchen', 'Seats eight, with both heads'].map(t => { const el = document.createElement('span'); el.className = 'fs-clash fs-fix-tag'; el.textContent = t; view.append(el); return el; });
+  const bigTags = ['The bedroom wall, moved 3 ft 3 in', 'A bed with a trundle, and a small closet', 'A sitting area for six'].map(t => { const el = document.createElement('span'); el.className = 'fs-clash fs-fix-tag'; el.textContent = t; view.append(el); return el; });
+  const u4Tags = ['A bedroom with a trundle and a closet', 'A U-shaped kitchen', 'Seats eight, with both heads', 'The living room, in the old bedroom'].map(t => { const el = document.createElement('span'); el.className = 'fs-clash fs-fix-tag'; el.textContent = t; view.append(el); return el; });
   const status = document.createElement('p');
   status.className = 'cap fs-status'; status.setAttribute('aria-live', 'polite');
   box.querySelector('.compare').before(view);
@@ -270,13 +336,21 @@ async function start() {
 
   // ---- architecture
   for (const f of FLOORS) { const m = block(scene, f, 1, mats.floor, -1, .001); m.castShadow = false; }
-  for (const w of WALLS) { block(scene, w, 105, mats.wall, 0, .002); block(scene, w, .6, mats.cut, 105, .001); }
-  for (const [a, b] of FACADE.wall) { block(scene, [a, FACADE.y0, b, FACADE.y1], 105, mats.wall, 0, .002); block(scene, [a, FACADE.y0, b, FACADE.y1], .6, mats.cut, 105, .001); }
+  for (const w of WALLS) { block(scene, w, WALL_H, mats.wall, 0, .002); block(scene, w, .6, mats.cut, WALL_H, .001); }
+  const wallOld = new THREE.Group(), wallNew = new THREE.Group(); scene.add(wallOld, wallNew);
+  for (const w of BWALL_OLD) { block(wallOld, w, WALL_H, mats.wall, 0, .002); block(wallOld, w, .6, mats.cut, WALL_H, .001); }
+  for (const w of BWALL_NEW) { block(wallNew, w, WALL_H, mats.wall, 0, .002); block(wallNew, w, .6, mats.cut, WALL_H, .001); }
+  wallNew.visible = false;
+  const u4Walls = new THREE.Group(); scene.add(u4Walls); u4Walls.visible = false;
+  for (const w of U4_WALLS) { block(u4Walls, w, WALL_H, mats.wall, 0, .002); block(u4Walls, w, .6, mats.cut, WALL_H, .001); }
+  for (const [a, b] of FACADE.wall) { block(scene, [a, FACADE.y0, b, FACADE.y1], WALL_H, mats.wall, 0, .002); block(scene, [a, FACADE.y0, b, FACADE.y1], .6, mats.cut, WALL_H, .001); }
   for (const [a, b] of FACADE.glass) {
     block(scene, [a, FACADE.y0, b, FACADE.y1], 45, mats.wall, 0, .002);
     block(scene, [a, FACADE.y0 + 6, b, FACADE.y1 - 6], 3, mats.frame, 45, .002);
-    for (const xx of [a, (a + b) / 2 - 1, b - 2]) block(scene, [xx, FACADE.y0 + 7, xx + 2, FACADE.y1 - 7], 60, mats.frame, 45, .002);
-    const g = block(scene, [a, FACADE.y0 + 8, b, FACADE.y1 - 8], 60, mats.glass, 45, .001); g.castShadow = false;
+    for (const xx of [a, (a + b) / 2 - 1, b - 2]) block(scene, [xx, FACADE.y0 + 7, xx + 2, FACADE.y1 - 7], 192, mats.frame, 45, .002);
+    block(scene, [a, FACADE.y0 + 6, b, FACADE.y1 - 6], 3, mats.frame, 237, .002);
+    block(scene, [a, FACADE.y0, b, FACADE.y1], WALL_H - 240, mats.wall, 240, .002); block(scene, [a, FACADE.y0, b, FACADE.y1], .6, mats.cut, WALL_H, .001);
+    const g = block(scene, [a, FACADE.y0 + 8, b, FACADE.y1 - 8], 195, mats.glass, 45, .001); g.castShadow = false;
   }
   // the kitchen: flat-front cabinets under a quartz top, the sink and tap, the hob, and a tall fridge column.
   // As drawn by the developer, an L along the west wall (oldKitchen); in the solution (owner, Nov 21:
@@ -285,11 +359,17 @@ async function start() {
     for (const [x0, y0, x1, y1, face] of runs) {
       block(parent, [x0, y0, x1, y1], 8, mats.plinth, 0, .002);
       if (face === 'e') block(parent, [x0, y0, x1 - 1.5, y1], 80, mats.front, 8, .004);
+      else if (face === 'w') block(parent, [x0 + 1.5, y0, x1, y1], 80, mats.front, 8, .004);
+      else if (face === 'n') block(parent, [x0, y0 + 1.5, x1, y1], 80, mats.front, 8, .004);
       else block(parent, [x0, y0, x1, y1 - 1.5], 80, mats.front, 8, .004);
       block(parent, [x0 - .5, y0 - .5, x1 + 1, y1 + 1], 3.5, mats.counter, 88, .004);
       if (face === 'e') for (let y = y0 + 40; y < y1 - 5; y += 40) block(parent, [x1 - 1.7, y - .4, x1 - 1.1, y + .4], 78, mats.groove, 9, .001);
+      else if (face === 'w') for (let y = y0 + 40; y < y1 - 5; y += 40) block(parent, [x0 + 1.1, y - .4, x0 + 1.7, y + .4], 78, mats.groove, 9, .001);
+      else if (face === 'n') for (let x = x0 + 76; x < x1 - 5; x += 40) block(parent, [x - .4, y0 + 1.1, x + .4, y0 + 1.7], 78, mats.groove, 9, .001);
       else for (let x = x0 + 40; x < x1 - 5; x += 40) block(parent, [x - .4, y1 - 1.7, x + .4, y1 - 1.1], 78, mats.groove, 9, .001);
       if (face === 'e') for (let y = y0 + 20; y < y1; y += 40) block(parent, [x1 - 1.3, y - 6, x1 - .4, y + 6], 1.2, mats.brass, 80, .002);
+      else if (face === 'w') for (let y = y0 + 20; y < y1; y += 40) block(parent, [x0 + .4, y - 6, x0 + 1.3, y + 6], 1.2, mats.brass, 80, .002);
+      else if (face === 'n') for (let x = x0 + 56; x < x1; x += 40) block(parent, [x - 6, y0 + .4, x + 6, y0 + 1.3], 1.2, mats.brass, 80, .002);
       else for (let x = x0 + 20; x < x1; x += 40) block(parent, [x - 6, y1 - 1.3, x + 6, y1 - .4], 1.2, mats.brass, 80, .002);
     }
     for (const r of sinks) block(parent, r, 1, mats.steel, 90.6, .01);
@@ -304,14 +384,21 @@ async function start() {
   }
   const oldKitchen = new THREE.Group(); scene.add(oldKitchen);
   kitchen(oldKitchen, [[92, 340, 128, 562, 'e'], [92, 302, 208, 340, 's']], [[98, 396, 122, 428], [98, 430, 122, 458]], [96, 428], [98, 520, 124, 558], [210, 302, 262, 350]);
+  // Option 2's kitchen (owner, Nov 22): the developer's L mirrored, its foot along the window wall; the
+  // fridge column at the north end of the long run
+  const fixKitchen = new THREE.Group(); scene.add(fixKitchen);
+  kitchen(fixKitchen, [[92, 346, 128, 524, 'e'], [92, 524, 238, 562, 'n']], [[98, 420, 122, 442], [98, 444, 122, 466]], [96, 443], [160, 530, 202, 556], [92, 302, 135, 346]);
+  // Option 4's U-shaped kitchen in the developer's kitchen corner
+  const uKitchen = new THREE.Group(); scene.add(uKitchen); uKitchen.visible = false;
+  kitchen(uKitchen, [[92, 302, 250, 338, 's'], [92, 338, 129, 407, 'e'], [92, 407, 307, 443, 'n']], [[170, 307, 194, 333], [196, 307, 220, 333]], [195, 305], [98, 350, 124, 395], [250, 302, 298, 346]);
   const newKitchen = new THREE.Group(); scene.add(newKitchen);
-  // the fridge column at the west end (owner), and a 40 cm closet back to back with the kitchen where the
+  // the fridge column at the west end (owner), the run ending 1.2 m short of the short wall (owner), and a
+  // 40 cm closet back to back with the kitchen where the
   // run crosses the entrance hall, its doors facing the way in
-  kitchen(newKitchen, [[135, 302, 405, 340, 's']], [[240, 306, 262, 334], [264, 306, 284, 334]], [263, 304], [160, 306, 202, 334], [93, 302, 135, 346]);
-  block(newKitchen, [300, 278.5, 405, 302], 100, mats.front, 0, .004);
-  for (let x = 300 + 26; x < 405 - 5; x += 26) block(newKitchen, [x - .4, 278.1, x + .4, 279], 92, mats.groove, 4, .001);
-  for (let x = 300 + 13; x < 405; x += 26) block(newKitchen, [x - .5, 277.6, x + .5, 278.5], 14, mats.brass, 46, .002);
-  block(newKitchen, [300, 278.5, 405, 302], .6, mats.cut, 100, .001);
+  kitchen(newKitchen, [[135, 302, 461, 340, 's']], [[240, 306, 262, 334], [264, 306, 284, 334]], [263, 304], [160, 306, 202, 334], [93, 302, 135, 346]);
+  block(newKitchen, [300, 278.5, 461, 302], 180, mats.front, 0, .004);   // 180 cm tall (owner, Nov 22)
+  for (let x = 300 + 26; x < 461 - 5; x += 26) block(newKitchen, [x - .4, 278.1, x + .4, 279], 172, mats.groove, 4, .001);
+  for (let x = 300 + 13; x < 461; x += 26) block(newKitchen, [x - .5, 277.6, x + .5, 278.5], 40, mats.brass, 70, .002);
   newKitchen.visible = false;
   // ---- furniture, each built at true size around its own centre; the sales size scales it
   const items = [];
@@ -395,6 +482,114 @@ async function start() {
   });
   const RUG = { sales: [326, 446, 484, 556], true: [326, 446, 484, 556] };
   piece(RUG, (g, c) => { const m = block(g, RUG.true, .8, mats.rug, 0, .01, c); m.castShadow = false; });
+  // Option 2's L-shaped sectional: one arm along the bedroom wall, one along the window wall
+  piece(SECTIONAL, (g, c) => {
+    const E = [453, 362, 506, 562], Sx = [394, 509, 453, 562];
+    for (const [x, y] of [[456, 365], [503, 365], [503, 559], [397, 512], [397, 559], [450, 512]]) leg(g, x, y, c);
+    block(g, E, 30, mats.linenDark, 8, .035, c); block(g, Sx, 30, mats.linenDark, 8, .035, c);
+    block(g, [496, 362, 506, 562], 42, mats.linen, 34, .05, c); block(g, [394, 552, 506, 562], 42, mats.linen, 34, .05, c);
+    block(g, [453, 362, 506, 368], 26, mats.linen, 36, .03, c); block(g, [394, 509, 400, 562], 26, mats.linen, 36, .03, c);
+    for (let k = 0; k < 4; k++) { const a = 368 + 46 * k; block(g, [453, a + .7, 496, a + 46 - .7], 14, mats.linen, 36, .06, c); }
+    block(g, [400.7, 509, 452.3, 552], 14, mats.linen, 36, .06, c);
+    for (const [r, mat, rz, rx] of [[[488, 376, 494, 392], mats.cushion, .25, 0], [[488, 532, 494, 548], mats.clay, .25, 0], [[410, 544, 426, 550], mats.cushion, 0, -.25]]) { const m = block(g, r, 32, mat, 48, .06, c); m.rotation.z = rz; m.rotation.x = rx; }
+  });
+
+  // Option 2's entry closet on the nook wall, doors facing south, full height like the fridge
+  piece(ENTRY_CLOSET, (g, c) => {
+    const [x0, y0, x1, y1] = ENTRY_CLOSET.true;
+    block(g, [x0 + 1, y0, x1 - 1, y1 - 2], 8, mats.plinth, 0, .002, c);
+    block(g, [x0, y0, x1, y1], 207, mats.front, 8, .004, c);
+    const n = 4, w = (x1 - x0) / n;
+    for (let k = 1; k < n; k++) block(g, [x0 + w * k - .4, y1 - .6, x0 + w * k + .4, y1 + .1], 205, mats.groove, 9, .001, c);
+    for (let k = 0; k < n; k++) { const x = x0 + w * k + (k % 2 ? 4 : w - 4); block(g, [x - .6, y1, x + .6, y1 + .9], 50, mats.brass, 80, .002, c); }
+  });
+
+  // Option 2's sectional: three seats along the bedroom wall, one turning along the windows
+  piece(SOL_SOFA4, (g, c) => {
+    const E = [453, 413, 506, 562], Sx = [394, 509, 453, 562];
+    for (const [x, y] of [[456, 416], [503, 416], [503, 559], [397, 512], [397, 559], [450, 512]]) leg(g, x, y, c);
+    block(g, E, 30, mats.linenDark, 8, .035, c); block(g, Sx, 30, mats.linenDark, 8, .035, c);
+    block(g, [496, 413, 506, 562], 42, mats.linen, 34, .05, c); block(g, [394, 552, 506, 562], 42, mats.linen, 34, .05, c);
+    block(g, [453, 413, 506, 419], 26, mats.linen, 36, .03, c); block(g, [394, 509, 400, 562], 26, mats.linen, 36, .03, c);
+    for (const [a, b] of [[419, 464.5], [464.5, 509]]) block(g, [453, a + .7, 496, b - .7], 14, mats.linen, 36, .06, c);
+    block(g, [453, 509.7, 496, 552], 14, mats.linen, 36, .06, c);
+    block(g, [400.7, 509, 452.3, 552], 14, mats.linen, 36, .06, c);
+    for (const [r, mat, rz, rx] of [[[488, 426, 494, 442], mats.cushion, .25, 0], [[488, 532, 494, 548], mats.clay, .25, 0], [[410, 544, 426, 550], mats.cushion, 0, -.25]]) { const m = block(g, r, 32, mat, 48, .06, c); m.rotation.z = rz; m.rotation.x = rx; }
+  });
+
+  // Option 3's sectional: three seats along the moved bedroom wall, one turning along the windows
+  function sect3(spec, d) { piece(spec, (g, c) => {
+    const E = [453 + d, 413, 506 + d, 562], Sx = [394 + d, 509, 453 + d, 562];
+    for (const [x, y] of [[456, 416], [503, 416], [503, 559], [397, 512], [397, 559], [450, 512]]) leg(g, x + d, y, c);
+    block(g, E, 30, mats.linenDark, 8, .035, c); block(g, Sx, 30, mats.linenDark, 8, .035, c);
+    block(g, [496 + d, 413, 506 + d, 562], 42, mats.linen, 34, .05, c); block(g, [394 + d, 552, 506 + d, 562], 42, mats.linen, 34, .05, c);
+    block(g, [453 + d, 413, 506 + d, 419], 26, mats.linen, 36, .03, c); block(g, [394 + d, 509, 400 + d, 562], 26, mats.linen, 36, .03, c);
+    for (const [a, b] of [[419, 464.5], [464.5, 509]]) block(g, [453 + d, a + .7, 496 + d, b - .7], 14, mats.linen, 36, .06, c);
+    block(g, [453 + d, 509.7, 496 + d, 552], 14, mats.linen, 36, .06, c);
+    block(g, [400.7 + d, 509, 452.3 + d, 552], 14, mats.linen, 36, .06, c);
+    for (const [r, mat, rz, rx] of [[[488 + d, 426, 494 + d, 442], mats.cushion, .25, 0], [[488 + d, 532, 494 + d, 548], mats.clay, .25, 0], [[410 + d, 544, 426 + d, 550], mats.cushion, 0, -.25]]) { const m = block(g, r, 32, mat, 48, .06, c); m.rotation.z = rz; m.rotation.x = rx; }
+  }); }
+  sect3(BIG_SECTIONAL, 59);
+  // Option 3's two armchairs, facing the sectional across the coffee table
+  function arms2(spec, x0) { piece(spec, (g, c) => {
+    const y00 = spec.true[1];
+    for (const y0 of [y00, y00 + 50]) {
+      const x1 = x0 + 44, y1 = y0 + 44;
+      for (const [x, y] of [[x0 + 3, y0 + 3], [x1 - 3, y0 + 3], [x0 + 3, y1 - 3], [x1 - 3, y1 - 3]]) leg(g, x, y, c, 0, 10);
+      block(g, [x0, y0, x1, y1], 28, mats.linenDark, 10, .035, c);
+      block(g, [x0, y0, x0 + 9, y1], 40, mats.linen, 36, .05, c);
+      block(g, [x0, y0, x1, y0 + 6], 22, mats.linen, 36, .03, c); block(g, [x0, y1 - 6, x1, y1], 22, mats.linen, 36, .03, c);
+      block(g, [x0 + 9, y0 + 6.5, x1 - 1, y1 - 6.5], 12, mats.linen, 36, .06, c);
+    }
+  }); }
+  arms2(BIG_ARMCHAIRS, 395);
+  // Option 3's smaller bedroom: a twin bed (97 × 190 cm) along the window wall with its trundle pulled out 50 cm,
+  // and a small closet (60 cm deep) on the north wall, clear of the door
+  piece(BEDROOM3, (g, c) => {
+    // the bed against the living-room wall, head by the window, 50 cm of the trundle showing (owner, Nov 22)
+    block(g, [572, 450, 629, 562], 26, mats.oak, 6, .01, c);
+    block(g, [573.5, 451.5, 627.5, 560.5], 20, mats.seat, 32, .04, c);
+    block(g, [572, 450, 629, 506], 4, mats.linen, 51, .03, c);
+    block(g, [577, 542, 624, 556], 10, mats.cushion, 52, .05, c);
+    block(g, [572, 559, 629, 562], 50, mats.oak, 30, .006, c);
+    block(g, [622, 455, 629 + 50 / CM, 556], 14, mats.oak, 4, .01, c);
+    block(g, [623.5, 456.5, 629 + 50 / CM - 1.5, 554.5], 12, mats.seat, 18, .04, c);
+    block(g, [574, 362, 652, 397], 8, mats.plinth, 0, .002, c);
+    block(g, [574, 362, 652, 397], 207, mats.front, 8, .004, c);
+    block(g, [612.6, 396.4, 613.4, 397.1], 205, mats.groove, 9, .001, c);
+    for (const x of [608, 617]) block(g, [x - .6, 397, x + .6, 397.9], 50, mats.brass, 80, .002, c);
+  });
+
+  // Option 4's small bedroom along the windows: a twin bed (97 × 202 cm) head to the west wall, 50 cm of its trundle
+  // showing (it pulls out fully), and a closet at its foot against the kitchen's back
+  piece(U4_BEDROOM, (g, c) => {
+    block(g, [92, 449, 211, 501], 26, mats.oak, 6, .01, c);
+    block(g, [93.5, 450.5, 209.5, 499.5], 20, mats.seat, 32, .04, c);
+    block(g, [140, 449, 211, 501], 4, mats.linen, 51, .03, c);
+    block(g, [97, 455, 111, 495], 10, mats.cushion, 52, .05, c);
+    block(g, [92, 449, 95, 501], 50, mats.oak, 30, .006, c);
+    block(g, [96, 494, 208, 501 + 50 / CM], 14, mats.oak, 4, .01, c);   // 50 cm of the trundle showing (owner, Nov 22)
+    block(g, [97.5, 495.5, 206.5, 501 + 50 / CM - 1.5], 12, mats.seat, 18, .04, c);
+    block(g, [211, 448, 301, 486], 8, mats.plinth, 0, .002, c);
+    block(g, [211, 448, 301, 486], WALL_H - 8, mats.front, 8, .004, c);   // to the ceiling (owner, Nov 22)
+    for (let k = 1; k < 3; k++) { const x = 211 + 30 * k; block(g, [x - .4, 485.4, x + .4, 486.1], WALL_H - 10, mats.groove, 9, .001, c); }
+    for (const x of [237, 245, 297]) block(g, [x - .6, 486, x + .6, 486.9], 50, mats.brass, 80, .002, c);
+  });
+  sect3(U4_SECT, 202);
+  arms2(U4_ARMS, 513);
+  piece(U4_ENTRY, (g, c) => {
+    const w = 400 + 10 / CM;
+    block(g, [400, 224, w, 259], WALL_H, mats.wall, 0, .002, c); block(g, [400, 224, w, 259], .6, mats.cut, WALL_H, .001, c);
+    block(g, [w + 1, 224, 531, 257], 8, mats.plinth, 0, .002, c);
+    block(g, [w, 224, 532, 259], WALL_H - 8, mats.front, 8, .004, c);
+    const n = 4, dw = (532 - w) / n;
+    for (let k = 1; k < n; k++) block(g, [w + dw * k - .4, 258.4, w + dw * k + .4, 259.1], WALL_H - 10, mats.groove, 9, .001, c);
+    for (let k = 0; k < n; k++) { const x = w + dw * k + (k % 2 ? 4 : dw - 4); block(g, [x - .6, 259, x + .6, 259.9], 50, mats.brass, 80, .002, c); }
+  });
+  piece(BIG_ENTRY_TOP, (g, c) => {
+    block(g, [400, 224, 532, 259], WALL_H - 215, mats.front, 215, .004, c);
+    for (const x of [433, 466, 499]) block(g, [x - .4, 258.4, x + .4, 259.1], WALL_H - 217, mats.groove, 216, .001, c);
+  });
 
   // ---- the path to the hallway, a dashed line on the floor
   function route(pts) {
@@ -404,18 +599,18 @@ async function start() {
       for (let k = 0; k < n; k++) {
         const t = (k + .25) / n, x = ax + (bx - ax) * t, y = ay + (by - ay) * t;
         const m = new THREE.Mesh(new THREE.BoxGeometry(7 * S, .004, 2.2 * S), mats.path);
-        m.position.set(wx(x), .004, wz(y)); m.rotation.y = -Math.atan2(by - ay, bx - ax);
+        m.position.set(wx(x), .012, wz(y)); m.rotation.y = -Math.atan2(by - ay, bx - ax);
         m.userData.x = x; scene.add(m); list.push(m);
       }
     }
     const [ex, ey] = pts[pts.length - 1];
     const tip = new THREE.Mesh(new THREE.ConeGeometry(6 * S, 12 * S, 3), mats.path);
-    tip.rotation.x = -Math.PI / 2; tip.position.set(wx(ex), .006, wz(ey - 6)); tip.scale.y = .1; scene.add(tip);
+    tip.rotation.x = -Math.PI / 2; tip.position.set(wx(ex), .014, wz(ey - 6)); tip.scale.y = .1; scene.add(tip);
     return { list, tip };
   }
   const { list: dashes, tip } = route(ROUTE);
   const routeFix = route(ROUTE_FIX);
-  const routeSol = route(ROUTE_SOL), routeKitchen = route(ROUTE_KITCHEN);
+  const routeSol = route(ROUTE_SOL), routeKitchen = route(ROUTE_KITCHEN), routeU4 = route(ROUTE_U4);
   const ring = new THREE.Mesh(new THREE.RingGeometry(22 * S, 26 * S, 40), new THREE.MeshBasicMaterial({ color: 0xb8452e, transparent: true }));
   ring.rotation.x = -Math.PI / 2; ring.position.set(wx(CLASH[0]), .006, wz(CLASH[1])); scene.add(ring);
 
@@ -425,11 +620,20 @@ async function start() {
   items[2].re = null;                                                    // the coffee table
   items[3].re = RE_TABLE;
   chairs.forEach((ch, j) => { const r = RE_CHAIRS[j]; items[4 + j].re = r ? { c: r.c, rot: ANG[r.face] - ANG[ch.face] } : null; });
-  items[1].fix = FIX_ARMCHAIR; items[3].fix = FIX_TABLE;
+  items[0].fix = null; items[1].fix = null; items[2].fix = FIX_COFFEE; items[3].fix = FIX_TABLE; items[12].fix = null; items[13].fix = FIX_TREE; items[14].fix = FIX_RUG;
+  items[15].only = 'fix'; items[17].only = 'sol'; items[18].only = 'big'; items[19].only = 'big'; items[20].only = 'big'; items[21].only = 'u4'; items[22].only = 'u4'; items[23].only = 'u4'; items[24].only = 'u4'; items[25].only = 'big';
   chairs.forEach((ch, j) => { const r = FIX_CHAIRS[j]; items[4 + j].fix = r ? { c: r.c, rot: ANG[r.face] - ANG[ch.face] } : null; });
   items[0].sol = SOL.sofa; items[1].sol = SOL.loveseat; items[2].sol = SOL.coffee; items[3].sol = SOL.table;
   chairs.forEach((ch, j) => { const [x, y, f] = SOL.chairs[j]; items[4 + j].sol = { c: [x, y], rot: ANG[f] - ANG[ch.face] }; });
   items[13].sol = SOL.tree; items[14].sol = SOL.rug;
+  items[0].sol = null; items[1].sol = null; items[12].sol = null; items[2].sol = { c: [415, 455] };
+  for (const it of items) it.big = it.fix;
+  for (const it of items) it.u4 = null;
+  items[3].u4 = U4_TABLE;
+  chairs.forEach((ch, j) => { const [x, y, f] = U4_CHAIRS[j]; items[4 + j].u4 = { c: [x, y], rot: ANG[f] - ANG[ch.face] }; });
+  items[2].u4 = { c: [610, 455] }; items[13].u4 = { c: [482, 545] };
+  items[14].u4 = { c: [605, 470], sx: 150 / 158, sz: 160 / 110 };
+  items[2].big = { c: [478, 459] }; items[14].big = { c: [470, 472.5], sx: 180 / 158, sz: 175 / 110 }; items[15].only = 'fix'; items[14].sol = FIX_RUG; items[16].only = ['fix', 'big'];
   // where the loveseat stood: a pale footprint when it has to go
   const ghost = new THREE.Mesh(new THREE.PlaneGeometry((LOVESEAT.true[2] - LOVESEAT.true[0]) * S, (LOVESEAT.true[3] - LOVESEAT.true[1]) * S),
     new THREE.MeshBasicMaterial({ color: 0xb8452e, transparent: true, opacity: 0, depthWrite: false }));
@@ -442,18 +646,19 @@ async function start() {
   const ok = new THREE.Color(0xffffff), bad = new THREE.Color(0xe0614a);
   function targetOf(it, st) {
     const tc = it.c, base = { x: tc[0], y: tc[1], sx: 1, sz: 1, r: 0, v: 1 };
+    if (it.only) return [].concat(it.only).includes(st) ? base : { ...base, v: 0 };
     if (st === 'true') return base;
     if (st === 'sales') {
       const s = it.spec.sales;
       if (!s) return { ...base, v: 0 };
       return { x: (s[0] + s[2]) / 2, y: (s[1] + s[3]) / 2, sx: (s[2] - s[0]) / it.w, sz: (s[3] - s[1]) / it.d, r: 0, v: 1 };
     }
-    const alt = st === 'fix' ? it.fix : st === 'sol' ? it.sol : it.re;
+    const alt = st === 'fix' ? it.fix : st === 'sol' ? it.sol : st === 'big' ? it.big : st === 'u4' ? it.u4 : it.re;
     if (alt === undefined) return base;
     if (alt === null) return { ...base, v: 0 };
     return { x: alt.c[0], y: alt.c[1], sx: alt.sx || 1, sz: alt.sz || 1, r: alt.rot || 0, v: 1 };
   }
-  const weights = st => ({ bad: st === 'true' ? 1 : 0, re: st === 're' ? 1 : 0, fix: st === 'fix' ? 1 : 0, sol: st === 'sol' ? 1 : 0 });
+  const weights = st => ({ bad: st === 'true' ? 1 : 0, re: st === 're' ? 1 : 0, fix: st === 'fix' ? 1 : 0, sol: st === 'sol' ? 1 : 0, big: st === 'big' ? 1 : 0, u4: st === 'u4' ? 1 : 0 });
   let W = weights('true'), Wfrom = W, Wto = W;
   for (const it of items) it.cur = targetOf(it, 'true');
   let fromP = [], toP = [], t0 = 0, anim = 0;
@@ -468,18 +673,25 @@ async function start() {
     tip.material = W.bad > .5 ? mats.pathBad : mats.path;
     ring.visible = W.bad > .05; ring.material.opacity = W.bad;
     ghost.visible = W.re > .05; ghost.material.opacity = .18 * W.re;
-    const way = W.fix > .5 ? 'fix' : W.sol > .5 ? 'sol' : 'base';
+    const way = W.fix > .5 || W.big > .5 ? 'fix' : W.sol > .5 ? 'sol' : W.u4 > .5 ? 'u4' : 'base';
     const show = (r, on) => { for (const m of r.list) m.visible = on; r.tip.visible = on; };
-    show({ list: dashes, tip }, way === 'base'); show(routeFix, way === 'fix'); show(routeSol, way === 'sol'); show(routeKitchen, way === 'sol');
-    oldKitchen.scale.y = Math.max(1 - W.sol, .001); oldKitchen.visible = W.sol < .98;
+    show({ list: dashes, tip }, way === 'base'); show(routeFix, way === 'fix'); show(routeSol, way === 'sol'); show(routeKitchen, way === 'sol'); show(routeU4, way === 'u4');
+    oldKitchen.scale.y = Math.max(1 - W.sol - W.u4, .001); oldKitchen.visible = W.sol + W.u4 < .98;
+    uKitchen.scale.y = Math.max(W.u4, .001); uKitchen.visible = W.u4 > .02;
+    u4Walls.scale.y = Math.max(W.u4, .001); u4Walls.visible = W.u4 > .02;
+    fixKitchen.visible = false;
     newKitchen.scale.y = Math.max(W.sol, .001); newKitchen.visible = W.sol > .02;
+    wallOld.scale.y = Math.max(1 - W.big - W.u4, .001); wallOld.visible = W.big + W.u4 < .98;
+    wallNew.scale.y = Math.max(W.big, .001); wallNew.visible = W.big > .02;
   }
   const TEXT = {
-    sales: 'As the sales plan draws it: the table looks small, and there’s a clear path between it and the loveseat to the hallway.',
+    sales: 'As the developer’s sales plan draws it: the furniture is drawn smaller than its real size, so the room looks bigger than it is. The table looks small, and there’s a clear path between it and the loveseat to the hallway.',
     true: 'At true size, the table and its chairs take far more room: the end chair runs into the loveseat, and the path to the hallway closes.',
-    fix: 'Second try: turn the table across the room. It seats eight with both heads, but the way from the front door into the kitchen squeezes to about 26 in, between the fridge and the head chair.',
-    sol: 'The solution: move the kitchen to the wall along the entrance, with a 16 in closet back to back with it facing the way in. The dining table then runs along the windows and seats eight with both heads, the living room gets its own corner facing the TV, and the ways to the kitchen and the bedrooms stay clear.',
-    re: 'First try: swap the areas. Nothing collides and the path to the bedrooms opens, but the dining table takes over the living room, and the seating area shrinks to a single sofa at the entrance.'
+    fix: 'Option 1: no structural changes, and the developer’s standard kitchen stays as drawn. The table moves toward the windows and seats eight with both heads, an L-shaped sectional runs the length of the bedroom wall with a coffee table, and an entry closet fills the wall along the way to the bedrooms. It works, but it doesn’t have the spacious feel the sales plan suggests, and the dining table feels like it’s in the kitchen.',
+    sol: 'Option 2: no structural changes, but an upgraded kitchen would be required. The kitchen is defined against a single wall along the entrance, with a 16 in closet back to back with it, which gives the plan a defined entryway and very generous storage. The plan is very open: the dining table runs along the windows, seats eight with both heads and has plenty of room to extend, and an L-shaped sectional fills the corner of the bedroom wall and the windows.',
+    big: 'Option 3: move the bedroom wall over 3 ft 3 in. The bedroom still fits a bed with a trundle and a small closet, and the living room gains a proper sitting area: the sectional, two armchairs facing it and a larger rug. The kitchen stays as the developer drew it, and the table still seats eight with both heads.',
+    u4: 'Option 4: a compact U-shaped kitchen fills the developer’s kitchen corner, and behind it, along the windows, a small bedroom fits a bed with a trundle, and a closet. The bedroom beside the living room opens up and becomes the living room, with the sectional, two armchairs and a rug. The dining table stands in the middle and seats eight with both heads, with plenty of space for it to open, and an entry closet fills the wall along the way to the bedrooms.',
+    re: 'Option 1: swap the areas. Nothing collides and the path to the bedrooms opens, but the dining table takes over the living room, and the seating area shrinks to a single sofa at the entrance.'
   };
   let size = 'true';
   function setSize(st, instant) {
@@ -500,7 +712,7 @@ async function start() {
     if (p < 1) anim = requestAnimationFrame(step);
   }
   // Play: the whole search, one step after another, from the sales plan to the solution
-  const ORDER = ['sales', 'true', 're', 'fix', 'sol'];
+  const ORDER = ['sales', 'true', 'fix', 'sol', 'big', 'u4'];   // the old Option 1 ('re') was removed (owner, Nov 22)
   const playBtn = sw.querySelector('[data-play]');
   let playTimer = 0;
   const stopPlay = () => { clearTimeout(playTimer); playTimer = 0; playBtn.setAttribute('aria-pressed', 'false'); };
@@ -518,14 +730,23 @@ async function start() {
   // the tags follow their spots on screen: the clash at true size, the compromises when rearranged
   const TAGS = [
     { el: clashTag, at: new THREE.Vector3(wx(CLASH[0]), h(95), wz(CLASH[1])), w: () => W.bad },
-    { el: fourTag, at: new THREE.Vector3(wx(415), h(95), wz(251)), w: () => W.re },
+    { el: fourTag, at: new THREE.Vector3(wx(461), h(95), wz(251)), w: () => W.re },
     { el: loveTag, at: new THREE.Vector3(wx(415), h(40), wz(404)), w: () => W.re },
-    { el: fixTags[0], at: new THREE.Vector3(wx(380), h(80), wz(372)), w: () => W.fix },
-    { el: fixTags[1], at: new THREE.Vector3(wx(282), h(80), wz(338)), w: () => W.fix },
+    { el: fixTags[0], at: new THREE.Vector3(wx(270), h(85), wz(469)), w: () => W.fix },
+    { el: fixTags[3], at: new THREE.Vector3(wx(470), h(80), wz(500)), w: () => W.fix },
+    { el: fixTags[4], at: new THREE.Vector3(wx(466), h(225), wz(241)), w: () => W.fix },
+    { el: fixTags[1], at: new THREE.Vector3(wx(190), h(100), wz(330)), w: () => W.fix },
+    { el: fixTags[2], at: new THREE.Vector3(wx(530), h(10), wz(300)), w: () => W.fix },
+    { el: bigTags[0], at: new THREE.Vector3(wx(568), h(115), wz(380)), w: () => W.big },
+    { el: bigTags[1], at: new THREE.Vector3(wx(640), h(90), wz(440)), w: () => W.big },
+    { el: bigTags[2], at: new THREE.Vector3(wx(430), h(80), wz(470)), w: () => W.big },
+    { el: u4Tags[0], at: new THREE.Vector3(wx(160), h(70), wz(520)), w: () => W.u4 },
+    { el: u4Tags[1], at: new THREE.Vector3(wx(170), h(100), wz(370)), w: () => W.u4 },
+    { el: u4Tags[2], at: new THREE.Vector3(wx(412), h(85), wz(420)), w: () => W.u4 },
+    { el: u4Tags[3], at: new THREE.Vector3(wx(610), h(80), wz(440)), w: () => W.u4 },
     { el: solTags[0], at: new THREE.Vector3(wx(250), h(110), wz(321)), w: () => W.sol },
     { el: solTags[1], at: new THREE.Vector3(wx(352), h(108), wz(290)), w: () => W.sol },
     { el: solTags[2], at: new THREE.Vector3(wx(214), h(95), wz(460)), w: () => W.sol },
-    { el: fixTags[2], at: new THREE.Vector3(wx(530), h(10), wz(300)), w: () => W.fix }
   ];
   function onRender() {
     const w = view.clientWidth, hh = view.clientHeight;
@@ -539,11 +760,11 @@ async function start() {
   }
 
   // ---- camera and controls (turn, move, zoom, reset), shared with the other models
-  const target = new THREE.Vector3(wx(390), 0, wz(380));
-  const fromPos = target.clone().add(new THREE.Vector3(-6.4, 12, 11.1));
+  const target = new THREE.Vector3(wx(405), 0, wz(380));   // a little east, so Option 3's bedroom is in view
+  const fromPos = target.clone().add(new THREE.Vector3(-6.4, 12, 11.1).multiplyScalar(1.06));
   camera.position.copy(fromPos); camera.lookAt(target);
   const { modelControls } = await import('./model-controls.js');
-  const controls = modelControls({ THREE, renderer, scene, camera, view, rooms: [], from: fromPos, target, bounds: [wx(120), wx(620), wz(200), wz(560)], onRender });
+  const controls = modelControls({ THREE, renderer, scene, camera, view, rooms: [], from: fromPos, target, bounds: [wx(120), wx(700), wz(200), wz(560)], onRender });
   function resize() {
     const w = view.clientWidth, hh = view.clientHeight;
     renderer.setSize(w, hh, false);
