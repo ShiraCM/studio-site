@@ -1360,3 +1360,13 @@ html[dir="rtl"] .fs-view canvas{direction:ltr}
 
 /* Neve Amim: the design process in 3D (fs3d.js, data-mode="process"); without WebGL the paragraph tells it */
 .fs3d[data-mode="process"]:not(.fs3d-live) > *{display:none !important}
+/* Neve Amim design process: on wide screens the option's description sits beside the model, on the left
+   (owner, Nov 22: "the description of each option cant be seen when you are looking at the plans") */
+@media (min-width:900px){
+  .fs3d[data-mode="process"].fs3d-live{grid-template-columns:minmax(240px,1fr) minmax(0,2.6fr);grid-template-rows:auto auto 1fr;column-gap:clamp(24px,3vw,44px);align-items:start}
+  .fs3d[data-mode="process"].fs3d-live > .titleblock{grid-column:1 / -1}
+  .fs3d[data-mode="process"].fs3d-live > .fs-view{grid-column:2;grid-row:2 / span 2}
+  .fs3d[data-mode="process"].fs3d-live > .fs-status{grid-column:1;grid-row:2;font-size:17px;line-height:1.6;color:var(--ink);padding-top:4px}
+  .fs3d[data-mode="process"].fs3d-live > .fs-note{grid-column:1;grid-row:3;margin:0}
+}
+.fs3d .titleblock .when{display:block}   /* not the "when" timeline list from the guide page */
