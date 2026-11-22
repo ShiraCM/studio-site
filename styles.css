@@ -1357,3 +1357,6 @@ html[dir="rtl"] .fs-view canvas{direction:ltr}
 .fs-switch .fs-play{margin-left:6px;border-left:1px solid var(--rule)}
 .fs-switch .fs-play[aria-pressed="true"]{background:var(--olive);border-color:var(--olive)}
 .fs3d .fs-fix-tag{display:none}   /* the green option labels are hidden (owner, Nov 22: "distracting"); the room labels and paths remain */
+
+/* Neve Amim: the design process in 3D (fs3d.js, data-mode="process"); without WebGL the paragraph tells it */
+.fs3d[data-mode="process"]:not(.fs3d-live) > *{display:none !important}

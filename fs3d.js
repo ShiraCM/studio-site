@@ -149,12 +149,24 @@ const ACCESS = {
   fix: [[[350, 285], [300, 375], [165, 385]], [[350, 285], [380, 440]]],
   big: [[[350, 285], [300, 375], [165, 385]], [[350, 285], [380, 440]]],
   sol: [[[430, 372], [340, 455]]],
-  u4: [[[350, 285], [320, 320], [315, 375], [270, 378]], [[350, 285], [372, 338]], [[315, 375], [330, 400], [330, 535], [285, 540]], [[350, 285], [480, 335], [492, 385], [575, 385], [684, 385], [684, 325]]]
+  u4: [[[350, 285], [320, 320], [315, 375], [270, 378]], [[350, 285], [372, 338]], [[315, 375], [330, 400], [330, 535], [285, 540]], [[350, 285], [480, 335], [492, 385], [575, 385], [684, 385], [684, 325]]],
+  f5: [[[350, 285], [300, 380], [150, 392]], [[350, 285], [470, 330], [494, 395], [512, 418]]]
 };
+// Option 5, the plan we built at Neve Amim (Neve Amim page only, owner, Nov 22: "decided on option 5 - gave up a
+// bedroom so there could be ample living space and a large kitchen"). Taken from al3d.js, whose plan is the same
+// apartment at about 2 px per plan px here: NX / NY turn its plan px into this plan's px.
+const NX = n => 92 + (n - 64) / 2.029, NY = n => 302 + (n - 608) / 2.023;
+const NR = ([x0, y0, x1, y1]) => [NX(x0), NY(y0), NX(x1), NY(y1)];
+const F5_WALLS = [[506, 362, 513, 381], [653, 362, 660, 381]];   // the two short walls either side of the sefarim bookcase
+const F5_ISLAND = { sales: null, true: NR([230, 790, 420, 976]) };   // the island and its two stools
+const F5_LIVING = { sales: null, true: NR([524, 712, 864, 1112]) };   // rug, sofa, two swivel chairs, round coffee table
+const F5_TABLE = { c: [582 + 20 / CM, 465], rot: Math.PI / 2 };   // the table from the other options, across the old bedroom, eight seats with both heads; 20 cm toward the east wall once the sideboard went (owner, Nov 22)
+const F5_BOOKS = { sales: null, true: [513, 362, 653, 379] };       // the sefarim bookcase on the hall wall, to the ceiling
 const ROUTE_SOL = [[345, 190], [350, 258], [480, 264], [524, 318], [566, 314], [572, 244]];
 const ROUTE_KITCHEN = [[470, 280], [478, 335], [430, 372], [300, 372], [150, 372]];
 
 const box = document.querySelector('.fs3d[data-three]');
+const PROCESS = !!box && box.dataset.mode === 'process';
 const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 function webglOK() {
   try { const c = document.createElement('canvas'); return !!(c.getContext('webgl2') || c.getContext('webgl')); } catch { return false; }
@@ -174,12 +186,16 @@ async function start() {
   view.className = 'jh-view fs-view';
   const sw = document.createElement('div');
   sw.className = 'm3d-seg fs-switch'; sw.setAttribute('role', 'group'); sw.setAttribute('aria-label', 'Furniture size');
-  sw.innerHTML = '<button type="button" class="m3d-btn m3d-txt" data-size="sales" aria-pressed="false">Sales plan</button>' +
-                 '<button type="button" class="m3d-btn m3d-txt" data-size="true" aria-pressed="true">True size</button>' +
+  // On the Neve Amim page (data-mode="process") the same model tells the design process: Options 1 to 5, no
+  // sales plan or true-size views (owner, Nov 22)
+  if (PROCESS) sw.setAttribute('aria-label', 'Layout options');
+  sw.innerHTML = (PROCESS ? '' : '<button type="button" class="m3d-btn m3d-txt" data-size="sales" aria-pressed="false">Sales plan</button>' +
+                 '<button type="button" class="m3d-btn m3d-txt" data-size="true" aria-pressed="true">True size</button>') +
                  '<button type="button" class="m3d-btn m3d-txt" data-size="fix" aria-pressed="false">Option 1</button>' +
                  '<button type="button" class="m3d-btn m3d-txt" data-size="sol" aria-pressed="false">Option 2</button>' +
                  '<button type="button" class="m3d-btn m3d-txt" data-size="big" aria-pressed="false">Option 3</button>' +
                  '<button type="button" class="m3d-btn m3d-txt" data-size="u4" aria-pressed="false">Option 4</button>' +
+                 (PROCESS ? '<button type="button" class="m3d-btn m3d-txt" data-size="f5" aria-pressed="false">Option 5</button>' : '') +
                  '<button type="button" class="m3d-btn m3d-txt fs-play" data-play aria-pressed="false">▶ Play</button>';
   view.append(sw);
   const clashTag = document.createElement('span');
@@ -193,10 +209,10 @@ async function start() {
   const u4Tags = ['A bedroom with a trundle and a closet', 'A U-shaped kitchen', 'Seats eight, with both heads', 'The living room, in the old bedroom'].map(t => { const el = document.createElement('span'); el.className = 'fs-clash fs-fix-tag'; el.textContent = t; view.append(el); return el; });
   const status = document.createElement('p');
   status.className = 'cap fs-status'; status.setAttribute('aria-live', 'polite');
-  box.querySelector('.compare').before(view);
+  box.querySelector('.compare, .fs-slot').before(view);
   view.after(status);
   const when = box.querySelector('.titleblock .when');
-  if (when) when.textContent = 'Turn it · switch sizes';
+  if (when) when.textContent = PROCESS ? 'Turn it · switch options' : 'Turn it · switch sizes';
 
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
   renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
@@ -356,6 +372,8 @@ async function start() {
   wallNew.visible = false;
   const u4Walls = new THREE.Group(); scene.add(u4Walls); u4Walls.visible = false;
   for (const w of U4_WALLS) { block(u4Walls, w, WALL_H, mats.wall, 0, .002); block(u4Walls, w, .6, mats.cut, WALL_H, .001); }
+  const f5Walls = new THREE.Group(); scene.add(f5Walls); f5Walls.visible = false;
+  for (const w of F5_WALLS) { block(f5Walls, w, WALL_H, mats.wall, 0, .002); block(f5Walls, w, .6, mats.cut, WALL_H, .001); }
   for (const [a, b] of FACADE.wall) { block(scene, [a, FACADE.y0, b, FACADE.y1], WALL_H, mats.wall, 0, .002); block(scene, [a, FACADE.y0, b, FACADE.y1], .6, mats.cut, WALL_H, .001); }
   for (const [a, b] of FACADE.glass) {
     block(scene, [a, FACADE.y0, b, FACADE.y1], 45, mats.wall, 0, .002);
@@ -413,6 +431,17 @@ async function start() {
   for (let x = 300 + 26; x < 461 - 5; x += 26) block(newKitchen, [x - .4, 278.1, x + .4, 279], 172, mats.groove, 4, .001);
   for (let x = 300 + 13; x < 461; x += 26) block(newKitchen, [x - .5, 277.6, x + .5, 278.5], 40, mats.brass, 70, .002);
   newKitchen.visible = false;
+  // Option 5's large kitchen (al3d.js): a U along the west wall and under the windows, the hob under the first
+  // window and a second sink under the second, two rows of uppers on the back wall, and tall units with the
+  // fridge and an oven at eye level along the whole north wall, to the entry corner
+  const f5Kitchen = new THREE.Group(); scene.add(f5Kitchen); f5Kitchen.visible = false;
+  kitchen(f5Kitchen, [[92, NY(678), NX(134), 562, 'e'], [NX(134), NY(1064), NX(380), 562, 'n']], [[98, NY(850), 120, NY(916)], [NX(300), NY(1076), NX(356), NY(1118)]], [95, NY(883)], [NR([110, 1078, 170, 1126])[0], NY(1078), NR([110, 1078, 170, 1126])[2], NY(1126)], [92, 302, NX(124), NY(678)]);
+  block(f5Kitchen, [NX(124), 302, NX(454), NY(678)], 224, mats.front, 8, .006);
+  block(f5Kitchen, [NX(124), 302.5, NX(454), NY(678) - .5], 8, mats.plinth, 0, .002);
+  for (let xx = 154; xx < 454; xx += 60) block(f5Kitchen, [NX(xx) - .4, NY(678) - .3, NX(xx) + .4, NY(678) + .4], 222, mats.groove, 9, .001);
+  block(f5Kitchen, [NX(140), NY(678) - .2, NX(180), NY(678) + .6], 40, mats.hob, 120, .002);   // the oven at eye level
+  block(f5Kitchen, [92, NY(700), NX(102), NY(1050)], 104, mats.front, 145, .006);          // two rows of uppers
+  for (const yy of [770, 840, 910, 980]) block(f5Kitchen, [NX(102) - .3, NY(yy) - .4, NX(102) + .4, NY(yy) + .4], 100, mats.groove, 147, .001);
   // ---- furniture, each built at true size around its own centre; the sales size scales it
   const items = [];
   function piece(spec, build) {
@@ -604,6 +633,58 @@ async function start() {
     for (const x of [433, 466, 499]) block(g, [x - .4, 258.4, x + .4, 259.1], WALL_H - 217, mats.groove, 216, .001, c);
   });
 
+  // ---- Option 5 (Neve Amim page), from al3d.js: pieces 26 to 28
+  const disc = (g, x, y, rpx, hcm, mat, lift, c, top = rpx) => {
+    const m = new THREE.Mesh(new THREE.CylinderGeometry(top * S, rpx * S, h(hcm), 32), mat);
+    m.position.set((x - c[0]) * S, h(lift + hcm / 2), (y - c[1]) * S); m.castShadow = m.receiveShadow = true; g.add(m); return m;
+  };
+  // the stone island, long side east-west, a stool on each side at its east end
+  piece(F5_ISLAND, (g, c) => {
+    block(g, NR([230, 836, 420, 932]), 90, mats.counter, 0, .01, c);
+    for (const sy of [814, 954]) {
+      disc(g, NX(386), NY(sy), 9, 6, mats.linen, 64, c);
+      for (const [lx, ly] of [[-6, -6], [6, -6], [-6, 6], [6, 6]]) disc(g, NX(386) + lx, NY(sy) + ly, .6, 64, mats.steel, 0, c);
+    }
+  });
+  // the living room: a large rug, the sofa with its back to the balcony doors, two swivel chairs facing it with
+  // a small side table between them, and a round travertine coffee table
+  piece(F5_LIVING, (g, c) => {
+    const rug = block(g, NR([524, 712, 864, 1092]), .8, mats.rug, 0, .01, c); rug.castShadow = false;
+    const [sx0, sy0, sx1, sy1] = NR([574, 1002, 824, 1112]);
+    for (const [x, y] of [[sx0 + 3, sy0 + 3], [sx1 - 3, sy0 + 3], [sx0 + 3, sy1 - 3], [sx1 - 3, sy1 - 3]]) leg(g, x, y, c);
+    block(g, [sx0, sy0, sx1, sy1], 30, mats.linenDark, 8, .035, c);
+    block(g, [sx0 + 5, sy1 - 10, sx1 - 5, sy1], 42, mats.linen, 34, .05, c);
+    block(g, [sx0, sy0, sx0 + 7, sy1], 26, mats.linen, 36, .03, c); block(g, [sx1 - 7, sy0, sx1, sy1], 26, mats.linen, 36, .03, c);
+    const sp = (sx1 - sx0 - 14) / 3;
+    for (let k = 0; k < 3; k++) { const a = sx0 + 7 + sp * k; block(g, [a + .7, sy0 + 1, a + sp - .7, sy1 - 10], 14, mats.linen, 36, .06, c); }
+    for (const [xa, mat] of [[sx0 + 12, mats.cushion], [sx1 - 28, mats.clay]]) { const m = block(g, [xa, sy1 - 16, xa + 16, sy1 - 10], 32, mat, 48, .06, c); m.rotation.x = -.25; }
+    disc(g, NX(699), NY(900), 26, 38, mats.travertine, 0, c);
+    for (const cx of [632, 766]) {
+      disc(g, NX(cx), NY(757), 8, 12, mats.brass, 0, c, 3);
+      disc(g, NX(cx), NY(757), 21, 33, mats.cushion, 12, c);
+      block(g, NR([cx - 41, 714, cx + 41, 734]), 33, mats.cushion, 45, .08, c);
+      block(g, NR([cx - 43, 726, cx - 29, 778]), 22, mats.cushion, 45, .06, c); block(g, NR([cx + 29, 726, cx + 43, 778]), 22, mats.cushion, 45, .06, c);
+    }
+    disc(g, NX(699), NY(757), 8, 50, mats.oakLight, 0, c, 7);
+  });
+  // dining in the old bedroom: the same oak table and eight chairs as the other options (items 3 to 11; owner, Nov 22);
+  // no sideboard (owner, Nov 22: "get rid of the buffet")
+  // the sefarim bookcase between the two short walls, to the ceiling, with rows of leather-bound volumes
+  piece(F5_BOOKS, (g, c) => {
+    const [x0, y0, x1, y1] = F5_BOOKS.true;
+    block(g, [x0, y0, x1, y0 + 2], WALL_H, mats.front, 0, .004, c);
+    for (const x of [x0, x0 + (x1 - x0) / 4, x0 + (x1 - x0) / 2, x0 + 3 * (x1 - x0) / 4, x1 - 1.5]) block(g, [x, y0, x + 1.5, y1], WALL_H, mats.front, 0, .003, c);
+    const spines = [0x2c3a55, 0x6a2a2e, 0x2f4a3a, 0x1f1d1b].map(color => M({ color, roughness: .6 }));   // deep blue, burgundy, dark green, black leather
+    for (let r = 0; r < 6; r++) {
+      const lift = 8 + r * 42;
+      block(g, [x0, y0, x1, y1], 2, mats.front, lift, .003, c);
+      for (let k = 0; k < 4; k++) {
+        const a = x0 + (x1 - x0) * k / 4 + 2.5, b = a + (x1 - x0) / 4 - 6 - rnd() * 6;
+        block(g, [a, y0 + 3, b, y1 - 3], 26 + rnd() * 6, spines[(r + k) % 4], lift + 2, .003, c);
+      }
+    }
+  });
+
   // ---- the path to the hallway, a dashed line on the floor
   // A walking path: a fine line of small dots with softly rounded corners and a slim chevron at its end (owner,
   // Nov 22: "more sophisticated looking"; it was chunky dashes and a cone)
@@ -665,6 +746,12 @@ async function start() {
   items[2].u4 = { c: [610, 455] }; items[13].u4 = { c: [482, 545] };
   items[14].u4 = { c: [605, 470], sx: 150 / 158, sz: 160 / 110 };
   items[2].big = { c: [478, 459] }; items[14].big = { c: [470, 472.5], sx: 180 / 158, sz: 175 / 110 }; items[15].only = 'fix'; items[14].sol = FIX_RUG; items[16].only = ['fix', 'big'];
+  // Option 5: only its own pieces, and Option 4's entry closet with its short wall (Neve Amim's coat closet)
+  for (const it of items) it.f5 = null;
+  items[3].f5 = F5_TABLE;
+  chairs.forEach((ch, j) => { const r = FIX_CHAIRS[j]; items[4 + j].f5 = { c: [r.c[0] + F5_TABLE.c[0] - FIX_TABLE.c[0], r.c[1] + F5_TABLE.c[1] - FIX_TABLE.c[1]], rot: ANG[r.face] - ANG[ch.face] }; });
+  for (const i of [26, 27, 28]) items[i].only = 'f5';
+  items[24].only = ['u4', 'f5'];
   // where the loveseat stood: a pale footprint when it has to go
   const ghost = new THREE.Mesh(new THREE.PlaneGeometry((LOVESEAT.true[2] - LOVESEAT.true[0]) * S, (LOVESEAT.true[3] - LOVESEAT.true[1]) * S),
     new THREE.MeshBasicMaterial({ color: 0xb8452e, transparent: true, opacity: 0, depthWrite: false }));
@@ -684,12 +771,12 @@ async function start() {
       if (!s) return { ...base, v: 0 };
       return { x: (s[0] + s[2]) / 2, y: (s[1] + s[3]) / 2, sx: (s[2] - s[0]) / it.w, sz: (s[3] - s[1]) / it.d, r: 0, v: 1 };
     }
-    const alt = st === 'fix' ? it.fix : st === 'sol' ? it.sol : st === 'big' ? it.big : st === 'u4' ? it.u4 : it.re;
+    const alt = st === 'fix' ? it.fix : st === 'sol' ? it.sol : st === 'big' ? it.big : st === 'u4' ? it.u4 : st === 'f5' ? it.f5 : it.re;
     if (alt === undefined) return base;
     if (alt === null) return { ...base, v: 0 };
     return { x: alt.c[0], y: alt.c[1], sx: alt.sx || 1, sz: alt.sz || 1, r: alt.rot || 0, v: 1 };
   }
-  const weights = st => ({ bad: st === 'true' ? 1 : 0, re: st === 're' ? 1 : 0, fix: st === 'fix' ? 1 : 0, sol: st === 'sol' ? 1 : 0, big: st === 'big' ? 1 : 0, u4: st === 'u4' ? 1 : 0 });
+  const weights = st => ({ bad: st === 'true' ? 1 : 0, re: st === 're' ? 1 : 0, fix: st === 'fix' ? 1 : 0, sol: st === 'sol' ? 1 : 0, big: st === 'big' ? 1 : 0, u4: st === 'u4' ? 1 : 0, f5: st === 'f5' ? 1 : 0 });
   let W = weights('true'), Wfrom = W, Wto = W;
   for (const it of items) it.cur = targetOf(it, 'true');
   let fromP = [], toP = [], t0 = 0, anim = 0;
@@ -704,17 +791,19 @@ async function start() {
     for (const c of tip.children) c.material = W.bad > .5 ? mats.pathBad : mats.path;
     ring.visible = W.bad > .05; ring.material.opacity = W.bad;
     ghost.visible = W.re > .05; ghost.material.opacity = .18 * W.re;
-    const way = W.fix > .5 || W.big > .5 ? 'fix' : W.sol > .5 ? 'sol' : W.u4 > .5 ? 'u4' : 'base';
+    const way = W.fix > .5 || W.big > .5 ? 'fix' : W.sol > .5 ? 'sol' : W.u4 > .5 || W.f5 > .5 ? 'u4' : 'base';
     const show = (r, on) => { for (const m of r.list) m.visible = on; r.tip.visible = on; };
     show({ list: dashes, tip }, way === 'base' && W.bad > .5); show(routeFix, way === 'fix'); show(routeSol, way === 'sol'); show(routeKitchen, way === 'sol'); show(routeU4, way === 'u4');
-    const opt = W.bad > .5 ? 'true' : ['fix', 'sol', 'big', 'u4'].find(k => W[k] > .5);
+    const opt = W.bad > .5 ? 'true' : ['fix', 'sol', 'big', 'u4', 'f5'].find(k => W[k] > .5);
     for (const k in access) for (const r of access[k]) show(r, k === opt);
-    oldKitchen.scale.y = Math.max(1 - W.sol - W.u4, .001); oldKitchen.visible = W.sol + W.u4 < .98;
+    oldKitchen.scale.y = Math.max(1 - W.sol - W.u4 - W.f5, .001); oldKitchen.visible = W.sol + W.u4 + W.f5 < .98;
+    f5Kitchen.scale.y = Math.max(W.f5, .001); f5Kitchen.visible = W.f5 > .02;
+    f5Walls.scale.y = Math.max(W.f5, .001); f5Walls.visible = W.f5 > .02;
     uKitchen.scale.y = Math.max(W.u4, .001); uKitchen.visible = W.u4 > .02;
     u4Walls.scale.y = Math.max(W.u4, .001); u4Walls.visible = W.u4 > .02;
     fixKitchen.visible = false;
     newKitchen.scale.y = Math.max(W.sol, .001); newKitchen.visible = W.sol > .02;
-    wallOld.scale.y = Math.max(1 - W.big - W.u4, .001); wallOld.visible = W.big + W.u4 < .98;
+    wallOld.scale.y = Math.max(1 - W.big - W.u4 - W.f5, .001); wallOld.visible = W.big + W.u4 + W.f5 < .98;
     wallNew.scale.y = Math.max(W.big, .001); wallNew.visible = W.big > .02;
   }
   const TEXT = {
@@ -724,9 +813,17 @@ async function start() {
     sol: 'Option 2: no structural changes, but an upgraded kitchen would be required. The kitchen is defined against a single wall along the entrance, with a 16 in closet back to back with it, which gives the plan a defined entryway and very generous storage. The plan is very open: the dining table runs along the windows, seats eight with both heads and has plenty of room to extend, and an L-shaped sectional fills the corner of the bedroom wall and the windows.',
     big: 'Option 3: move the bedroom wall over 3 ft 3 in. The bedroom still fits a bed with a trundle and a small closet, and the living room gains a proper sitting area: the sectional, two armchairs facing it and a larger rug. The kitchen stays as the developer drew it, and the table still seats eight with both heads.',
     u4: 'Option 4: a compact U-shaped kitchen fills the developer’s kitchen corner, and behind it, along the windows, a small bedroom fits a bed with a trundle, and a closet. The bedroom beside the living room opens up and becomes the living room, with the sectional, two armchairs and a rug. The dining table stands in the middle and seats eight with both heads, with plenty of space for it to open, and an entry closet fills the wall along the way to the bedrooms.',
+    f5: 'Option 5, the plan we chose: we gave up a bedroom. Its wall comes down and the dining table moves into it, which leaves ample living space for hosting between the dining table and the kitchen. The kitchen grows into a large U with a stone island, tall units along the whole north wall and two rows of uppers.',
     re: 'Option 1: swap the areas. Nothing collides and the path to the bedrooms opens, but the dining table takes over the living room, and the seating area shrinks to a single sofa at the entrance.'
   };
-  let size = 'true';
+  // On the Neve Amim page the options are told as the search for the plan we built (owner, Nov 22)
+  if (PROCESS) Object.assign(TEXT, {
+    fix: 'Option 1: no structural changes, and the developer’s kitchen stays as drawn. It works, but it doesn’t offer enough space: the dining table feels like it’s in the kitchen, and the seating area is tight.',
+    sol: 'Option 2: no structural changes. The kitchen moves to a single wall along the entrance, with an entry closet behind it. Very open, but still not enough space for how this family lives and hosts.',
+    big: 'Option 3: the bedroom wall moves over 3 ft 3 in, for a proper sitting area with a sectional and two armchairs. Better, but the kitchen still feels like part of the living room.',
+    u4: 'Option 4: the bedroom beside the living room opens up and becomes the living room, and a small bedroom goes in behind a compact U-shaped kitchen. Enough living space, but the kitchen is too small.'
+  });
+  let size = PROCESS ? 'fix' : 'true';
   function setSize(st, instant) {
     size = st;
     sw.querySelectorAll('[data-size]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.size === st)));
@@ -746,7 +843,7 @@ async function start() {
     if (p < 1) anim = requestAnimationFrame(step);
   }
   // Play: the whole search, one step after another, from the sales plan to the solution
-  const ORDER = ['sales', 'true', 'fix', 'sol', 'big', 'u4'];   // the old Option 1 ('re') was removed (owner, Nov 22)
+  const ORDER = PROCESS ? ['fix', 'sol', 'big', 'u4', 'f5'] : ['sales', 'true', 'fix', 'sol', 'big', 'u4'];   // the old Option 1 ('re') was removed (owner, Nov 22)
   const playBtn = sw.querySelector('[data-play]');
   let playTimer = 0;
   const stopPlay = () => { clearTimeout(playTimer); playTimer = 0; playBtn.setAttribute('aria-pressed', 'false'); };
@@ -784,7 +881,7 @@ async function start() {
   ];
   // Room sizes, quiet labels on the floor (owner, Nov 22: feet and inches in English, metres in Hebrew; "not
   // obtrusive but should be there"). Inside wall-to-wall sizes in cm, measured off the plan at CM cm per px.
-  const base = () => 1 - W.fix - W.sol - W.big - W.u4, notBig = () => 1 - W.big - W.u4;
+  const base = () => 1 - W.fix - W.sol - W.big - W.u4 - W.f5, notBig = () => 1 - W.big - W.u4 - W.f5;
   const K = ['Kitchen', 'מטבח'], D = ['Dining', 'פינת אוכל'], L = ['Living', 'סלון'], E = ['Entry', 'כניסה'], B = ['Bedroom', 'חדר שינה'];
   // Each area with its floor area (owner, Nov 22: "i want each area marked", "square feet of each area"). r = the
   // area in plan px; room: true for a walled room (its wall-to-wall size is shown too); open-plan zones are
@@ -798,7 +895,8 @@ async function start() {
     { name: K, r: [92, 302, 461, 382], at: [300, 360], w: () => W.sol }, { name: D, r: [92, 382, 380, 562], at: [214, 525], w: () => W.sol }, { name: L, r: [380, 382, 506, 562], at: [480, 470], w: () => W.sol },
     { name: B, r: [572, 362, 709, 562], room: true, at: [675, 430], w: () => W.big },
     { name: K, r: [92, 302, 307, 443], at: [235, 322], w: () => W.u4 }, { name: B, r: [92, 448, 301, 562], room: true, at: [160, 480], w: () => W.u4 },
-    { name: D, r: [308, 302, 506, 562], at: [410, 525], w: () => W.u4 }, { name: L, r: [513, 362, 709, 562], room: true, at: [640, 405], w: () => W.u4 }
+    { name: D, r: [308, 302, 506, 562], at: [410, 525], w: () => W.u4 }, { name: L, r: [513, 362, 709, 562], room: true, at: [640, 405], w: () => W.u4 },
+    { name: K, r: [92, 302, 300, 562], at: [150, 490], w: () => W.f5 }, { name: L, r: [300, 302, 506, 562], at: [470, 470], w: () => W.f5 }, { name: D, r: [506, 381, 709, 562], at: [600, 540], w: () => W.f5 }
   ];
   const ftin = cm => { const t = Math.round(cm / 2.54); return Math.floor(t / 12) + '′ ' + (t % 12) + '″'; };
   const metres = cm => (cm / 100).toFixed(2);
@@ -843,7 +941,7 @@ async function start() {
     controls.render();
   }
   new ResizeObserver(resize).observe(view);
-  setSize('true', true);
+  setSize(PROCESS ? 'fix' : 'true', true);
   controls.show();
   resize();
   window.__fs3d = { setSize, renderer, render: () => controls.render() };
