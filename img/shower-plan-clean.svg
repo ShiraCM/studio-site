@@ -1,0 +1,99 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 1000" width="700" height="1000" font-family="Helvetica Neue, Helvetica, Arial, sans-serif">
+  <!-- Bathroom with a walk-in shower, redrawn from the owner's CAD plan (shower-plan.webp) in the style of
+       tub-plan-clean.svg. Scale: 1 cm = 2.4 px. Interior 170 x 325 cm at (140,120)-(548,900).
+       Along the left wall, top to bottom: shower 85, WC 100, vanity 140. Window by the WC, door bottom right. -->
+  <defs>
+    <clipPath id="room"><rect x="140" y="120" width="408" height="780"/></clipPath>
+    <marker id="tick" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="10" markerHeight="10" orient="auto">
+      <path d="M1 9 L9 1" stroke="#6b6660" stroke-width="1.4"/>
+    </marker>
+  </defs>
+  <rect width="700" height="1000" fill="#ffffff"/>
+
+  <!-- floor: large-format tiles, 60 x 120 cm -->
+  <g clip-path="url(#room)" stroke="#e7e4de" stroke-width="1">
+    <rect x="140" y="120" width="408" height="780" fill="#faf9f6" stroke="none"/>
+    <path d="M284 120V900M428 120V900M140 408H548M140 696H548"/>
+  </g>
+  <!-- shower floor, sloping to the drain -->
+  <rect x="188" y="120" width="360" height="204" fill="#f3f1ec"/>
+  <g stroke="#cfcac2" stroke-width="1" fill="none">
+    <path d="M188 120 L236 168 L548 120 M236 168 L548 324 M236 168 L188 324"/>
+  </g>
+  <circle cx="236" cy="168" r="9" fill="#ffffff" stroke="#2b2926" stroke-width="1.3"/>
+
+  <!-- walls -->
+  <g fill="#2b2926">
+    <rect x="95" y="75" width="45" height="275"/>           <!-- left, above the window -->
+    <rect x="95" y="494" width="45" height="451"/>          <!-- left, below the window -->
+    <rect x="548" y="75" width="45" height="870"/>          <!-- right -->
+    <rect x="95" y="75" width="498" height="45"/>           <!-- top -->
+    <rect x="95" y="900" width="227" height="45"/>          <!-- bottom, left of door -->
+    <rect x="512" y="900" width="81" height="45"/>          <!-- bottom, right of door -->
+  </g>
+
+  <!-- window -->
+  <g fill="none" stroke="#2b2926" stroke-width="1.5">
+    <rect x="95" y="350" width="45" height="144" fill="#ffffff"/>
+    <line x1="112" y1="350" x2="112" y2="494"/>
+    <line x1="123" y1="350" x2="123" y2="494"/>
+  </g>
+
+  <!-- installation wall along the left: 20 cm deep, behind the shower and the WC -->
+  <rect x="140" y="120" width="48" height="444" fill="#efede8" stroke="#2b2926" stroke-width="1.4"/>
+  <!-- shower fittings -->
+  <rect x="188" y="212" width="7" height="26" fill="#b07a4f"/>
+
+  <!-- glass screen and door across the shower -->
+  <line x1="190" y1="324" x2="548" y2="324" stroke="#7d93a0" stroke-width="5" stroke-linecap="round"/>
+
+  <!-- wall-hung toilet -->
+  <g stroke="#2b2926" stroke-width="1.6" fill="#ffffff">
+    <path d="M188 389 H262 C306 389 330 408 330 432 C330 456 306 475 262 475 H188 Z"/>
+    <path d="M204 403 H262 C296 403 314 416 314 432 C314 448 296 461 262 461 H204 Z" stroke-width="1.2"/>
+  </g>
+  <rect x="182" y="420" width="6" height="24" fill="#b07a4f"/>
+
+  <!-- vanity: 46 x 140 cm with an oval basin -->
+  <g stroke="#2b2926" stroke-width="1.6">
+    <rect x="140" y="564" width="110" height="336" fill="#ffffff"/>
+    <ellipse cx="196" cy="732" rx="32" ry="52" fill="#f6f5f2" stroke-width="1.3"/>
+    <circle cx="196" cy="732" r="5" fill="none" stroke-width="1.2"/>
+  </g>
+  <rect x="140" y="726" width="10" height="12" fill="#b07a4f"/>
+  <!-- lit mirror above the vanity -->
+  <line x1="146" y1="572" x2="146" y2="892" stroke="#c9a46c" stroke-width="4" stroke-linecap="round" opacity=".9"/>
+
+  <!-- door: about 80 cm, hinged on the right, opening into the room -->
+  <g fill="none" stroke="#2b2926">
+    <line x1="512" y1="900" x2="512" y2="710" stroke-width="3"/>
+    <path d="M322 900 A190 190 0 0 1 512 710" stroke-width="1" stroke-dasharray="5 4"/>
+  </g>
+
+  <!-- labels -->
+  <g fill="#6b6660" font-size="15" letter-spacing="1.5" text-anchor="middle">
+    <text x="400" y="250">SHOWER</text>
+    <text x="410" y="438">WC</text>
+    <text x="330" y="740">VANITY</text>
+    <text x="70" y="428" transform="rotate(-90 70 422)">WINDOW</text>
+  </g>
+
+  <!-- dimensions (cm) -->
+  <g stroke="#6b6660" stroke-width="1" fill="none">
+    <line x1="140" y1="40" x2="548" y2="40" marker-start="url(#tick)" marker-end="url(#tick)"/>
+    <line x1="140" y1="32" x2="140" y2="70"/><line x1="548" y1="32" x2="548" y2="70"/>
+    <line x1="625" y1="120" x2="625" y2="900" marker-start="url(#tick)" marker-end="url(#tick)"/>
+    <path d="M621 328 L629 320 M621 568 L629 560" stroke-width="1.4"/>
+    <line x1="598" y1="120" x2="633" y2="120"/><line x1="598" y1="324" x2="633" y2="324"/>
+    <line x1="598" y1="564" x2="633" y2="564"/><line x1="598" y1="900" x2="633" y2="900"/>
+    <line x1="672" y1="120" x2="672" y2="900" marker-start="url(#tick)" marker-end="url(#tick)"/>
+    <line x1="640" y1="120" x2="680" y2="120"/><line x1="640" y1="900" x2="680" y2="900"/>
+  </g>
+  <g fill="#3a3632" font-size="17" text-anchor="middle">
+    <text x="344" y="32">170</text>
+    <text x="614" y="228" transform="rotate(-90 614 222)">85</text>
+    <text x="614" y="450" transform="rotate(-90 614 444)">100</text>
+    <text x="614" y="738" transform="rotate(-90 614 732)">140</text>
+    <text x="662" y="516" transform="rotate(-90 662 510)">325</text>
+  </g>
+</svg>
