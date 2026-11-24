@@ -1437,3 +1437,14 @@ html[dir="rtl"] .lx-x{right:auto;left:8px}
   .lx-subj{order:2}
   .lx-time{order:3;text-align:right;font-size:11px}
 }
+.lx-skip{position:absolute;top:14px;right:62px;min-height:32px;padding:0 4px;background:none;border:0;border-bottom:1px solid var(--rule);color:var(--muted);font:500 12px/1 var(--body);cursor:pointer;visibility:hidden}
+html[dir="rtl"] .lx-skip{right:auto;left:62px}
+.lx-playing .lx-skip{visibility:visible}
+.lx-skip:hover{color:var(--ink)}
+.lx-skip:focus-visible{outline:2px solid var(--olive);outline-offset:3px}
+.lx-many .lx-count b{background:#8E3B24}
+.lx-list{max-height:min(52vh,470px);overflow:auto;overscroll-behavior:contain;scrollbar-width:thin}
+.lx-kicker{padding-right:170px}
+html[dir="rtl"] .lx-kicker{padding-right:0;padding-left:150px}
+@media (max-width:560px){.lx-list{max-height:48vh}.lx-cap{min-height:2.4em}}
+.lx-list{position:relative}

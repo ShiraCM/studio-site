@@ -1,4 +1,4 @@
-/* "See what this looks like": a short animation under Contractor liaison on the Packages page (owner, Nov 24).
+/* "See what this looks like": a short animation under Contractor and supplier liaison on the Packages page (owner, Nov 24).
    It replaces the old actor video (media/buying-on-paper.mp4, off the site since Nov 17), which the owner felt
    looked less professional. No actor: the inbox itself. Hebrew messages from the contractor and suppliers arrive
    on Israel time (with the hour in New York), the unread count climbs; then each message gets our short note in
@@ -13,24 +13,42 @@
 
   // [sender, subject, Israel time, New York time, our note, deadline tag]
   var MAIL = [
-    ['מחלקת שינויי דיירים', 'נדרש אישור: תוכנית חשמל, גרסה 3', '09:00', '2:00 a.m.',
+    ['מחלקת שינויי דיירים', 'נדרש אישור: תוכנית חשמל, גרסה 3', '08:05', '1:05 a.m.',
       'Electrical plan, version 3. It matches what you approved, except one outlet moved in the main bedroom. We’ve flagged it with the contractor.', 'Reply by Thursday'],
-    ['ספק מיזוג האוויר', 'אפשרויות לשדרוג מערכת המיזוג', '09:40', '2:40 a.m.',
+    ['מחלקת שינויי דיירים', 'נדרש אישור: תוכנית אינסטלציה', '08:30', '1:30 a.m.',
+      'Plumbing plan for approval. We checked the toilet, shower and laundry points against your bathroom design. One drain is in the wrong place, and we’ve asked for it to be moved.', 'Reply by Thursday'],
+    ['ספק מיזוג האוויר', 'אפשרויות לשדרוג מערכת המיזוג', '09:10', '2:10 a.m.',
       'Air conditioning upgrade options: a stronger unit for the living room, or a separate unit in each bedroom. We compared the prices and what fits your ceilings, and sent you our recommendation.', 'Decide by the 20th'],
-    ['הנהלת חשבונות', 'דרישת תשלום מס׳ 4', '10:25', '3:25 a.m.',
+    ['הנהלת חשבונות', 'דרישת תשלום מס׳ 4', '09:35', '2:35 a.m.',
       'Payment 4 is due Sunday. Part of it is linked to the construction index, so we checked the amount against your contract.', 'Due Sunday'],
-    ['ספק המטבחים', 'תיאום פגישה באולם התצוגה', '11:10', '4:10 a.m.',
-      'The kitchen supplier wants a showroom date. We suggested next Tuesday and will be there with you.', ''],
-    ['ספק המטבחים', 'הזמנת מטבח ותוכנית תשתיות לחתימה', '11:50', '4:50 a.m.',
+    ['מחלקת שינויי דיירים', 'תזכורת דחופה: תוכנית חשמל', '10:05', '3:05 a.m.',
+      'A reminder about the electrical plan. We answered it this morning, so there’s nothing more to do.', ''],
+    ['ספק המטבחים', 'תיאום פגישה באולם התצוגה', '10:30', '3:30 a.m.',
+      'The kitchen supplier asked for a showroom date. You’re in Israel the week of the 4th, so we booked the kitchen showroom for Monday and the tile supplier for Tuesday, and sent you both confirmations.', ''],
+    ['ספק האלומיניום', 'בחירת גוון לחלונות ולתריסים', '10:50', '3:50 a.m.',
+      'Window and shutter colors. The standard is white; we sent you the three options that suit your design, with the price of each.', 'Your choice needed'],
+    ['ספק המטבחים', 'הזמנת מטבח ותוכנית תשתיות לחתימה', '11:15', '4:15 a.m.',
       'Your kitchen order and its plumbing and electrical plan are ready to sign. We checked that the sink, dishwasher, oven and outlets on the plan match your kitchen design, so the connections are built in the right places.', 'Sign by the 18th'],
-    ['ספק הדלתות', 'בחירת דלתות פנים: קטלוג ודגמים', '12:35', '5:35 a.m.',
+    ['ספק המטבחים', 'חסרה מידה לנישת המקרר', '11:40', '4:40 a.m.',
+      'The kitchen supplier needs your fridge’s exact size. We sent them the model you chose, with its measurements.', ''],
+    ['ספק הדלתות', 'בחירת דלתות פנים: קטלוג ודגמים', '12:10', '5:10 a.m.',
       'The door supplier sent the catalog. We marked the three models that suit the finishes you chose, and priced an upgraded front door.', 'Reply by Monday'],
-    ['ספק הקרמיקה', 'הזמנת קרמיקה לחתימה', '13:20', '6:20 a.m.',
+    ['מחלקת שינויי דיירים', 'זיכוי על כלים סניטריים', '12:35', '5:35 a.m.',
+      'If you buy your own sinks and toilets, the contractor gives you a credit. We checked the amount: it covers about half of what you chose.', ''],
+    ['ספק הקרמיקה', 'הזמנת קרמיקה לחתימה', '13:05', '6:05 a.m.',
       'Your tile order is ready to sign. We checked every line against what you chose at the supplier: codes, sizes, finishes and quantities, with extra for cuts.', 'Sign by Wednesday'],
-    ['מחלקת שינויי דיירים', 'מועד אחרון להגשת שינויים', '14:30', '7:30 a.m.',
+    ['מחלקת שינויי דיירים', 'שינוי שלא ניתן לבצע', '13:30', '6:30 a.m.',
+      'The contractor turned down moving the guest bathroom door. We found another way to keep your storage wall and resubmitted the change.', ''],
+    ['מחלקת שינויי דיירים', 'מועד אחרון להגשת שינויים', '14:00', '7:00 a.m.',
       'The last day for changes is the 14th. Your kitchen and storage changes are already submitted.', 'Deadline: the 14th'],
-    ['מנהל הפרויקט', 'עדכון לוח זמנים לבנייה', '15:45', '8:45 a.m.',
+    ['הנהלת חשבונות', 'עדכון מדד תשומות הבנייה', '14:25', '7:25 a.m.',
+      'The construction index went up this month, so payment 5 will be a little higher. We added the new figure to your payment schedule.', ''],
+    ['עו״ד הפרויקט', 'נספח שינויים לחתימה', '14:50', '7:50 a.m.',
+      'An addendum for your changes, from the developer’s lawyer. We checked that it lists exactly the changes and prices you agreed. Your lawyer should still review it.', 'Sign by the 22nd'],
+    ['מנהל הפרויקט', 'עדכון לוח זמנים לבנייה', '15:20', '8:20 a.m.',
       'A schedule update. Handover is still planned for the spring. Nothing here needs an answer from you.', ''],
+    ['מנהל הפרויקט', 'סיור בדירה בשלב השלד', '15:45', '8:45 a.m.',
+      'The apartment can be visited at the frame stage next week. We confirmed a time that works for you and sent the details.', ''],
     ['ספק הקרמיקה', 'תעודת משלוח: ריצוף לדירה', '16:25', '9:25 a.m.',
       'Your floor tiles were delivered to the site. We checked the delivery note and photos against your order: the right tile, size, finish and quantity.', ''],
     ['ספק הקרמיקה', 'אריח החיפוי לאמבטיה חסר במלאי', '17:10', '10:10 a.m.',
@@ -43,7 +61,8 @@
   dlg.innerHTML =
     '<div class="lx">' +
       '<button type="button" class="lx-x" aria-label="Close">×</button>' +
-      '<p class="label lx-kicker" id="lx-title">Contractor liaison</p>' +
+      '<p class="label lx-kicker" id="lx-title">Contractor and supplier liaison</p>' +
+      '<button type="button" class="lx-skip">Skip to the end</button>' +
       '<p class="lx-cap" aria-live="polite"></p>' +
       '<div class="lx-box">' +
         '<div class="lx-bar"><span class="lx-bar-name">Contractor &amp; suppliers</span><span class="lx-count"><b>0</b> <span class="lx-count-w">unread</span></span></div>' +
@@ -86,45 +105,58 @@
   function reset() {
     timers.forEach(clearTimeout); timers = [];
     rows.forEach(function (r) { r.classList.remove('in', 'done'); });
-    wrap.classList.remove('lx-over');
+    wrap.classList.remove('lx-over', 'lx-playing', 'lx-many');
     count.textContent = '0';
   }
   function finished() {
     rows.forEach(function (r) { r.classList.add('in', 'done'); });
     count.textContent = '0';
     setCap('We read every one and tell you, in English, what it means.');
+    wrap.classList.remove('lx-playing', 'lx-many');
     wrap.classList.add('lx-over');
   }
   function play() {
     reset();
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { finished(); return; }
+    wrap.classList.add('lx-playing');
     setCap('During construction, the messages come in Hebrew, on Israel time.');
+    // the messages arrive faster and faster, and the list follows the newest one
     var t = 600;
     rows.forEach(function (r, i) {
-      at(t + i * 600, function () { r.classList.add('in'); count.textContent = String(i + 1); });
+      at(t, function () {
+        r.classList.add('in'); count.textContent = String(i + 1);
+        wrap.classList.toggle('lx-many', i >= 9);
+        list.scrollTo({ top: r.offsetTop + r.offsetHeight - list.clientHeight, behavior: 'smooth' });
+      });
+      if (i === 10) at(t, function () { setCap('And they keep coming.'); });
+      t += Math.max(260, 760 - i * 45);
     });
-    t += rows.length * 600 + 1400;
-    at(t, function () { setCap('We read every one and tell you, in English, what it means.'); });
-    t += 900;
+    t += 1500;
+    at(t, function () { setCap('We read every one and tell you, in English, what it means.'); list.scrollTo({ top: 0, behavior: 'smooth' }); });
+    t += 1100;
     rows.forEach(function (r, i) {
-      at(t + i * 1500, function () {
+      at(t + i * 1000, function () {
         r.classList.add('done');
         count.textContent = String(rows.length - i - 1);
-        r.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+        wrap.classList.toggle('lx-many', rows.length - i - 1 > 9);
+        list.scrollTo({ top: Math.max(0, r.offsetTop - 8), behavior: 'smooth' });
       });
     });
-    t += rows.length * 1500 + 1200;
-    at(t, function () { wrap.classList.add('lx-over'); end.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); });
+    t += rows.length * 1000 + 1000;
+    at(t, function () { wrap.classList.remove('lx-playing'); wrap.classList.add('lx-over'); end.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); });
   }
 
   open.hidden = false;
   open.addEventListener('click', function () {
     if (dlg.showModal) dlg.showModal(); else dlg.setAttribute('open', '');
-    wrap.scrollTop = 0;
+    wrap.scrollTop = 0; list.scrollTop = 0;
     play();
   });
   dlg.querySelector('.lx-x').addEventListener('click', function () { dlg.close(); });
-  dlg.querySelector('.lx-again').addEventListener('click', function () { wrap.scrollTop = 0; play(); });
+  dlg.querySelector('.lx-skip').addEventListener('click', function () {
+    timers.forEach(clearTimeout); timers = []; finished(); end.scrollIntoView({ block: 'nearest' });
+  });
+  dlg.querySelector('.lx-again').addEventListener('click', function () { wrap.scrollTop = 0; list.scrollTop = 0; play(); });
   dlg.addEventListener('click', function (e) { if (e.target === dlg) dlg.close(); });
   dlg.addEventListener('close', reset);
 })();
