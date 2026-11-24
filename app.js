@@ -121,3 +121,29 @@
   });
   update();
 })();
+
+/* Links to a section further down a page (the "See an example" links on Packages, Nov 24): the browser jumps to
+   the section, then the plans and 3D models above it finish loading and push it down. Re-settle on the section a
+   few times after load, unless the visitor has started scrolling themselves. */
+(function () {
+  var id = location.hash.slice(1);
+  if (!id) return;
+  var el; try { el = document.getElementById(decodeURIComponent(id)); } catch (e) {}
+  if (!el) return;
+  var stop = false;
+  ['wheel', 'touchstart', 'keydown', 'mousedown'].forEach(function (t) {
+    addEventListener(t, function () { stop = true; }, { once: true, passive: true });
+  });
+  var pad = parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop) || 0, n = 0;
+  function fix() {
+    if (stop) return;
+    if (Math.abs(el.getBoundingClientRect().top - pad) > 6) {
+      var root = document.documentElement, sb = root.style.scrollBehavior;
+      root.style.scrollBehavior = 'auto';
+      el.scrollIntoView({ block: 'start' });
+      root.style.scrollBehavior = sb;
+    }
+    if (++n < 16) setTimeout(fix, 250);
+  }
+  if (document.readyState === 'complete') fix(); else addEventListener('load', function () { setTimeout(fix, 30); });
+})();

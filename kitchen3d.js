@@ -293,6 +293,7 @@ async function init(box) {
   const replay = box.querySelector('.k3d-replay');
   const full = box.classList.contains('k3d-full');        // full-screen pinned hero: words on one side, kitchen in the free space
   const story = box.classList.contains('k3d-story');      // the page scrolls; text blocks pass by and the kitchen follows them
+  const stepper = box.classList.contains('k3d-stepper');  // project-kitchen.html: four stage buttons, each plays up to its stage and stops (owner, Nov 24)
   const copyEl = box.querySelector('.k3d-copy');
   const marks = box.querySelectorAll('.k3d-line li');
   const focus = { x: 0, y: 0, w: 1, h: 1 };              // where the kitchen sits on screen, in px
@@ -517,7 +518,7 @@ let tagStep = -1;
 
 // The rendering is drawn on a canvas: bare counters first, then the accessories pop on.
 let styled = null, styleLast = -1;
-if (full || story) {
+if (full || story || stepper) {
   styled = await styledPhoto('img/kitchen-render-bare.webp', 'img/kitchen-render-styled.webp').catch(e => { console.warn('kitchen styling:', e); return null; });
   if (styled) {
     const pc = document.createElement('canvas'); pc.width = styled.W; pc.height = styled.H;
@@ -607,7 +608,7 @@ function drawStyled(t) {
     if (skMesh.visible) drawOpening(t);
     skMat.opacity = 1 - snap;
     planMat.opacity = snap * (1 - f);
-    if (tag) {
+    if (tag && !stepper) {
       const k = t < PRE.erase[0] ? 0 : t < T.rise[0] ? 1 : t < T.photo[0] + .4 ? 2 : 3;
       if (k !== tagStep) {
         tagStep = k;
@@ -632,7 +633,7 @@ function drawStyled(t) {
     camera.updateProjectionMatrix();
 
 const st = t < T.rise[0] + .8 ? 0 : t < T.photo[0] + .6 ? 1 : 2;
-if (full || story) {
+if (full || story || stepper) {
   // the rendering opens in a growing circle from the middle of the kitchen
   const k = ease(span(t, ...T.photo)), R = Math.hypot(Math.max(focus.x, focus.w - focus.x), Math.max(focus.y, focus.h - focus.y));
   photo.style.opacity = k > 0 ? 1 : 0;
@@ -679,8 +680,8 @@ if (full) {
   }
   TOP.pos.z = TOP.look.z = 2.0;
 }
-if (story) {
-  // the kitchen fills its own sticky box beside (or above) the text
+if (story || stepper) {
+  // the kitchen fills its own box (sticky beside the text on the home page; on project-kitchen.html, under the title)
   camera.clearViewOffset();
   focus.x = w / 2; focus.y = h / 2; focus.w = w; focus.h = h;
   const V = Math.max(860 / 150, (900 / 150) / camera.aspect) * 1.03;
@@ -690,12 +691,16 @@ if (story) {
 frame(time);
   }
 
-  let time = reduce ? STAGES[hero ? 2 : 0] : 0, playing = !reduce && !reel && !scrolled, visible = true, last = 0;
+  // Stepper stops: the contractor's plan, our plan with its labels, the 3D model at eye level, the styled rendering
+  const STOPS = [.6, D + .6, T.cam[1], T.style[1] + .35];
+  let target = null;
+  let time = stepper ? STOPS[0] : reduce ? STAGES[hero ? 2 : 0] : 0, playing = !reduce && !reel && !scrolled && !stepper, visible = true, last = 0;
   function loop(now) {
     requestAnimationFrame(loop);
     if (!playing || !visible) { last = now; return; }
     const dt = Math.min(.05, (now - last) / 1000 || 0); last = now;
     time += dt;
+    if (target !== null && time >= target) { time = target; target = null; playing = false; }
     if (reel && time >= T.photo[1]) { time = T.photo[1]; playing = false; }
     if (time > T.end) { time = 0; wrapped = true; }
     frame(time);
@@ -752,6 +757,36 @@ if (scrolled) {
     scrollTo({ top: scrollY + (STAGES[i] / SCROLL_END) * s.len - s.start, behavior: reduce ? 'auto' : 'smooth' });
   }));
 } else buttons.forEach((b, i) => b.addEventListener('click', () => jump(STAGES[i])));
+  if (stepper) {
+    // Five stages; the Materials stage holds the 3D model and lays the materials board over it (owner, Nov 24:
+    // "include the materials"). Each button plays the change into its stage and stops; Back and Next move one stage.
+    const ST = [STOPS[0], STOPS[1], STOPS[2], STOPS[2], STOPS[3]];
+    const NAMES = ['Standard contractor kitchen', 'Our new kitchen design', '3D model', 'Materials', 'Photo-realistic rendering'];
+    const sbtns = [...box.querySelectorAll('.kx-steps button')];
+    const descs = [...document.querySelectorAll('[data-kx-step]')];
+    const prev = box.querySelector('.kx-prev'), next = box.querySelector('.kx-next'), board = box.querySelector('.kx-mat');
+    let cur = 0;
+    const mark = i => {
+      cur = i;
+      sbtns.forEach((b, k) => b.setAttribute('aria-pressed', k === i ? 'true' : 'false'));
+      descs.forEach(d => { d.hidden = +d.dataset.kxStep !== i; });
+      if (prev) prev.disabled = i === 0;
+      if (next) next.disabled = i === ST.length - 1;
+      if (board) board.classList.toggle('on', i === 3);
+      if (tag) { const n = document.createElement('b'); n.textContent = `${i + 1}/${ST.length}`; tag.replaceChildren(n, ' ' + NAMES[i]); }
+    };
+    const go = i => {
+      i = Math.max(0, Math.min(ST.length - 1, i));
+      wrapped = false;
+      if (reduce || i === 0 || ST[i] === ST[i - 1]) { target = null; playing = false; time = ST[i]; frame(time); }
+      else { if (i !== cur + 1 || time > ST[i]) time = ST[i - 1]; target = ST[i]; playing = true; frame(time); }
+      mark(i);
+    };
+    sbtns.forEach((b, i) => b.addEventListener('click', () => go(i)));
+    prev?.addEventListener('click', () => go(cur - 1));
+    next?.addEventListener('click', () => go(cur + 1));
+    mark(0);
+  }
   replay?.addEventListener('click', () => { jump(0, true); });
   new IntersectionObserver(es => { visible = es[0].isIntersecting; }).observe(box);
   new ResizeObserver(size).observe(stageEl);

@@ -1448,3 +1448,41 @@ html[dir="rtl"] .lx-skip{right:auto;left:62px}
 html[dir="rtl"] .lx-kicker{padding-right:0;padding-left:150px}
 @media (max-width:560px){.lx-list{max-height:48vh}.lx-cap{min-height:2.4em}}
 .lx-list{position:relative}
+/* "See an example" links under the packages (owner, Nov 24) */
+a.lx-open{display:inline-flex;align-items:center;text-decoration:none}
+.oex-consult{margin:6px 0 0;justify-self:start}
+html[dir="rtl"] .oex-consult{margin:6px 0 0}
+
+/* Neve Amim kitchen, stage by stage (project-kitchen.html, kitchen3d.js k3d-stepper; owner, Nov 24) */
+.kx{display:grid;gap:16px}
+.kx .k3d-stage{aspect-ratio:auto;display:grid;gap:10px;background:transparent;border:0;border-radius:0;overflow:visible}
+.kx .k3d-tag{position:static;max-width:none;padding:0;background:none;box-shadow:none;border:0}
+.kx .k3d-view{position:relative;aspect-ratio:1452/720;background:#fff;border:1px solid var(--rule);border-radius:3px;overflow:hidden}
+.kx .k3d-view canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.kx:not(.k3d-live) .k3d-photo{opacity:1}
+.kx-bar{display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;align-items:center}
+.kx-steps,.kx-nav{display:flex;flex-wrap:wrap;gap:6px}
+.kx-bar button{font:500 14px/1 var(--body);color:var(--ink);background:transparent;border:1px solid var(--rule);border-radius:999px;padding:0 16px;min-height:44px;cursor:pointer}
+.kx-bar button span{font:500 11px/1 var(--mono);color:var(--muted);margin-right:4px}
+.kx-bar button:hover{border-color:var(--olive)}
+.kx-bar button:focus-visible{outline:2px solid var(--olive);outline-offset:2px}
+.kx-steps button[aria-pressed="true"]{background:var(--olive);border-color:var(--olive);color:var(--on-olive)}
+.kx-steps button[aria-pressed="true"] span{color:inherit;opacity:.8}
+.kx-next{background:var(--ink)!important;color:var(--stone)!important;border-color:var(--ink)!important}
+.kx-bar button:disabled{opacity:.35;cursor:default}
+.kx-descs p{margin:0;max-width:62ch;font-size:17px;line-height:1.6;color:var(--ink)}
+.kx-more{margin-top:28px}
+.k3d-static.kx .kx-bar,.k3d-static.kx .kx-descs p{display:none}
+.k3d-static.kx .kx-descs p[data-kx-step="4"]{display:block}
+@media (max-width:719px){
+  .kx .k3d-view{aspect-ratio:4/3.4}
+  .kx-bar{display:grid}
+  .kx-steps{display:grid;grid-template-columns:1fr 1fr}
+  .kx-nav{justify-content:space-between}
+  .kx-nav .kx-next{flex:1}
+}
+html[dir="rtl"] .kx-prev{transform:scaleX(-1)}
+.kx-mat{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 45%;background:var(--sheet);opacity:0;transition:opacity .6s ease;z-index:2;pointer-events:none}
+.kx-mat.on{opacity:1}
+@media (prefers-reduced-motion:reduce){.kx-mat{transition:none}}
+@media (max-width:719px){.kx-steps{display:flex;flex-wrap:wrap;gap:6px}.kx-bar button{padding:0 13px}}
