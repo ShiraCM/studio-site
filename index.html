@@ -137,7 +137,7 @@
     <p class="lede">With professional architectural training and firsthand knowledge of the Israeli building process, we bring design, practical guidance and personal attention together in one place.</p>
     <div class="with-hours">
       <h3>We work on your clock, too.</h3>
-      <p class="with-clock label" hidden><span data-tz="Asia/Jerusalem">Jerusalem</span> <span data-tz="America/New_York">New York</span> <span data-tz="America/Los_Angeles">Los Angeles</span></p>
+      <p class="with-clock label" hidden><span data-tz="America/Los_Angeles">Los Angeles</span><i aria-hidden="true">|</i><span data-tz="America/New_York">New York</span><i aria-hidden="true">|</i><span data-tz="Asia/Jerusalem">Jerusalem</span></p>
       <p>By 10 a.m. in New York, most Israeli offices are closing for the day. On the West Coast, they’ve closed before you’re up. We keep Israel and U.S. business hours, so you can reach us during your day, decisions don’t stall, and your project stays on track.</p>
     </div>
     <script>
@@ -152,7 +152,7 @@
             var s = spans[i], city = s.getAttribute('data-city') || s.textContent;
             s.setAttribute('data-city', city);
             var t = new Intl.DateTimeFormat('en-US', { hour: 'numeric', minute: '2-digit', timeZone: s.getAttribute('data-tz') }).format(now);
-            s.innerHTML = city + ' <b>' + t.toLowerCase() + '</b>';
+            s.innerHTML = city + ': <b>' + t.toLowerCase() + '</b>';
           }
           box.hidden = false;
         }
