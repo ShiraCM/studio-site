@@ -1,0 +1,130 @@
+/* "See what this looks like": a short animation under Contractor liaison on the Packages page (owner, Nov 24).
+   It replaces the old actor video (media/buying-on-paper.mp4, off the site since Nov 17), which the owner felt
+   looked less professional. No actor: the inbox itself. Hebrew messages from the contractor and suppliers arrive
+   on Israel time (with the hour in New York), the unread count climbs; then each message gets our short note in
+   English and the count falls to zero; then the close. The messages are invented examples, never a client's.
+   With prefers-reduced-motion it opens on the finished, sorted inbox. The Hebrew site translates the English
+   through i18n-he.js and leaves out the New York hour. */
+(function () {
+  var open = document.querySelector('[data-open="liaison-inbox"]');
+  if (!open) return;
+  var HE = window.__lang === 'he';
+  var CALL = 'https://calendar.app.google/4QgwyBekD6NayyUT6';
+
+  // [sender, subject, Israel time, New York time, our note, deadline tag]
+  var MAIL = [
+    ['מחלקת שינויי דיירים', 'נדרש אישור: תוכנית חשמל, גרסה 3', '09:00', '2:00 a.m.',
+      'Electrical plan, version 3. It matches what you approved, except one outlet moved in the main bedroom. We’ve flagged it with the contractor.', 'Reply by Thursday'],
+    ['ספק מיזוג האוויר', 'אפשרויות לשדרוג מערכת המיזוג', '09:40', '2:40 a.m.',
+      'Air conditioning upgrade options: a stronger unit for the living room, or a separate unit in each bedroom. We compared the prices and what fits your ceilings, and sent you our recommendation.', 'Decide by the 20th'],
+    ['הנהלת חשבונות', 'דרישת תשלום מס׳ 4', '10:25', '3:25 a.m.',
+      'Payment 4 is due Sunday. Part of it is linked to the construction index, so we checked the amount against your contract.', 'Due Sunday'],
+    ['ספק המטבחים', 'תיאום פגישה באולם התצוגה', '11:10', '4:10 a.m.',
+      'The kitchen supplier wants a showroom date. We suggested next Tuesday and will be there with you.', ''],
+    ['ספק המטבחים', 'הזמנת מטבח ותוכנית תשתיות לחתימה', '11:50', '4:50 a.m.',
+      'Your kitchen order and its plumbing and electrical plan are ready to sign. We checked that the sink, dishwasher, oven and outlets on the plan match your kitchen design, so the connections are built in the right places.', 'Sign by the 18th'],
+    ['ספק הדלתות', 'בחירת דלתות פנים: קטלוג ודגמים', '12:35', '5:35 a.m.',
+      'The door supplier sent the catalog. We marked the three models that suit the finishes you chose, and priced an upgraded front door.', 'Reply by Monday'],
+    ['ספק הקרמיקה', 'הזמנת קרמיקה לחתימה', '13:20', '6:20 a.m.',
+      'Your tile order is ready to sign. We checked every line against what you chose at the supplier: codes, sizes, finishes and quantities, with extra for cuts.', 'Sign by Wednesday'],
+    ['מחלקת שינויי דיירים', 'מועד אחרון להגשת שינויים', '14:30', '7:30 a.m.',
+      'The last day for changes is the 14th. Your kitchen and storage changes are already submitted.', 'Deadline: the 14th'],
+    ['מנהל הפרויקט', 'עדכון לוח זמנים לבנייה', '15:45', '8:45 a.m.',
+      'A schedule update. Handover is still planned for the spring. Nothing here needs an answer from you.', ''],
+    ['ספק הקרמיקה', 'תעודת משלוח: ריצוף לדירה', '16:25', '9:25 a.m.',
+      'Your floor tiles were delivered to the site. We checked the delivery note and photos against your order: the right tile, size, finish and quantity.', ''],
+    ['ספק הקרמיקה', 'אריח החיפוי לאמבטיה חסר במלאי', '17:10', '10:10 a.m.',
+      'The bathroom wall tile you chose is out of stock. We found two close matches and sent you photos.', 'Your choice needed']
+  ];
+
+  var dlg = document.createElement('dialog');
+  dlg.className = 'lx-dlg';
+  dlg.setAttribute('aria-labelledby', 'lx-title');
+  dlg.innerHTML =
+    '<div class="lx">' +
+      '<button type="button" class="lx-x" aria-label="Close">×</button>' +
+      '<p class="label lx-kicker" id="lx-title">Contractor liaison</p>' +
+      '<p class="lx-cap" aria-live="polite"></p>' +
+      '<div class="lx-box">' +
+        '<div class="lx-bar"><span class="lx-bar-name">Contractor &amp; suppliers</span><span class="lx-count"><b>0</b> <span class="lx-count-w">unread</span></span></div>' +
+        '<ol class="lx-list"></ol>' +
+      '</div>' +
+      '<div class="lx-end">' +
+        '<p class="lx-end-h">Every message read, explained and answered.</p>' +
+        '<p class="lx-end-p">We read each message from the contractor and suppliers, tell you in English what it means and what’s due, and answer them for you in Hebrew.</p>' +
+        '<div class="lx-end-btns"><a class="btn btn-primary" href="' + CALL + '" target="_blank" rel="noopener">Book a free call</a>' +
+        '<button type="button" class="btn btn-ghost lx-again">Watch again</button></div>' +
+      '</div>' +
+    '</div>';
+  document.body.append(dlg);
+
+  var list = dlg.querySelector('.lx-list'), cap = dlg.querySelector('.lx-cap'), count = dlg.querySelector('.lx-count b'),
+      end = dlg.querySelector('.lx-end'), wrap = dlg.querySelector('.lx');
+
+  var rows = MAIL.map(function (m) {
+    var li = document.createElement('li');
+    li.className = 'lx-row';
+    li.innerHTML =
+      '<span class="lx-dot" aria-hidden="true"></span>' +
+      '<div class="lx-msg">' +
+        '<div class="lx-head"><p class="lx-time"></p><p class="lx-from" lang="he" dir="rtl"></p></div>' +
+        '<p class="lx-subj" lang="he" dir="rtl"></p>' +
+      '</div>' +
+      '<div class="lx-note"><div><p class="lx-note-t"></p>' + (m[5] ? '<p class="lx-due"></p>' : '') + '</div></div>';
+    li.querySelector('.lx-from').textContent = m[0];
+    li.querySelector('.lx-subj').textContent = m[1];
+    li.querySelector('.lx-time').textContent = HE ? m[2] : m[2] + ' Israel · ' + m[3] + ' New York';
+    li.querySelector('.lx-note-t').textContent = m[4];
+    if (m[5]) li.querySelector('.lx-due').textContent = m[5];
+    list.append(li);
+    return li;
+  });
+
+  var timers = [];
+  var at = function (ms, fn) { timers.push(setTimeout(fn, ms)); };
+  var setCap = function (t) { cap.textContent = t; };
+  function reset() {
+    timers.forEach(clearTimeout); timers = [];
+    rows.forEach(function (r) { r.classList.remove('in', 'done'); });
+    wrap.classList.remove('lx-over');
+    count.textContent = '0';
+  }
+  function finished() {
+    rows.forEach(function (r) { r.classList.add('in', 'done'); });
+    count.textContent = '0';
+    setCap('We read every one and tell you, in English, what it means.');
+    wrap.classList.add('lx-over');
+  }
+  function play() {
+    reset();
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { finished(); return; }
+    setCap('During construction, the messages come in Hebrew, on Israel time.');
+    var t = 600;
+    rows.forEach(function (r, i) {
+      at(t + i * 600, function () { r.classList.add('in'); count.textContent = String(i + 1); });
+    });
+    t += rows.length * 600 + 1400;
+    at(t, function () { setCap('We read every one and tell you, in English, what it means.'); });
+    t += 900;
+    rows.forEach(function (r, i) {
+      at(t + i * 1500, function () {
+        r.classList.add('done');
+        count.textContent = String(rows.length - i - 1);
+        r.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      });
+    });
+    t += rows.length * 1500 + 1200;
+    at(t, function () { wrap.classList.add('lx-over'); end.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); });
+  }
+
+  open.hidden = false;
+  open.addEventListener('click', function () {
+    if (dlg.showModal) dlg.showModal(); else dlg.setAttribute('open', '');
+    wrap.scrollTop = 0;
+    play();
+  });
+  dlg.querySelector('.lx-x').addEventListener('click', function () { dlg.close(); });
+  dlg.querySelector('.lx-again').addEventListener('click', function () { wrap.scrollTop = 0; play(); });
+  dlg.addEventListener('click', function (e) { if (e.target === dlg) dlg.close(); });
+  dlg.addEventListener('close', reset);
+})();

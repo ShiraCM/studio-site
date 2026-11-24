@@ -1382,3 +1382,58 @@ html[dir="rtl"] .fs-view canvas{direction:ltr}
 @media (max-width:560px){.with-clock{font-size:min(12px,2.5vw);letter-spacing:.02em;gap:min(12px,1.6vw)}}
 .with-clock b{font-weight:500;color:var(--ink)}
 html[lang="he"] .with-clock{display:none}
+
+/* Contractor liaison: "See what this looks like" inbox animation (liaison-inbox.js, owner Nov 24) */
+.lx-open{font:inherit;font-size:14.5px;background:none;border:0;border-bottom:1px solid var(--olive);color:var(--ink);padding:0 0 2px;margin:2px 0 0 38px;cursor:pointer;justify-self:start;min-height:32px}
+.lx-open:hover{color:var(--olive)}
+.lx-open:focus-visible{outline:2px solid var(--olive);outline-offset:4px}
+html[dir="rtl"] .lx-open{margin:2px 38px 0 0}
+dialog.lx-dlg{border:0;padding:0;background:transparent;width:min(720px,calc(100vw - 24px));max-width:none;max-height:calc(100dvh - 24px);overflow:visible}
+dialog.lx-dlg::backdrop{background:rgba(15,16,13,.72)}
+.lx{background:var(--sheet);color:var(--ink);border-radius:6px;padding:clamp(20px,4vw,36px);max-height:calc(100dvh - 24px);overflow:auto;overscroll-behavior:contain;display:grid;gap:14px}
+.lx-x{position:absolute;top:8px;right:8px;width:44px;height:44px;border-radius:50%;border:0;background:var(--stone);color:var(--ink);font:400 24px/1 var(--body);cursor:pointer;z-index:2}
+html[dir="rtl"] .lx-x{right:auto;left:8px}
+.lx-x:focus-visible{outline:2px solid var(--olive);outline-offset:2px}
+.lx-kicker{margin:0;color:var(--olive)}
+.lx-cap{margin:0;font:400 clamp(22px,3.2vw,30px)/1.15 var(--display);max-width:26ch;min-height:2.3em}
+.lx-box{border:1px solid var(--rule);border-radius:4px;background:var(--paper);color:#1F1D1A}
+.lx-bar{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 16px;border-bottom:1px solid #E4E0D7;font:500 11px/1.3 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:#5F5A52}
+.lx-count b{display:inline-block;min-width:22px;padding:2px 7px;border-radius:999px;background:#4E5A33;color:#F6F5EE;text-align:center;font-weight:500;transition:background .3s}
+.lx-list{list-style:none;margin:0;padding:0}
+.lx-row{display:grid;grid-template-columns:12px 1fr;column-gap:12px;padding:12px 16px;border-bottom:1px solid #EEEBE4;opacity:0;transform:translateY(6px);transition:opacity .45s,transform .45s,background .4s}
+.lx-row:last-child{border-bottom:0}
+.lx-row.in{opacity:1;transform:none}
+.lx-dot{width:9px;height:9px;border-radius:50%;background:#4E5A33;margin-top:7px;transition:background .3s,transform .3s}
+.lx-row.done .lx-dot{background:transparent;width:8px;height:12px;border-radius:0;border:solid #4E5A33;border-width:0 2px 2px 0;transform:rotate(45deg);margin:2px 0 0 2px}
+.lx-msg{display:grid;gap:2px;min-width:0}
+.lx p{max-width:none}
+.lx-msg p{margin:0}
+.lx-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;direction:ltr}
+.lx-subj{text-align:right}
+.lx-from{font:500 13px/1.3 var(--body);color:#5F5A52}
+.lx-subj{font:600 16px/1.35 var(--body);color:#1F1D1A;font-family:"Assistant","Arial Hebrew",Arial,var(--body)}
+.lx-row.done .lx-subj{font-weight:400}
+.lx-time{font:400 11.5px/1.4 var(--mono);color:#5F5A52}
+.lx-note{grid-column:2;display:grid;grid-template-rows:0fr;transition:grid-template-rows .5s ease}
+.lx-note > div{overflow:hidden;min-height:0}
+.lx-row.done .lx-note{grid-template-rows:1fr}
+.lx-note p{margin:0}
+.lx-note .lx-note-t{font:400 14.5px/1.5 var(--body);color:#1F1D1A;border-inline-start:2px solid #4E5A33;padding-inline-start:12px;margin-top:8px}
+.lx-note .lx-due{font:500 11px/1.3 var(--mono);letter-spacing:.06em;text-transform:uppercase;color:#4E5A33;padding-inline-start:14px;margin-top:6px}
+.lx-end{display:none;gap:12px;padding-top:6px}
+.lx-over .lx-end{display:grid;animation:lxfade .6s ease both}
+.lx-end p{margin:0}
+.lx-end-h{font:400 clamp(24px,3.2vw,32px)/1.1 var(--display)}
+.lx-end-p{color:var(--muted);max-width:56ch}
+.lx-end-btns{display:flex;flex-wrap:wrap;gap:10px;margin-top:4px}
+.lx-end-btns .btn{min-height:44px;cursor:pointer;font-family:var(--body)}
+.lx-end-btns button.btn{background:transparent}
+@keyframes lxfade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@media (max-width:560px){
+  .lx{padding:20px 16px}
+  .lx-bar,.lx-row{padding-inline:12px}
+  .lx-head{display:contents}
+  .lx-from{order:1;text-align:right}
+  .lx-subj{order:2}
+  .lx-time{order:3;text-align:right;font-size:11px}
+}
