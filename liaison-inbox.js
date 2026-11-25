@@ -9,7 +9,7 @@
   var open = document.querySelector('[data-open="liaison-inbox"]');
   if (!open) return;
   var HE = window.__lang === 'he';
-  var CALL = 'https://calendar.app.google/4QgwyBekD6NayyUT6';
+  var CALL = 'https://calendar.app.google/oiMrJbxqETnfsCGP8';
 
   // [sender, subject, Israel time, New York time, our note, deadline tag]
   var MAIL = [
