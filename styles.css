@@ -1502,3 +1502,40 @@ html[dir="rtl"] .kx-prev{transform:scaleX(-1)}
 @media (prefers-reduced-motion:reduce){.kx-mat{transition:none}}
 @media (max-width:719px){.kx-steps{display:flex;flex-wrap:wrap;gap:6px}.kx-bar button{padding:0 13px}}
 @media (max-width:480px){.bb-chips{gap:10px 10px}.bb-chips li{width:58px}.bb-chips i{width:36px;height:36px}}
+
+/* ---- shops.html: Israeli shops, each name in a font close to that shop's own logo (owner, Nov 25) */
+.shops{display:grid;gap:clamp(40px,6vw,64px)}
+.shop-group{display:grid;gap:16px}
+.shop-cat{margin:0;padding-bottom:12px;border-bottom:1px solid var(--rule)}
+.shop-list{--s:30px;list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+.shop{display:flex;flex-direction:column;justify-content:space-between;gap:18px;min-height:132px;padding:22px 22px 18px;background:var(--sheet);border:1px solid var(--rule);border-radius:4px;color:var(--ink);text-decoration:none;transition:border-color .2s,transform .2s}
+.shop:hover{border-color:var(--olive)}
+.shop:focus-visible{outline:2px solid var(--olive);outline-offset:3px}
+.shop-name{font-size:var(--s);line-height:1.1;overflow-wrap:anywhere}
+.shop-dom{font:400 12.5px/1.3 var(--mono);color:var(--muted);letter-spacing:.02em}
+.shop:hover .shop-dom{color:var(--olive)}
+html[dir="rtl"] .shop-name,html[dir="rtl"] .shop-dom{direction:ltr;text-align:right}
+@media (prefers-reduced-motion:no-preference){.shop:hover{transform:translateY(-2px)}}
+@media (max-width:480px){.shop-list{--s:21px;grid-template-columns:1fr 1fr;gap:8px}.shop{min-height:96px;gap:12px;padding:16px 14px 12px}.shop-dom{font-size:11px}}
+.sh-tollmans{font-family:"Playfair Display",serif;font-weight:500}
+.sh-habitat{font-family:Poppins,sans-serif;font-weight:600;letter-spacing:-.02em}
+.sh-kaza{font-family:"Bebas Neue",sans-serif;font-size:calc(var(--s) * 1.27);letter-spacing:.12em}
+.sh-mobilia{font-family:"Cormorant Garamond",serif;font-style:italic;font-weight:500;font-size:calc(var(--s) * 1.13)}
+.sh-boconcept{font-family:"Nunito Sans",sans-serif;font-weight:700;letter-spacing:-.01em}
+.sh-natuzzi{font-family:Cinzel,serif;font-weight:500;letter-spacing:.14em;font-size:calc(var(--s) * .9)}
+.sh-ikea{font-family:"Archivo Black",sans-serif;letter-spacing:.02em}
+.sh-kamchi{font-family:"Josefin Sans",sans-serif;font-weight:600;letter-spacing:.04em}
+.sh-technolite{font-family:"Exo 2",sans-serif;font-weight:600}
+.sh-thomas{font-family:Raleway,sans-serif;font-weight:300;letter-spacing:.3em}
+.sh-machsanei{font-family:Rubik,sans-serif;font-weight:600;font-size:calc(var(--s) * .9)}
+.sh-serfaty{font-family:Marcellus,serif;letter-spacing:.04em}
+.sh-rugsco{font-family:"DM Serif Display",serif}
+.sh-renby{font-family:Quicksand,sans-serif;font-weight:500;letter-spacing:.06em}
+.sh-kitan{font-family:Oswald,sans-serif;font-weight:500;letter-spacing:.16em}
+.sh-linera{font-family:Lora,serif;font-style:italic}
+.sh-golf{font-family:Syne,sans-serif;font-weight:700;letter-spacing:.02em}
+.sh-fox{font-family:"Varela Round",sans-serif}
+.sh-zara{font-family:"Bodoni Moda",serif;font-weight:500;letter-spacing:.08em;font-size:calc(var(--s) * .93)}
+.sh-naaman{font-family:"Secular One",sans-serif}
+.sh-domicile{font-family:"Tenor Sans",sans-serif;letter-spacing:.2em;font-size:calc(var(--s) * .87)}
+.sh-studiolighting{font-family:Heebo,sans-serif;font-weight:300;letter-spacing:.18em;font-size:calc(var(--s) * .8)}

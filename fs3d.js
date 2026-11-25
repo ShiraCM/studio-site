@@ -930,7 +930,8 @@ async function start() {
 
   // ---- camera and controls (turn, move, zoom, reset), shared with the other models
   const target = new THREE.Vector3(wx(405), 0, wz(380));   // a little east, so Option 3's bedroom is in view
-  const fromPos = target.clone().add(new THREE.Vector3(-6.4, 12, 11.1).multiplyScalar(1.06));
+  // Opens straight from above, a bird's-eye view (owner, Nov 25); Turn tilts it from there. Was (-6.4, 12, 11.1) * 1.06.
+  const fromPos = target.clone().add(new THREE.Vector3(0, 22, .05));
   camera.position.copy(fromPos); camera.lookAt(target);
   // On the Neve Amim page the model stays still, straight from above (owner, Nov 22: "i dont want the part with the
   // 5 versions to be rotatable … i want it to stay birds eye"): no turning, moving or zooming; the light and
@@ -946,6 +947,13 @@ async function start() {
       camera.position.set(target.x, d, z + .001); camera.lookAt(target.x, 0, z);
     };
   } else {
+    // Bird's-eye opening view, backed off to fit the whole plan in this view's shape (square on phones), and nudged
+    // down a little so the size buttons along the top don't cover the entry (owner, Nov 25)
+    const aspect = (view.clientWidth || 4) / (view.clientHeight || 3), half = Math.tan(camera.fov * Math.PI / 360);
+    const vis = Math.max((583 - 161) * S * 1.45, (716 - 78) * S * (aspect < 1.1 ? 1.3 : 1.12) / aspect);
+    target.z -= vis * (aspect < 1.1 ? .1 : .05);
+    fromPos.copy(target).add(new THREE.Vector3(0, vis / 2 / half + h(WALL_H), .05));
+    camera.position.copy(fromPos); camera.lookAt(target);
     const { modelControls } = await import('./model-controls.js');
     controls = modelControls({ THREE, renderer, scene, camera, view, rooms: [], from: fromPos, target, bounds: [wx(120), wx(700), wz(200), wz(560)], onRender });
   }

@@ -11,7 +11,7 @@ export function modelControls({ THREE, renderer, scene, camera, view, rooms, fro
   const off = from.clone().sub(target);
   let r = off.length(), theta = Math.atan2(off.x, off.z), phi = Math.acos(Math.min(1, Math.max(-1, off.y / r)));
   const home = { r, theta, phi, target: target.clone() };
-  const PHI_MIN = .1, PHI_MAX = 1.25, R_MIN = home.r * .3, R_MAX = home.r * 1.3;
+  const PHI_MIN = Math.min(.1, phi), PHI_MAX = 1.25, R_MIN = home.r * .3, R_MAX = home.r * 1.3;
   const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
   let mode = 'turn';
 
