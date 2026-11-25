@@ -299,7 +299,7 @@ async function init(box) {
   const focus = { x: 0, y: 0, w: 1, h: 1 };              // where the kitchen sits on screen, in px
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: scrolled });
+  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: scrolled || stepper });   // stepper: no white box, sits on the page (owner, Nov 25)
   renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -311,7 +311,7 @@ async function init(box) {
 
   const scene = new THREE.Scene();
   const paper = new THREE.Color('#ffffff'), room = new THREE.Color('#ece8e1');
-  scene.background = scrolled ? null : paper.clone();
+  scene.background = (scrolled || stepper) ? null : paper.clone();
   const camera = new THREE.PerspectiveCamera(TOP.fov, 2, 0.05, 60);
 
   // Light: soft sky fill, warm daylight through the left windows
@@ -492,7 +492,7 @@ if (scrolled) {
   mat.floor.alphaMap = new THREE.CanvasTexture(a);
 }
   scene.add(floor);
-  const planMat = new THREE.MeshBasicMaterial({ map: await planTexture('img/kitchen-plan-clean.svg', scrolled), transparent: true, toneMapped: false });
+  const planMat = new THREE.MeshBasicMaterial({ map: await planTexture('img/kitchen-plan-clean.svg', scrolled || stepper), transparent: true, toneMapped: false });
   const plan = new THREE.Mesh(new THREE.PlaneGeometry(6, 860 / 150), planMat);
   plan.rotation.x = -Math.PI / 2; plan.position.set(X(450), .003, Z(430));
   scene.add(plan);
@@ -500,8 +500,8 @@ if (scrolled) {
   // The hand-drawn opening lives on its own canvas, laid exactly over the finished plan.
   const SK = 1.5;                                                    // canvas px per SVG px
   const [sketch, oldPlan] = await Promise.all([
-    buildSketch('img/kitchen-plan-clean.svg', scrolled),
-    contractorLayer('img/kitchen-plan-contractor.png', SK, scrolled)
+    buildSketch('img/kitchen-plan-clean.svg', scrolled || stepper),
+    contractorLayer('img/kitchen-plan-contractor.png', SK, scrolled || stepper)
   ]);
   const eraser = eraserPath();
   const skCanvas = document.createElement('canvas'); skCanvas.width = 900 * SK; skCanvas.height = 860 * SK;
