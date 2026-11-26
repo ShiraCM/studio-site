@@ -1540,3 +1540,31 @@ html[dir="rtl"] .shop-name,html[dir="rtl"] .shop-dom{direction:ltr;text-align:ri
 .sh-domicile{font-family:"Tenor Sans",sans-serif;letter-spacing:.2em;font-size:calc(var(--s) * .87)}
 .sh-studiolighting{font-family:Heebo,sans-serif;font-weight:300;letter-spacing:.18em;font-size:calc(var(--s) * .8)}
 .sh-tzemer{font-family:"Work Sans",sans-serif;font-weight:500;letter-spacing:.01em}
+
+/* Phones (owner, Nov 26: a visitor found the phone version "a little bit overwhelming … hard to navigate").
+   1. The home kitchen is its own short scene: it sticks while you scroll through its track and plays start to
+      finish (kitchen3d.js fromScene), then the steps follow as plain reading, with nothing sliding under them.
+   2. A slim "On this page" bar under the header (index.html .jump), the current part underlined (app.js).
+   3. A back-to-top button after a couple of screens, on every page (app.js .to-top). */
+.jump{display:none}
+.to-top{display:none}
+@media (max-width:900px){
+  .story-media{position:relative;top:auto;z-index:auto;height:175svh;margin-inline:0;padding-inline:0;background:none}
+  .story-media::after{display:none}
+  .story-media .k3d-stage{position:sticky;top:calc(68px + 45px + 10px);height:calc(100svh - 68px - 45px - 28px);padding-top:4px}
+  .story-step:not(.story-intro){padding-block:36px}
+  .story .story-howto{min-height:auto}
+}
+@media (max-width:760px){
+  .jump{display:flex;position:sticky;top:calc(env(safe-area-inset-top,0px) + 68px);z-index:8;gap:0;padding:0 6px;justify-content:space-between;overflow-x:auto;scrollbar-width:none;background:color-mix(in srgb,var(--stone) 94%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid color-mix(in srgb,var(--rule) 65%,transparent)}
+  .jump::-webkit-scrollbar{display:none}
+  .jump a{flex:none;display:flex;align-items:center;min-height:44px;padding:0 8px;font:600 10.5px/1 var(--body);letter-spacing:.07em;text-transform:uppercase;color:var(--muted);text-decoration:none;border-bottom:2px solid transparent;margin-bottom:-1px}
+  .jump a[aria-current="true"]{color:var(--ink);border-bottom-color:var(--olive)}
+  .jump a:focus-visible{outline:2px solid var(--olive);outline-offset:-4px}
+  html:has(.jump){scroll-padding-top:120px}
+  .to-top{display:grid;place-items:center;position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:8;width:44px;height:44px;border-radius:50%;border:1px solid var(--rule);background:color-mix(in srgb,var(--sheet) 92%,transparent);color:var(--ink);box-shadow:0 8px 20px -12px rgba(30,34,20,.45);cursor:pointer}
+  .to-top[hidden]{display:none}
+  .to-top svg{width:16px;height:16px}
+  .to-top:focus-visible{outline:2px solid var(--olive);outline-offset:2px}
+}
+@media (min-width:761px) and (max-width:900px){.story-media .k3d-stage{top:calc(68px + 10px);height:calc(100svh - 68px - 28px)}}

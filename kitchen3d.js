@@ -725,7 +725,20 @@ function scrollRange() {
 // "01" holds the plan, "02" builds the 3D model, "03" opens the rendering.
 const STEP_T = [.6, PRE.draw[0], D, D + 2.6, D + 5.6, D + 8.6, SCROLL_END]; // problem: the contractor’s plan; erased by "how we help"; ours drawn by 01; then 3D, eye level, rendering. One entry per .story-step.
 const steps = [...box.querySelectorAll('.story-step')];
+// Phones (owner, Nov 26): the kitchen is its own short scene between the intro and the steps, and plays from
+// start to finish as you scroll through it. Nothing scrolls under it, and the text below reads on its own.
+const sceneTrack = box.querySelector('.story-media'), sceneStage = sceneTrack && sceneTrack.querySelector('.k3d-stage');
+function fromScene() {
+  if (!sceneStage || getComputedStyle(sceneStage).position !== 'sticky' || !matchMedia('(max-width: 900px)').matches) return false;
+  const r = sceneTrack.getBoundingClientRect(), top = parseFloat(getComputedStyle(sceneStage).top) || 0;
+  const len = Math.max(1, r.height - sceneStage.offsetHeight);
+  time = clamp01((top - r.top) / len) * SCROLL_END;
+  steps.forEach(el => el.classList.add('on'));
+  frame(time);
+  return true;
+}
 function fromStory() {
+  if (fromScene()) return;
   const sr = stageEl.getBoundingClientRect();
   const stacked = sr.width > innerWidth * .8;                 // phones: the kitchen sits above the text
   const lineY = stacked ? sr.bottom + (innerHeight - sr.bottom) / 2 : innerHeight / 2;
