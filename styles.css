@@ -1568,3 +1568,72 @@ html[dir="rtl"] .shop-name,html[dir="rtl"] .shop-dom{direction:ltr;text-align:ri
   .to-top:focus-visible{outline:2px solid var(--olive);outline-offset:2px}
 }
 @media (min-width:761px) and (max-width:900px){.story-media .k3d-stage{top:calc(68px + 10px);height:calc(100svh - 68px - 28px)}}
+
+/* Nov 26 (owner): the new logo in the header (her S and mirrored S, drawn from Bodoni Moda as a shape, beside
+   SHIRA SVEI / DESIGN STUDIO in Jost), the Hebrew button right beside it, a slimmer call button; and the home
+   landing made lighter in style ("its not the amount of words, its the style"): no solid green bar, less haze
+   over the photo, a quieter second button. Every word stays. */
+.brand{display:flex;align-items:center;gap:12px;justify-items:initial}
+.brand-mark{width:auto;height:30px;flex:none;fill:var(--olive)}
+.brand-text{display:grid;gap:6px}
+.brand-word{font:500 15px/1 Jost,var(--body);letter-spacing:.3em;margin-right:-.3em}
+.brand-sub{font:400 8.5px/1 Jost,var(--body);letter-spacing:.5em;margin-right:-.5em;color:var(--muted)}
+.brand-rule{display:none}
+@media (min-width:721px){.brand-word{font-size:17px}.brand-sub{font-size:9px}}
+
+.top .wrap>.lang-btn{margin-right:auto;margin-left:6px;padding-left:16px;border-left:1px solid var(--rule);border-radius:0;min-height:28px}
+html[dir="rtl"] .top .wrap>.lang-btn{margin-right:6px;margin-left:auto;padding-left:6px;padding-right:16px;border-left:0;border-right:1px solid var(--rule)}
+.top .btn-primary{white-space:nowrap;min-height:40px;padding-block:0;padding-inline:18px}
+@media (max-width:420px){.top .wrap>.lang-btn{padding-left:10px;margin-left:2px}html[dir="rtl"] .top .wrap>.lang-btn{padding-right:10px;margin-right:2px}}
+
+.feature-pic img{object-position:50% 58%}
+.feature-scrim{background:linear-gradient(90deg,color-mix(in srgb,var(--stone) 90%,transparent) 0%,color-mix(in srgb,var(--stone) 72%,transparent) 34%,color-mix(in srgb,var(--stone) 0%,transparent) 58%)}
+.feature-niche{background:none;box-shadow:none;border-radius:0;color:var(--ink);padding:2px 0 4px 18px;border-left:2px solid var(--olive);font-size:clamp(22px,2.1vw,32px)}
+.feature-niche em,.feature-niche .niche-link em{color:var(--olive)}
+.feature-services{color:var(--muted);border-top-color:color-mix(in srgb,var(--rule) 70%,transparent)}
+.feature .hero-actions{align-items:center;gap:22px}
+.feature .hero-actions .btn-ghost{border-color:transparent;background:none;padding-inline:2px;text-decoration:underline;text-decoration-color:var(--olive);text-underline-offset:6px}
+.feature .hero-actions .btn-ghost:hover{color:var(--olive)}
+@media (max-width:900px){
+  .feature-pic img{object-position:50% 40%}
+  .feature-scrim{background:linear-gradient(0deg,color-mix(in srgb,var(--stone) 95%,transparent) 0%,color-mix(in srgb,var(--stone) 88%,transparent) 55%,color-mix(in srgb,var(--stone) 0%,transparent) 85%)}
+}
+/* Desktop (owner, Nov 26: "i like the soft veil"): the photo runs across the whole screen and fades softly into
+   stone behind the words on the left. */
+@media (min-width:901px){
+  .feature-pic{left:0}
+  .feature-pic img{object-position:50% 60%}
+  .feature-scrim{background:linear-gradient(90deg,color-mix(in srgb,var(--stone) 93%,transparent) 0%,color-mix(in srgb,var(--stone) 86%,transparent) 38%,color-mix(in srgb,var(--stone) 0%,transparent) 62%)}
+  .feature-copy>*,.feature-copy>h1,.feature-copy>.feature-niche{max-width:min(600px,46vw)}
+}
+@media (min-width:901px){.feature h1{font-size:clamp(38px,4.1vw,64px)}}
+
+/* Header logo as the watermark (owner, Nov 26): her S's large and faint behind SHIRA SVEI / DESIGN STUDIO. */
+.brand{position:relative;display:grid;place-items:center;gap:0;padding:0 6px}
+.brand-mark{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);height:62px;width:auto;fill:var(--olive);opacity:.22;pointer-events:none}
+.brand-text{position:relative;display:grid;justify-items:center;gap:6px}
+/* Phones: the header holds the logo, the Hebrew button, the call button and the menu. "Design Studio" steps out
+   of the header, SHIRA SVEI stays on one line, and on the narrowest phones only the S's show. */
+@media (max-width:480px){
+  .brand-text{display:block}
+  .brand-sub{display:none}
+  .brand-word{white-space:nowrap;font-size:13px;letter-spacing:.22em;margin-right:-.22em}
+  .brand-mark{height:56px}
+  header.top .wrap{gap:10px}
+  .top .btn-primary{padding-inline:12px}
+  .top .wrap>.lang-btn{padding-left:8px;margin-left:0}
+  html[dir="rtl"] .top .wrap>.lang-btn{padding-right:8px;margin-right:0}
+  .feature-services{letter-spacing:.05em}
+}
+@media (max-width:370px){.brand-word{font-size:11.5px;letter-spacing:.18em}}
+@media (max-width:900px){.feature-scrim{background:linear-gradient(0deg,var(--stone) 0%,var(--stone) 50%,color-mix(in srgb,var(--stone) 0%,transparent) 64%)}}
+/* Phones: the photo sits on top as a clear picture, the words follow on plain stone (no haze, no gap). */
+@media (max-width:900px){
+  .feature{display:block;min-height:0}
+  .feature-pic{position:relative;inset:auto;height:44svh;min-height:260px}
+  .feature-pic img{object-position:50% 45%}
+  .feature-scrim{display:none}
+  .feature-copy{margin-top:0;padding-top:28px;padding-bottom:48px}
+}
+html[dir="rtl"] .feature-niche{border-left:0;border-right:2px solid var(--olive);padding:2px 18px 4px 0}
+html[dir="rtl"] .brand{direction:ltr}

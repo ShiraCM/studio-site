@@ -90,7 +90,9 @@
       try { localStorage.setItem('lang', he ? 'en' : 'he'); } catch (e) {}
       location.reload();
     });
-    nav.insertBefore(b, nav.querySelector('.btn-primary') || nav.firstChild);
+    // beside the logo (owner, Nov 26: "put the hebrew button next to the logo")
+    var brand = document.querySelector('header .brand');
+    if (brand) brand.after(b); else nav.insertBefore(b, nav.querySelector('.btn-primary') || nav.firstChild);
   }
 
   document.addEventListener('DOMContentLoaded', function () {
